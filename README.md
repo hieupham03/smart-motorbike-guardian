@@ -2,7 +2,7 @@
 
 Hệ thống giám sát, cảnh báo chống trộm và điều khiển an toàn xe máy thông minh thời gian thực (Dual-Node Real-time IoT Architecture).
 
-## 📁 Cấu trúc thư mục dự án (Repository Structure)
+##  Cấu trúc thư mục dự án (Repository Structure)
 
 Cấu trúc thư mục được tổ chức chuẩn hóa theo yêu cầu đề bài đồ án:
 
