@@ -1,0 +1,20 @@
+# Local workspace temporary files / drafts
+node_a/
+node_b/
+BAO-CAO-DO-AN-IoT-Motorbike-Guardian.md
+task-list.txt
+
+# Arduino / PlatformIO / IDE build outputs
+.vscode/
+.idea/
+*.bin
+*.hex
+*.elf
+*.o
+build/
+.pio/
+.clangd/
+
+# Environment files with sensitive credentials (use .env.example instead)
+.env
+.env.local
