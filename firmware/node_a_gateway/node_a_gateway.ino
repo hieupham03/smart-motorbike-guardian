@@ -1,7 +1,25 @@
 #include "uart_protocol.h"
+#include <WiFi.h>
+#include <PubSubClient.h>
 #include <esp_task_wdt.h>
 
-// --- Cấu hình phần cứng & Chân giao tiếp (Node A Gateway - ESP32-WROOM-32D) ---
+// --- Cấu hình Wi-Fi & MQTT Broker ---
+#define WIFI_SSID       "WIFI_NAME_HERE"          // Thay tên Wi-Fi
+#define WIFI_PASSWORD   "WIFI_PASS_HERE"          // Thay mật khẩu Wi-Fi
+
+#define MQTT_BROKER     "broker.emqx.io"          // MQTT Broker công cộng hoặc IP local
+#define MQTT_PORT       1883
+#define DEVICE_ID       "550e8400-e29b-41d4-a716-446655440000" // UUID thiết bị
+
+// Topic MQTT chuẩn hóa
+#define TOPIC_STATUS    "guardian/" DEVICE_ID "/status"
+#define TOPIC_TELEMETRY "guardian/" DEVICE_ID "/telemetry"
+#define TOPIC_ALERT     "guardian/" DEVICE_ID "/alert"
+#define TOPIC_CMD_SUB   "guardian/" DEVICE_ID "/cmd/#"
+#define TOPIC_CMD_ACK   "guardian/" DEVICE_ID "/cmd/ack"
+#define TOPIC_HEARTBEAT "guardian/" DEVICE_ID "/heartbeat"
+
+// --- Cấu hình phần cứng & Chân giao tiếp (Node A Gateway) ---
 #define RXD2 16
 #define TXD2 17
 #define UART_BAUD 115200
@@ -11,6 +29,8 @@
 #define PIN_LED     2   // LED Onboard chỉ thị trạng thái
 
 HardwareSerial CommSerial(2);
+WiFiClient espClient;
+PubSubClient mqttClient(espClient);
 
 // --- Trạng thái hệ thống & Đồng bộ FreeRTOS ---
 enum VehicleState : uint8_t {
@@ -19,6 +39,16 @@ enum VehicleState : uint8_t {
     STATE_ALARM      = 2, // Báo động (còi hú & nháy LED)
     STATE_THEFT_LOCK = 3  // Khóa cứng (ngắt rơ-le động cơ)
 };
+
+const char* state_to_string(VehicleState s) {
+    switch (s) {
+        case STATE_PARKED:     return "PARKED";
+        case STATE_ARMED:      return "ARMED";
+        case STATE_ALARM:      return "ALARM";
+        case STATE_THEFT_LOCK: return "THEFT_LOCK";
+        default:               return "UNKNOWN";
+    }
+}
 
 struct ControlCommand {
     uint8_t target_state;
@@ -30,6 +60,7 @@ static TelemetryData sharedTelemetry = {0};
 static SemaphoreHandle_t telemetryMutex = NULL;
 
 static QueueHandle_t controlQueue = NULL;
+static QueueHandle_t alertMqttQueue = NULL;
 
 static volatile uint32_t lastSensorHeartbeat = 0;
 static volatile bool sensorConnected = false;
@@ -44,6 +75,82 @@ void set_buzzer(bool on) {
     }
 }
 
+// --- Callback MQTT: Xử lý lệnh điều khiển từ xa ---
+void mqtt_callback(char* topic, byte* payload, unsigned int length) {
+    char message[256];
+    if (length >= sizeof(message)) length = sizeof(message) - 1;
+    memcpy(message, payload, length);
+    message[length] = '\0';
+
+    Serial.printf("\n[MQTT Rx] Topic: %s | Msg: %s\n", topic, message);
+
+    char cmdId[40] = "cmd-default";
+    char *pCmdId = strstr(message, "\"cmd_id\":\"");
+    if (pCmdId) {
+        pCmdId += 10;
+        char *pEnd = strchr(pCmdId, '\"');
+        if (pEnd) {
+            int len = pEnd - pCmdId;
+            if (len < sizeof(cmdId)) {
+                strncpy(cmdId, pCmdId, len);
+                cmdId[len] = '\0';
+            }
+        }
+    }
+
+    bool isExecuted = false;
+    const char* reasonIfFailed = NULL;
+
+    if (strstr(message, "\"ARM\"") || strstr(topic, "/arm")) {
+        currentState = STATE_ARMED;
+        ControlCommand cmd = { .target_state = STATE_ARMED, .cut_power = false };
+        if (controlQueue != NULL) xQueueSend(controlQueue, &cmd, 0);
+        isExecuted = true;
+        Serial.println("[Command] ARMED activated");
+    } 
+    else if (strstr(message, "\"DISARM\"") || strstr(topic, "/disarm")) {
+        currentState = STATE_PARKED;
+        ControlCommand cmd = { .target_state = STATE_PARKED, .cut_power = false };
+        if (controlQueue != NULL) xQueueSend(controlQueue, &cmd, 0);
+        isExecuted = true;
+        Serial.println("[Command] DISARMED (PARKED)");
+    } 
+    else if (strstr(message, "\"LOCK_ENGINE\"") || strstr(topic, "/lock_engine")) {
+        // RÀNG BUỘC AN TOÀN: Chỉ ngắt relay khi tốc độ <= 0.5 km/h
+        float spd = 0.0f;
+        if (xSemaphoreTake(telemetryMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+            spd = sharedTelemetry.speed;
+            xSemaphoreGive(telemetryMutex);
+        }
+
+        if (spd <= 0.5f) {
+            currentState = STATE_THEFT_LOCK;
+            ControlCommand cmd = { .target_state = STATE_THEFT_LOCK, .cut_power = true };
+            if (controlQueue != NULL) xQueueSend(controlQueue, &cmd, 0);
+
+            CmdRelayData relayCmd = { .state = 0, .seq = 1 };
+            send_msg(CommSerial, MSG_CMD_RELAY, relayCmd);
+
+            isExecuted = true;
+            Serial.println("[Command] LOCK_ENGINE executed (Power Cut)");
+        } else {
+            isExecuted = false;
+            reasonIfFailed = "SPEED_NOT_ZERO";
+            Serial.printf("[Command] LOCK_ENGINE REJECTED: Speed = %.2f km/h > 0\n", spd);
+        }
+    }
+
+    // Phản hồi Command ACK
+    char ackJson[192];
+    snprintf(ackJson, sizeof(ackJson), 
+             "{\"cmd_id\":\"%s\",\"result\":\"%s\",\"ts\":%lu,\"reason_if_failed\":%s%s%s}",
+             cmdId, isExecuted ? "EXECUTED" : "REJECTED",
+             (unsigned long)(millis() / 1000),
+             reasonIfFailed ? "\"" : "", reasonIfFailed ? reasonIfFailed : "null", reasonIfFailed ? "\"" : "");
+
+    mqttClient.publish(TOPIC_CMD_ACK, ackJson);
+}
+
 // --- Task 1: Nhận và giải mã dữ liệu UART từ Node B (Core 0) ---
 void UARTRxTask(void *pvParameters) {
     UartPacket rxPacket;
@@ -51,7 +158,6 @@ void UARTRxTask(void *pvParameters) {
     uint8_t hbSeq = 0;
 
     for (;;) {
-        // Đọc và phân tích gói tin từ UART
         while (CommSerial.available()) {
             uint8_t b = CommSerial.read();
             if (parse_byte(b, rxPacket)) {
@@ -72,6 +178,11 @@ void UARTRxTask(void *pvParameters) {
                             memcpy(&evt, rxPacket.data, sizeof(AccelEventData));
                             Serial.printf("[Gateway] Sự kiện va chạm/rung: Type=%u, Accel=%.2f m/s2\n",
                                           evt.event_type, evt.value);
+
+                            // Đẩy vào Queue gửi cảnh báo ngay lên MQTT
+                            if (alertMqttQueue != NULL) {
+                                xQueueSend(alertMqttQueue, &evt, 0);
+                            }
 
                             // Kích hoạt báo động nếu xe đang ở chế độ ARMED
                             if (currentState == STATE_ARMED) {
@@ -97,8 +208,7 @@ void UARTRxTask(void *pvParameters) {
                         if (rxPacket.len == sizeof(NackData)) {
                             NackData nack;
                             memcpy(&nack, rxPacket.data, sizeof(NackData));
-                            Serial.printf("[Gateway] Node B phản hồi NACK: Code=%u, BadType=0x%02X\n",
-                                          nack.err_code, nack.bad_type);
+                            Serial.printf("[Gateway] Node B phản hồi NACK: Code=%u\n", nack.err_code);
                         }
                         break;
                     }
@@ -196,7 +306,6 @@ void ControlTask(void *pvParameters) {
             }
         }
 
-        // Điều khiển LED và còi theo trạng thái hoạt động
         switch (currentState) {
             case STATE_PARKED:
                 digitalWrite(PIN_LED, LOW);
@@ -223,6 +332,99 @@ void ControlTask(void *pvParameters) {
     }
 }
 
+// --- Task 4: Quản lý kết nối Wi-Fi & MQTT Client (Core 0) ---
+void MQTTTask(void *pvParameters) {
+    mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
+    mqttClient.setCallback(mqtt_callback);
+
+    uint32_t lastTelemetryPub = 0;
+    uint32_t lastHeartbeatPub = 0;
+
+    for (;;) {
+        // 1. Quản lý kết nối Wi-Fi
+        if (WiFi.status() != WL_CONNECTED) {
+            if (strlen(WIFI_SSID) > 0 && strcmp(WIFI_SSID, "WIFI_NAME_HERE") != 0) {
+                WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+                vTaskDelay(pdMS_TO_TICKS(3000));
+            } else {
+                vTaskDelay(pdMS_TO_TICKS(5000));
+            }
+        }
+
+        // 2. Quản lý kết nối MQTT Broker kèm LWT (Last Will)
+        if (WiFi.status() == WL_CONNECTED && !mqttClient.connected()) {
+            char clientId[48];
+            snprintf(clientId, sizeof(clientId), "Guardian-NodeA-%08X", (uint32_t)ESP.getEfuseMac());
+
+            const char* willTopic = TOPIC_STATUS;
+            const char* willMessage = "{\"status\":\"offline\",\"reason\":\"lwt_disconnect\"}";
+            uint8_t willQos = 1;
+            bool willRetain = true;
+
+            if (mqttClient.connect(clientId, NULL, NULL, willTopic, willQos, willRetain, willMessage)) {
+                Serial.println("[MQTT] Kết nối thành công tới Broker!");
+                
+                // Báo Online
+                char onlineMsg[128];
+                snprintf(onlineMsg, sizeof(onlineMsg), "{\"status\":\"online\",\"ip\":\"%s\",\"fw\":\"v1.0.0\"}",
+                         WiFi.localIP().toString().c_str());
+                mqttClient.publish(TOPIC_STATUS, onlineMsg, true);
+
+                // Lắng nghe topic nhận lệnh
+                mqttClient.subscribe(TOPIC_CMD_SUB);
+            } else {
+                vTaskDelay(pdMS_TO_TICKS(4000));
+            }
+        }
+
+        // 3. Xử lý truyền nhận tin MQTT
+        if (mqttClient.connected()) {
+            mqttClient.loop();
+
+            // Gửi Alert khẩn cấp ngay khi có sự kiện
+            AccelEventData evt;
+            if (alertMqttQueue != NULL && xQueueReceive(alertMqttQueue, &evt, 0) == pdTRUE) {
+                char alertJson[192];
+                snprintf(alertJson, sizeof(alertJson),
+                         "{\"device_id\":\"%s\",\"ts\":%lu,\"alert_id\":\"a%lu\",\"reason\":\"IMPACT_OR_THEFT\",\"severity\":\"HIGH\",\"val\":%.2f}",
+                         DEVICE_ID, (unsigned long)(millis() / 1000), (unsigned long)millis(), evt.value);
+                mqttClient.publish(TOPIC_ALERT, alertJson);
+                Serial.println("[MQTT Tx] Đã publish Alert!");
+            }
+
+            // Định kỳ 3s gửi Telemetry
+            if (millis() - lastTelemetryPub >= 3000) {
+                lastTelemetryPub = millis();
+
+                float spd = 0.0f, ax = 0.0f, ay = 0.0f, az = 0.0f;
+                if (xSemaphoreTake(telemetryMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+                    spd = sharedTelemetry.speed;
+                    ax = sharedTelemetry.ax; ay = sharedTelemetry.ay; az = sharedTelemetry.az;
+                    xSemaphoreGive(telemetryMutex);
+                }
+
+                char telemJson[256];
+                snprintf(telemJson, sizeof(telemJson),
+                         "{\"device_id\":\"%s\",\"ts\":%lu,\"speed_kmh\":%.2f,\"state\":\"%s\",\"accel\":[%.2f,%.2f,%.2f]}",
+                         DEVICE_ID, (unsigned long)(millis() / 1000), spd, state_to_string(currentState), ax, ay, az);
+                mqttClient.publish(TOPIC_TELEMETRY, telemJson);
+            }
+
+            // Định kỳ 15s gửi Heartbeat
+            if (millis() - lastHeartbeatPub >= 15000) {
+                lastHeartbeatPub = millis();
+                char hbJson[160];
+                snprintf(hbJson, sizeof(hbJson),
+                         "{\"device_id\":\"%s\",\"status\":\"online\",\"heap\":%u,\"uptime\":%lu}",
+                         DEVICE_ID, esp_get_free_heap_size(), (unsigned long)(millis() / 1000));
+                mqttClient.publish(TOPIC_HEARTBEAT, hbJson);
+            }
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
+}
+
 // --- Khởi tạo hệ thống ---
 void setup() {
     Serial.begin(115200);
@@ -232,7 +434,6 @@ void setup() {
     pinMode(PIN_BUZZER, OUTPUT);
     pinMode(PIN_LED, OUTPUT);
 
-    // Mặc định cấp nguồn cho xe hoạt động bình thường
     digitalWrite(PIN_RELAY, HIGH);
     digitalWrite(PIN_BUZZER, LOW);
     digitalWrite(PIN_LED, LOW);
@@ -241,10 +442,11 @@ void setup() {
 
     Serial.println("\n--- ESP32 Gateway (Node A) Initializing ---");
 
-    telemetryMutex = xSemaphoreCreateMutex();
-    controlQueue   = xQueueCreate(5, sizeof(ControlCommand));
+    telemetryMutex  = xSemaphoreCreateMutex();
+    controlQueue    = xQueueCreate(5, sizeof(ControlCommand));
+    alertMqttQueue  = xQueueCreate(5, sizeof(AccelEventData));
 
-    if (telemetryMutex == NULL || controlQueue == NULL) {
+    if (telemetryMutex == NULL || controlQueue == NULL || alertMqttQueue == NULL) {
         Serial.println("[ERROR] Không thể tạo FreeRTOS primitives!");
         while (1) delay(1000);
     }
@@ -253,6 +455,7 @@ void setup() {
     xTaskCreatePinnedToCore(UARTRxTask,   "UARTRxTask",   4096, NULL, 3, NULL, 0);
     xTaskCreatePinnedToCore(SafetyTask,   "SafetyTask",   4096, NULL, 3, NULL, 1);
     xTaskCreatePinnedToCore(ControlTask,  "ControlTask",  3072, NULL, 2, NULL, 1);
+    xTaskCreatePinnedToCore(MQTTTask,     "MQTTTask",     6144, NULL, 2, NULL, 0);
 
     Serial.printf("[Node A] Free Heap: %u bytes\n", esp_get_free_heap_size());
 }
@@ -314,10 +517,11 @@ void loop() {
             xSemaphoreGive(telemetryMutex);
         }
 
-        Serial.printf("[Trạng thái] Mode: %u | Node B: %s | Spd: %.2f km/h | Accel: [%.2f, %.2f, %.2f] | Heap: %u B\n",
-                      currentState,
+        Serial.printf("[Trạng thái] Mode: %s | Sensor: %s | WiFi: %s | Spd: %.2f km/h | Heap: %u B\n",
+                      state_to_string(currentState),
                       sensorConnected ? "CONNECTED" : "DISCONNECTED",
-                      spd, ax, ay, az,
+                      WiFi.status() == WL_CONNECTED ? "CONNECTED" : "DISCONNECTED",
+                      spd,
                       esp_get_free_heap_size());
     }
 
