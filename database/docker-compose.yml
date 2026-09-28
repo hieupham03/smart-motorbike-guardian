@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database Container
+  postgres:
+    image: postgres:15-alpine
+    container_name: guardian-postgres-db
+    restart: always
+    environment:
+      POSTGRES_DB: guardian_db
+      POSTGRES_USER: guardian_user
+      POSTGRES_PASSWORD: GuardianPassword@2026
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U guardian_user -d guardian_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - guardian-db-net
+
+  # pgAdmin 4 Web GUI (Quản lý Database trực quan qua trình duyệt)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: guardian-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@guardian.iot
+      PGADMIN_DEFAULT_PASSWORD: AdminPassword@2026
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - guardian-db-net
+
+networks:
+  guardian-db-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    name: guardian_postgres_data
