@@ -1,20 +1,66 @@
-# Local workspace temporary files / drafts
-node_a/
-node_b/
-BAO-CAO-DO-AN-IoT-Motorbike-Guardian.md
-task-list.txt
+# =========================================================================
+# SMART MOTORBIKE GUARDIAN - GITIGNORE
+# =========================================================================
 
-# Arduino / PlatformIO / IDE build outputs
-.vscode/
-.idea/
-*.bin
-*.hex
-*.elf
-*.o
+# Dependencies & Package Managers
+node_modules/
+frontend/node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build Outputs & Bundles
+dist/
+frontend/dist/
 build/
-.pio/
-.clangd/
+backend/target/
+*.class
+*.jar
+*.war
+*.ear
 
-# Environment files with sensitive credentials (use .env.example instead)
+# Environment Variables & Secrets
 .env
 .env.local
+.env.*.local
+*.pem
+*.key
+credentials.json
+
+# IDE & Editor Configs
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Logs & Temporary Files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.tmp
+*.temp
+
+# Database & Runtime Data
+postgres_data/
+*.db
+*.sqlite
+*.sqlite3
