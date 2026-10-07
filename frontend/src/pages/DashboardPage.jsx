@@ -22,7 +22,8 @@ export default function DashboardPage() {
         try {
           const res = await api.getTelemetryHistory(selectedDevice.deviceId);
           if (res.success && res.data) {
-            setTelemetryHistory(res.data);
+            const sorted = [...res.data].sort((a, b) => (a.ts || 0) - (b.ts || 0));
+            setTelemetryHistory(sorted);
           }
         } catch (err) {
           console.error(err);
@@ -58,8 +59,9 @@ export default function DashboardPage() {
     );
   }
 
-  const speed = selectedDevice.lastSpeedKmh || 0;
-  const battery = selectedDevice.lastBatteryV || 12.6;
+  const latestTel = telemetryHistory.length > 0 ? telemetryHistory[telemetryHistory.length - 1] : null;
+  const speed = latestTel?.speedKmh ?? selectedDevice.lastSpeedKmh ?? 0;
+  const battery = latestTel?.batteryV ?? selectedDevice.lastBatteryV ?? 12.6;
   const state = selectedDevice.securityState || 'PARKED';
   const openAlerts = alerts.filter(a => a.status === 'OPEN');
 

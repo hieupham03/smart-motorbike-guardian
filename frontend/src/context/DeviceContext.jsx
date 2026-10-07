@@ -75,6 +75,8 @@ export function DeviceProvider({ children }) {
         payload,
         confirmationPassword
       });
+      // Đợi 600ms để bản tin ACK từ Node A kịp về Backend và cập nhật Database
+      await new Promise(r => setTimeout(r, 600));
       await fetchDevices();
       await fetchAlerts();
       return res;

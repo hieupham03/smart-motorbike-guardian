@@ -50,7 +50,7 @@ export default function StepUpConfirmModal({ isOpen, onClose, onConfirm, current
                 XÁC THỰC KHOÁ ĐỘNG CƠ KHẨN CẤP
               </div>
               <div style={{ fontSize: '0.75rem', color: '#b91c1c' }}>
-                Cơ chế bảo mật hai lớp (Step-up Confirmation)
+                Xác thực bước nâng cao (Step-up Re-authentication)
               </div>
             </div>
           </div>

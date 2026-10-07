@@ -37,7 +37,7 @@ public class VirtualDeviceSimulatorService {
     private CommandService commandService;
 
     private final Random random = new Random();
-    private boolean simulationEnabled = true;
+    private boolean simulationEnabled = false; // Disabled by default to prioritize real hardware data
 
     public void handleCommandSimulated(Command command) {
         Device device = command.getDevice();

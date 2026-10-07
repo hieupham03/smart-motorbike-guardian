@@ -40,7 +40,8 @@ public class TelemetryService {
 
     @Transactional
     public TelemetryDto recordTelemetry(String deviceId, TelemetryDto dto) {
-        Device device = deviceRepository.findById(deviceId).orElse(null);
+        Device device = deviceRepository.findById(deviceId)
+                .orElseGet(() -> deviceRepository.findByDeviceUuid(deviceId).orElse(null));
         if (device == null) {
             return null;
         }
@@ -63,7 +64,8 @@ public class TelemetryService {
         deviceRepository.save(device);
 
         String readingId = "tel-" + UUID.randomUUID().toString().substring(0, 8);
-        long ts = dto.getTs() != null ? dto.getTs() : Instant.now().getEpochSecond();
+        long nowEpoch = Instant.now().getEpochSecond();
+        long ts = (dto.getTs() != null && dto.getTs() > 1000000000L) ? dto.getTs() : nowEpoch;
 
         TelemetryReading reading = new TelemetryReading(
                 readingId,

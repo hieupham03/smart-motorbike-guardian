@@ -2,7 +2,7 @@
 echo ========================================================
 echo   KHOI DONG POSTGRESQL & PGADMIN VOI DOCKER COMPOSE
 echo ========================================================
-cd /d "%~dp0database"
+cd /d "%~dp0..\database"
 docker compose down
 docker compose up -d
 

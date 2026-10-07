@@ -150,10 +150,25 @@ public class MqttSubscriberService implements MqttCallbackExtended {
         TelemetryDto dto = new TelemetryDto();
         dto.setDeviceId(deviceId);
         if (node.has("speed_kmh")) dto.setSpeedKmh(node.get("speed_kmh").asDouble());
-        if (node.has("battery_v")) dto.setBatteryV(node.get("battery_v").asDouble());
+        if (node.has("battery_v")) {
+            dto.setBatteryV(node.get("battery_v").asDouble());
+        } else {
+            dto.setBatteryV(12.6); // Default 12.6V if hardware has not yet integrated ADC
+        }
+
+        // Support both separated fields and array format: "accel": [ax, ay, az]
         if (node.has("accel_x")) dto.setAccelX(node.get("accel_x").asDouble());
         if (node.has("accel_y")) dto.setAccelY(node.get("accel_y").asDouble());
         if (node.has("accel_z")) dto.setAccelZ(node.get("accel_z").asDouble());
+        if (node.has("accel") && node.get("accel").isArray()) {
+            JsonNode arr = node.get("accel");
+            if (arr.size() >= 3) {
+                dto.setAccelX(arr.get(0).asDouble());
+                dto.setAccelY(arr.get(1).asDouble());
+                dto.setAccelZ(arr.get(2).asDouble());
+            }
+        }
+
         if (node.has("state")) dto.setState(node.get("state").asText());
         if (node.has("ts")) dto.setTs(node.get("ts").asLong());
         if (node.has("latitude")) dto.setLatitude(node.get("latitude").asDouble());
@@ -166,7 +181,15 @@ public class MqttSubscriberService implements MqttCallbackExtended {
         AlertDto dto = new AlertDto();
         dto.setDeviceId(deviceId);
         if (node.has("alert_id")) dto.setAlertId(node.get("alert_id").asText());
-        if (node.has("reason")) dto.setReason(node.get("reason").asText());
+        
+        if (node.has("reason")) {
+            String r = node.get("reason").asText();
+            if ("IMPACT_OR_THEFT".equalsIgnoreCase(r)) {
+                r = "MOTION_WHILE_ARMED";
+            }
+            dto.setReason(r);
+        }
+
         if (node.has("severity")) {
             try {
                 dto.setSeverity(AlertSeverity.valueOf(node.get("severity").asText().toUpperCase()));
