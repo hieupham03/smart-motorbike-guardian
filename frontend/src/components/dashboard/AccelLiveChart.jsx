@@ -36,15 +36,15 @@ export default function AccelLiveChart({ telemetryHistory = [], currentX = 0, cu
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', margin: '0.5rem 0' }}>
         <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '8px', padding: '0.35rem 0.5rem', textAlign: 'center' }}>
           <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#0284c7' }}>TRỤC X</div>
-          <div style={{ fontSize: '1rem', fontWeight: '800', color: '#0c4a6e' }}>{Number(currentX || 0).toFixed(2)} <span style={{ fontSize: '0.7rem', color: '#64748b' }}>g</span></div>
+          <div style={{ fontSize: '1rem', fontWeight: '800', color: '#0c4a6e' }}>{Number(currentX || 0).toFixed(2)} <span style={{ fontSize: '0.7rem', color: '#64748b' }}>m/s²</span></div>
         </div>
         <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '0.35rem 0.5rem', textAlign: 'center' }}>
           <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#16a34a' }}>TRỤC Y</div>
-          <div style={{ fontSize: '1rem', fontWeight: '800', color: '#0c4a6e' }}>{Number(currentY || 0).toFixed(2)} <span style={{ fontSize: '0.7rem', color: '#64748b' }}>g</span></div>
+          <div style={{ fontSize: '1rem', fontWeight: '800', color: '#0c4a6e' }}>{Number(currentY || 0).toFixed(2)} <span style={{ fontSize: '0.7rem', color: '#64748b' }}>m/s²</span></div>
         </div>
         <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '0.35rem 0.5rem', textAlign: 'center' }}>
           <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#d97706' }}>TRỤC Z</div>
-          <div style={{ fontSize: '1rem', fontWeight: '800', color: '#0c4a6e' }}>{Number(currentZ || 1).toFixed(2)} <span style={{ fontSize: '0.7rem', color: '#64748b' }}>g</span></div>
+          <div style={{ fontSize: '1rem', fontWeight: '800', color: '#0c4a6e' }}>{Number(currentZ || 1).toFixed(2)} <span style={{ fontSize: '0.7rem', color: '#64748b' }}>m/s²</span></div>
         </div>
       </div>
 
@@ -54,7 +54,7 @@ export default function AccelLiveChart({ telemetryHistory = [], currentX = 0, cu
           <LineChart data={chartData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
             <CartesianGrid strokeDasharray="2 2" stroke="#f1f5f9" />
             <XAxis dataKey="time" hide />
-            <YAxis domain={[-2, 2]} tick={{ fontSize: 9, fill: '#94a3b8' }} ticks={[-1.5, 0, 1.5]} />
+            <YAxis domain={[-12, 12]} tick={{ fontSize: 9, fill: '#94a3b8' }} ticks={[-10, 0, 10]} />
             <Tooltip
               contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '8px', border: '1px solid #bae6fd', fontSize: '11px', padding: '4px 8px' }}
             />

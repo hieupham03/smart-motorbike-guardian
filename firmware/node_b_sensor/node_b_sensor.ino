@@ -184,13 +184,20 @@ void SensorTask(void *pvParameters) {
     }
 }
 
-// --- Task 2: Xử lý dữ liệu và phát hiện va chạm / trộm (Core 1) ---
+// --- Task 2: Xử lý dữ liệu và phát hiện va chạm / trộm / ngã xe (Core 1) ---
 void ProcessingTask(void *pvParameters) {
     RawSensorSample sample;
-    const float ACCEL_EVENT_THRESHOLD = 3.5f;
+    const float ACCEL_EVENT_THRESHOLD = 3.5f;   // Ngưỡng gia tốc động rung lắc
+    const float TILT_FALL_THRESHOLD = 50.0f;    // Ngưỡng góc nghiêng đổ xe (50 độ)
+    
+    uint8_t consecutiveVibeCount = 0;           // Bộ đếm mẫu liên tiếp vượt ngưỡng (Debounce)
+    uint32_t lastAlertTriggerTime = 0;          // Cooldown chống spam cảnh báo
+    uint32_t tiltStartTime = 0;                 // Thời điểm bắt đầu nghiêng quá ngưỡng
 
     for (;;) {
         if (xQueueReceive(sensorQueue, &sample, portMAX_DELAY) == pdTRUE) {
+            uint32_t now = millis();
+
             if (xSemaphoreTake(telemMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
                 latestTelemetry.speed = sample.raw_speed;
                 latestTelemetry.ax = sample.raw_ax;
@@ -200,21 +207,63 @@ void ProcessingTask(void *pvParameters) {
                 xSemaphoreGive(telemMutex);
             }
 
-            // Phát hiện gia tốc động vượt ngưỡng rung lắc
+            // 1. Tính toán góc nghiêng (Tilt Angle)
+            float tiltDeg = atan2(sqrt(sample.raw_ax * sample.raw_ax + sample.raw_ay * sample.raw_ay), 
+                                  fabs(sample.raw_az > 0.01f ? sample.raw_az : 1.0f)) * (180.0f / 3.14159265f);
+
+            // 2. Thuật toán phát hiện Ngã xe thông minh (Phân biệt Ôm cua vs Ngã xe thật)
+            // Xe ôm cua: Nghiêng nhưng tốc độ > 5 km/h và chỉ nghiêng tạm thời < 2 giây.
+            // Ngã xe thật: Nghiêng > 50 độ KÈM theo xe dừng khựng (speed <= 2 km/h) HOẶC nghiêng liên tục > 2 giây.
+            if (tiltDeg > TILT_FALL_THRESHOLD) {
+                if (tiltStartTime == 0) {
+                    tiltStartTime = now;
+                }
+                
+                bool isRealCrash = (sample.raw_speed <= 2.0f && (now - tiltStartTime >= 500)) || 
+                                   (now - tiltStartTime >= 2000); // Nghiêng liên tục > 2s
+
+                if (isRealCrash && (now - lastAlertTriggerTime >= 5000)) { // Cooldown 5s
+                    lastAlertTriggerTime = now;
+                    AccelEventData evt = {
+                        .event_type = 2, // 2 = FALL_DETECTED (CRITICAL)
+                        .value = tiltDeg,
+                        .timestamp = now
+                    };
+                    if (eventQueue != NULL) {
+                        xQueueSend(eventQueue, &evt, 0);
+                    }
+                    Serial.printf("[Node B] ⚠️ PHÁT HIỆN NGÃ XE THẬT: Nghiêng = %.1f độ, Vận tốc = %.1f km/h\n", 
+                                  tiltDeg, sample.raw_speed);
+                }
+            } else {
+                tiltStartTime = 0; // Trở về góc thẳng đứng bình thường
+            }
+
+            // 3. Phát hiện gia tốc động vượt ngưỡng rung lắc (Kèm Debounce 3 mẫu liên tiếp & Cooldown 4s)
             float dynamicAccel = sqrt(sample.raw_ax * sample.raw_ax + 
                                       sample.raw_ay * sample.raw_ay + 
                                       (sample.raw_az - 9.81f) * (sample.raw_az - 9.81f));
 
             if (dynamicAccel > ACCEL_EVENT_THRESHOLD) {
-                AccelEventData evt = {
-                    .event_type = 1,
-                    .value = dynamicAccel,
-                    .timestamp = millis()
-                };
-                if (eventQueue != NULL) {
-                    xQueueSend(eventQueue, &evt, 0);
+                consecutiveVibeCount++;
+                // Yêu cầu 3 mẫu liên tiếp vượt ngưỡng (chống nảy tiếp điểm, gió thổi hoặc va chạm nhẹ thoáng qua)
+                if (consecutiveVibeCount >= 3) {
+                    if (now - lastAlertTriggerTime >= 4000) { // Cooldown 4s chống spam alert
+                        lastAlertTriggerTime = now;
+                        AccelEventData evt = {
+                            .event_type = 1, // 1 = MOTION_WHILE_ARMED (HIGH)
+                            .value = dynamicAccel,
+                            .timestamp = now
+                        };
+                        if (eventQueue != NULL) {
+                            xQueueSend(eventQueue, &evt, 0);
+                        }
+                        Serial.printf("[Node B] Phát hiện rung lắc/cạy phá (Debounce OK): %.2f m/s2\n", dynamicAccel);
+                    }
+                    consecutiveVibeCount = 0;
                 }
-                Serial.printf("[Node B] Phát hiện rung/va chạm: %.2f m/s2\n", dynamicAccel);
+            } else {
+                if (consecutiveVibeCount > 0) consecutiveVibeCount--;
             }
         }
     }

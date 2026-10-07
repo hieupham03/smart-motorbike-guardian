@@ -2,8 +2,7 @@
 echo ========================================================
 echo   KHOI DONG POSTGRESQL & PGADMIN VOI DOCKER COMPOSE
 echo ========================================================
-cd /d "%~dp0..\database"
-docker compose down
+cd /d "%~dp0database"
 docker compose up -d
 
 echo.
@@ -18,3 +17,4 @@ echo      - Email: admin@guardian.iot
 echo      - Password: AdminPassword@2026
 echo ========================================================
 pause
+

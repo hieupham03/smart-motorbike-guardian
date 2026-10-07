@@ -11,9 +11,9 @@
 
 INSERT INTO users (user_id, email, password_hash, full_name, role, status, created_at, updated_at)
 VALUES 
-('usr-admin-001', 'admin@guardian.iot', '$2a$10$w8.1G2T7qCqY2U2Z0mN6E.x1b1W.w0X6e2C2Y7U3M8N7O9P0Q1R2S', 'System Administrator', 'ADMIN', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('usr-owner-001', 'owner@guardian.iot', '$2a$10$w8.1G2T7qCqY2U2Z0mN6E.x1b1W.w0X6e2C2Y7U3M8N7O9P0Q1R2S', 'Nguyen Van A (Chủ xe)', 'OWNER', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('usr-viewer-001', 'viewer@guardian.iot', '$2a$10$w8.1G2T7qCqY2U2Z0mN6E.x1b1W.w0X6e2C2Y7U3M8N7O9P0Q1R2S', 'Tran Thi B (Người thân)', 'VIEWER', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+('usr-admin-001', 'admin@guardian.iot', '$2a$10$EfWr9Iyn6h9feZih4.3t4OBCSIj0S/h68B69aJ6xm9.wq6XJ4QxR2', 'System Administrator', 'ADMIN', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('usr-owner-001', 'owner@guardian.iot', '$2a$10$EfWr9Iyn6h9feZih4.3t4OBCSIj0S/h68B69aJ6xm9.wq6XJ4QxR2', 'Nguyen Van A (Chủ xe)', 'OWNER', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('usr-viewer-001', 'viewer@guardian.iot', '$2a$10$EfWr9Iyn6h9feZih4.3t4OBCSIj0S/h68B69aJ6xm9.wq6XJ4QxR2', 'Tran Thi B (Người thân)', 'VIEWER', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 2. Demo Devices
 INSERT INTO devices (device_id, device_uuid, name, license_plate, vehicle_model, lifecycle_state, security_state, firmware_version, hw_version, claim_token, speed_threshold_kmh, battery_low_threshold_v, tilt_threshold_deg, last_speed_kmh, last_battery_v, last_latitude, last_longitude, last_seen_at)

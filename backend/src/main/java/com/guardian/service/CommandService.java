@@ -83,7 +83,13 @@ public class CommandService {
         String payloadJson = String.format("{\"cmd_id\":\"%s\",\"type\":\"%s\",\"issued_by\":\"%s\",\"ts\":%d}",
                 cmdId, request.getType().name(), user.getUserId(), Instant.now().getEpochSecond());
 
-        boolean mqttSent = mqttSubscriberService.publishCommand(deviceId, request.getType().name(), payloadJson);
+        String targetUuid = (device.getDeviceUuid() != null && !device.getDeviceUuid().isBlank())
+                ? device.getDeviceUuid() : device.getDeviceId();
+
+        boolean mqttSent = mqttSubscriberService.publishCommand(targetUuid, request.getType().name(), payloadJson);
+        if (!targetUuid.equals(device.getDeviceId())) {
+            mqttSubscriberService.publishCommand(device.getDeviceId(), request.getType().name(), payloadJson);
+        }
 
         if (!mqttSent) {
             // Broker unavailable or fallback: trigger virtual device simulator immediately
@@ -117,6 +123,10 @@ public class CommandService {
                     device.setSecurityState(SecurityState.PARKED);
                 } else if (command.getType() == CommandType.LOCK_ENGINE) {
                     device.setSecurityState(SecurityState.THEFT_LOCK);
+                } else if (command.getType() == CommandType.SIREN_ON) {
+                    device.setSecurityState(SecurityState.ALARM);
+                } else if (command.getType() == CommandType.SIREN_OFF && device.getSecurityState() == SecurityState.ALARM) {
+                    device.setSecurityState(SecurityState.PARKED);
                 }
                 deviceRepository.save(device);
             }

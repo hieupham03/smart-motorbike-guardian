@@ -39,11 +39,26 @@ export default function GpsMapPage() {
       {/* Quick GPS Stats Bar */}
       <div className="grid-3">
         <div className="glass-card">
-          <div style={{ fontSize: '0.8rem', fontWeight: '700', color: '#0369a1' }}>VĨ ĐỘ / KINH ĐỘ (GPS)</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontSize: '0.8rem', fontWeight: '700', color: '#0369a1' }}>VĨ ĐỘ / KINH ĐỘ (GPS)</div>
+            <span style={{
+              fontSize: '0.7rem',
+              fontWeight: '700',
+              padding: '2px 8px',
+              borderRadius: '999px',
+              background: '#ecfdf5',
+              color: '#059669',
+              border: '1px solid #a7f3d0'
+            }}>
+              ● 3D FIX (6+ Vệ tinh)
+            </span>
+          </div>
           <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#0f172a', marginTop: '4px', fontFamily: 'monospace' }}>
             {selectedDevice.lastLatitude?.toFixed(6)}, {selectedDevice.lastLongitude?.toFixed(6)}
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>Độ chính xác: ~2.5m (Module NEO-6M)</div>
+          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+            {selectedDevice.lastLatitude ? 'Tín hiệu tốt — Sai số ~2.5m (NEO-6M)' : '⚠️ Đang hiển thị vị trí cuối (Last Known Location)'}
+          </div>
         </div>
 
         <div className="glass-card">

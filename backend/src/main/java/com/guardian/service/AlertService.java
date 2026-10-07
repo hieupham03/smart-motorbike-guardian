@@ -37,7 +37,8 @@ public class AlertService {
 
     @Transactional
     public AlertDto processAlert(String deviceId, AlertDto dto) {
-        Device device = deviceRepository.findById(deviceId).orElse(null);
+        Device device = deviceRepository.findById(deviceId)
+                .orElseGet(() -> deviceRepository.findByDeviceUuid(deviceId).orElse(null));
         if (device == null) return null;
 
         String alertId = dto.getAlertId() != null ? dto.getAlertId() : "alt-" + UUID.randomUUID().toString().substring(0, 8);
