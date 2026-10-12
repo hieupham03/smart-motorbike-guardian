@@ -9,6 +9,7 @@
 #define FRAME_START_BYTE    0xAA
 #define MAX_PAYLOAD_LEN     128
 #define FRAME_TIMEOUT_MS    50
+#define UART_PROTOCOL_VERSION 2
 
 // --- Các loại bản tin ---
 enum MsgType : uint8_t {
@@ -34,6 +35,9 @@ struct TelemetryData {
     float speed;             // Vận tốc (km/h)
     float ax, ay, az;        // Gia tốc 3 trục (m/s2)
     uint32_t timestamp;      // Thời gian lấy mẫu (ms)
+    float latitude, longitude;
+    uint32_t gps_age_ms, wheel_idle_ms;
+    uint8_t gps_valid, imu_valid, speed_valid;
 };
 
 struct AccelEventData {
@@ -59,6 +63,7 @@ struct NackData {
 };
 
 #pragma pack(pop)
+static_assert(sizeof(TelemetryData) == 39, "UART v2 payload must be 39 bytes");
 
 // Cấu trúc gói tin sau khi giải mã
 struct UartPacket {
@@ -80,7 +85,7 @@ inline uint8_t calc_checksum(uint8_t type, uint8_t len, const uint8_t *data) {
 }
 
 inline size_t send_frame(HardwareSerial &serial, uint8_t type, const uint8_t *data, uint8_t len) {
-    if (len > MAX_PAYLOAD_LEN) return 0;
+    if (len > MAX_PAYLOAD_LEN || (len && !data)) return 0;
 
     uint8_t buf[MAX_PAYLOAD_LEN + 4];
     uint16_t idx = 0;

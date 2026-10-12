@@ -1,0 +1,274 @@
+{
+  "version": 1,
+  "author": "Smart Motorbike Guardian Team",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-s3-devkitc-1",
+      "id": "esp-sensor",
+      "top": 0,
+      "left": -180,
+      "attrs": {
+        "code": "node_b.ino"
+      }
+    },
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp-gateway",
+      "top": 0,
+      "left": 220,
+      "attrs": {
+        "code": "node_a.ino"
+      }
+    },
+    {
+      "type": "wokwi-mpu6050",
+      "id": "mpu1",
+      "top": -90,
+      "left": -420,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn-hall",
+      "top": 140,
+      "left": -380,
+      "attrs": {
+        "color": "green",
+        "label": "KY-003 Hall Magnet Pulse"
+      }
+    },
+    {
+      "type": "wokwi-relay-module",
+      "id": "relay1",
+      "top": -80,
+      "left": 480,
+      "attrs": {
+        "transistor": "pnp"
+      }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "buzzer1",
+      "top": 120,
+      "left": 480,
+      "attrs": {
+        "volume": "0.8"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "res-led",
+      "top": 240,
+      "left": 430,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led-status",
+      "top": 230,
+      "left": 510,
+      "attrs": {
+        "color": "blue",
+        "label": "Security State LED"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "res-motor",
+      "top": -60,
+      "left": 660,
+      "attrs": {
+        "value": "330"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led-motor",
+      "top": -70,
+      "left": 730,
+      "attrs": {
+        "color": "green",
+        "label": "Motor DC Ignition Load"
+      }
+    }
+  ],
+  "connections": [
+    [
+      "esp-sensor:17",
+      "esp-gateway:16",
+      "cyan",
+      [
+        "v-40",
+        "h360"
+      ]
+    ],
+    [
+      "esp-gateway:17",
+      "esp-sensor:18",
+      "green",
+      [
+        "v-60",
+        "h-360"
+      ]
+    ],
+    [
+      "esp-sensor:GND.1",
+      "esp-gateway:GND.1",
+      "black",
+      [
+        "v-80",
+        "h400"
+      ]
+    ],
+    [
+      "mpu1:VCC",
+      "esp-sensor:3V3",
+      "red",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "mpu1:GND",
+      "esp-sensor:GND.1",
+      "black",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "mpu1:SDA",
+      "esp-sensor:8",
+      "blue",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "mpu1:SCL",
+      "esp-sensor:9",
+      "yellow",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "btn-hall:1.l",
+      "esp-sensor:4",
+      "orange",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "btn-hall:2.l",
+      "esp-sensor:GND.2",
+      "black",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "relay1:IN",
+      "esp-gateway:23",
+      "blue",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "relay1:VCC",
+      "esp-gateway:5V",
+      "red",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "relay1:GND",
+      "esp-gateway:GND.2",
+      "black",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "buzzer1:2",
+      "esp-gateway:18",
+      "purple",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "buzzer1:1",
+      "esp-gateway:GND.2",
+      "black",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "esp-gateway:2",
+      "res-led:1",
+      "blue",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "res-led:2",
+      "led-status:A",
+      "blue",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "led-status:C",
+      "esp-gateway:GND.3",
+      "black",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "relay1:COM",
+      "esp-gateway:5V",
+      "red",
+      [
+        "h20",
+        "v-20"
+      ]
+    ],
+    [
+      "relay1:NO",
+      "res-motor:1",
+      "green",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "res-motor:2",
+      "led-motor:A",
+      "green",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "led-motor:C",
+      "esp-gateway:GND.2",
+      "black",
+      [
+        "h20",
+        "v80"
+      ]
+    ]
+  ],
+  "dependencies": {}
+}
