@@ -1,11 +1,12 @@
 #include "uart_protocol.h"
 #include <WiFi.h>
 #include <PubSubClient.h>
-#include <esp_task_wdt.h>
+#include "guardian_config.h"
+#include <ArduinoJson.h>
+#include <math.h>
 
 // --- Cấu hình Wi-Fi & MQTT Broker ---
-#define WIFI_SSID       "P103"          // Thay tên Wi-Fi
-#define WIFI_PASSWORD   "7421yenxa"          // Thay mật khẩu Wi-Fi
+#include "network_config.h"
 
 #define MQTT_BROKER     "broker.emqx.io"          // MQTT Broker công cộng hoặc IP local
 #define MQTT_PORT       1883
@@ -50,10 +51,14 @@ const char* state_to_string(VehicleState s) {
     }
 }
 
-struct ControlCommand {
-    uint8_t target_state;
-    bool cut_power;
-};
+enum Action : uint8_t {ACTION_ARM,ACTION_DISARM,ACTION_LOCK,ACTION_UNLOCK,ACTION_SIREN_ON,ACTION_SIREN_OFF,ACTION_REBOOT,ACTION_ALARM};
+struct ControlCommand {Action action; char id[40]; bool remote;};
+struct CommandResult {char id[40]; bool executed; char reason[40]; bool reboot;};
+static QueueHandle_t resultQueue;
+static uint32_t telemetryReceived=0;
+static bool telemetrySeen=false;
+static uint32_t bootNonce;
+
 
 // Dữ liệu chia sẻ được bảo vệ bởi Mutex
 static TelemetryData sharedTelemetry = {0};
@@ -105,30 +110,19 @@ void enqueue_offline_message(const char* topic, const char* payload, uint8_t qos
 }
 
 void flush_offline_messages() {
-    if (!mqttClient.connected()) return;
-
-    if (bufferMutex != NULL && xSemaphoreTake(bufferMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
-        if (offlineCount > 0) {
-            Serial.printf("[Offline Buffer] Phat hien %u tin luu tru luc mat mang. Dang xả len Broker...\n", offlineCount);
+    if(!mqttClient.connected() || xSemaphoreTake(bufferMutex,pdMS_TO_TICKS(10))!=pdTRUE) return;
+    if(offlineCount) {
+        BufferedMqttMessage &msg=offlineBuffer[offlineTail];
+        if(!msg.is_valid || mqttClient.publish(msg.topic,msg.payload)) {
+            msg.is_valid=false;offlineTail=(offlineTail+1)%OFFLINE_BUFFER_CAPACITY;--offlineCount;
         }
-        while (offlineCount > 0 && mqttClient.connected()) {
-            BufferedMqttMessage &msg = offlineBuffer[offlineTail];
-            if (msg.is_valid) {
-                mqttClient.publish(msg.topic, msg.payload);
-                Serial.printf("[Offline Buffer Flush] -> Da gui bu: [%s]\n", msg.topic);
-                msg.is_valid = false;
-            }
-            offlineTail = (offlineTail + 1) % OFFLINE_BUFFER_CAPACITY;
-            offlineCount--;
-            vTaskDelay(pdMS_TO_TICKS(25)); // Tránh ngập broker
-        }
-        xSemaphoreGive(bufferMutex);
     }
+    xSemaphoreGive(bufferMutex);
 }
 
 void publish_or_buffer(const char* topic, const char* payload, uint8_t qos = 1) {
     if (mqttClient.connected()) {
-        mqttClient.publish(topic, payload);
+        if(!mqttClient.publish(topic,payload)) enqueue_offline_message(topic,payload,qos);
     } else {
         Serial.printf("[Offline Buffer] Mat song mang -> Luu vao Buffer RAM (Slot %u/%u)\n", offlineCount + 1, OFFLINE_BUFFER_CAPACITY);
         enqueue_offline_message(topic, payload, qos);
@@ -136,142 +130,45 @@ void publish_or_buffer(const char* topic, const char* payload, uint8_t qos = 1) 
 }
 
 // --- Hàm điều khiển còi báo động ---
-void set_buzzer(bool on) {
-    static bool currentBuzzerState = false;
-    if (on != currentBuzzerState) {
-        currentBuzzerState = on;
-        digitalWrite(PIN_BUZZER, on ? HIGH : LOW);
-    }
-}
 
 // --- Callback MQTT: Xử lý lệnh điều khiển từ xa ---
-void mqtt_callback(char* topic, byte* payload, unsigned int length) {
-    char message[256];
-    if (length >= sizeof(message)) length = sizeof(message) - 1;
-    memcpy(message, payload, length);
-    message[length] = '\0';
-
-    Serial.printf("\n[MQTT Rx] Topic: %s | Msg: %s\n", topic, message);
-
-    char cmdId[40] = "cmd-default";
-    char *pCmdId = strstr(message, "\"cmd_id\":\"");
-    if (pCmdId) {
-        pCmdId += 10;
-        char *pEnd = strchr(pCmdId, '\"');
-        if (pEnd) {
-            int len = pEnd - pCmdId;
-            if (len < sizeof(cmdId)) {
-                strncpy(cmdId, pCmdId, len);
-                cmdId[len] = '\0';
-            }
-        }
+void set_motor(bool power) {digitalWrite(PIN_RELAY,(power==RELAY_ACTIVE_LOW)?LOW:HIGH);}
+bool get_snapshot(TelemetryData &t,uint32_t &received) {
+    if(xSemaphoreTake(telemetryMutex,pdMS_TO_TICKS(10))!=pdTRUE) return false;
+    t=sharedTelemetry;received=telemetryReceived;bool seen=telemetrySeen;
+    xSemaphoreGive(telemetryMutex);return seen;
+}
+const char *lock_block_reason() {
+    TelemetryData t;uint32_t received;
+    if(!get_snapshot(t,received)) return "NO_SENSOR_DATA";
+    if(!sensorConnected || millis()-lastSensorHeartbeat>3000 || millis()-received>SENSOR_STALE_MS) return "SENSOR_STALE";
+    if(!t.speed_valid||!isfinite(t.speed)||t.speed<0) return "SPEED_INVALID";
+    if(t.speed>0.5f||t.wheel_idle_ms<WHEEL_STOP_MS) return "SPEED_NOT_ZERO";
+    return nullptr;
+}
+void mqtt_callback(char* topic,byte* payload,unsigned length) {
+    const char *suffix=strrchr(topic,'/');
+    if(!suffix||strcmp(suffix,"/ack")==0) return; // Never acknowledge ACK.
+    if(length>384) return;
+    StaticJsonDocument<512> doc;
+    if(deserializeJson(doc,payload,length)) return;
+    const char *id=doc["cmd_id"]|"",*type=doc["type"]|"";
+    if(!id[0]||strlen(id)>=40) return;
+    for(const char *p=id;*p;++p) if(!(isalnum((unsigned char)*p)||*p=='-'||*p=='_')) return;
+    struct Map {const char *type,*suffix;Action action;};
+    static const Map maps[]={{"ARM","/arm",ACTION_ARM},{"DISARM","/disarm",ACTION_DISARM},
+        {"LOCK_ENGINE","/lock_engine",ACTION_LOCK},{"UNLOCK_ENGINE","/unlock_engine",ACTION_UNLOCK},
+        {"SIREN_ON","/siren_on",ACTION_SIREN_ON},{"SIREN_OFF","/siren_off",ACTION_SIREN_OFF},{"REBOOT","/reboot",ACTION_REBOOT}};
+    for(const auto &m:maps) if(strcmp(type,m.type)==0 && strcmp(suffix,m.suffix)==0) {
+        ControlCommand c={};c.action=m.action;c.remote=true;strlcpy(c.id,id,sizeof(c.id));
+        if(xQueueSend(controlQueue,&c,0)==pdTRUE) return;
+        char json[160];snprintf(json,sizeof(json),"{\"cmd_id\":\"%s\",\"result\":\"REJECTED\",\"reason_if_failed\":\"QUEUE_FULL\"}",id);
+        mqttClient.publish(TOPIC_CMD_ACK,json);return;
     }
-
-    bool isExecuted = false;
-    const char* reasonIfFailed = NULL;
-
-    if (strstr(message, "\"DISARM\"") || strstr(topic, "/disarm")) {
-        currentState = STATE_PARKED;
-        set_buzzer(false);
-        ControlCommand cmd = { .target_state = STATE_PARKED, .cut_power = false };
-        if (controlQueue != NULL) xQueueSend(controlQueue, &cmd, 0);
-        isExecuted = true;
-        Serial.println("[Command] DISARMED (PARKED)");
-    } 
-    else if (strstr(message, "\"ARM\"") || strstr(topic, "/arm")) {
-        currentState = STATE_ARMED;
-        set_buzzer(false);
-        ControlCommand cmd = { .target_state = STATE_ARMED, .cut_power = false };
-        if (controlQueue != NULL) xQueueSend(controlQueue, &cmd, 0);
-        isExecuted = true;
-        Serial.println("[Command] ARMED activated");
-    } 
-    else if (strstr(message, "\"LOCK_ENGINE\"") || strstr(topic, "/lock_engine")) {
-        // RÀNG BUỘC AN TOÀN: Chỉ ngắt relay khi tốc độ <= 0.5 km/h
-        float spd = 0.0f;
-        if (xSemaphoreTake(telemetryMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
-            spd = sharedTelemetry.speed;
-            xSemaphoreGive(telemetryMutex);
-        }
-
-        if (spd <= 0.5f) {
-            currentState = STATE_THEFT_LOCK;
-            ControlCommand cmd = { .target_state = STATE_THEFT_LOCK, .cut_power = true };
-            if (controlQueue != NULL) xQueueSend(controlQueue, &cmd, 0);
-
-            CmdRelayData relayCmd = { .state = 0, .seq = 1 };
-            send_msg(CommSerial, MSG_CMD_RELAY, relayCmd);
-
-            isExecuted = true;
-            Serial.println("[Command] LOCK_ENGINE executed (Power Cut)");
-        } else {
-            isExecuted = false;
-            reasonIfFailed = "SPEED_NOT_ZERO";
-            Serial.printf("[Command] LOCK_ENGINE REJECTED: Speed = %.2f km/h > 0\n", spd);
-        }
-    }
-    else if (strstr(message, "\"UNLOCK_ENGINE\"") || strstr(topic, "/unlock_engine")) {
-        currentState = STATE_PARKED;
-        ControlCommand cmd = { .target_state = STATE_PARKED, .cut_power = false };
-        if (controlQueue != NULL) xQueueSend(controlQueue, &cmd, 0);
-
-        CmdRelayData relayCmd = { .state = 1, .seq = 1 };
-        send_msg(CommSerial, MSG_CMD_RELAY, relayCmd);
-
-        isExecuted = true;
-        Serial.println("[Command] UNLOCK_ENGINE executed (Relay Closed)");
-    }
-    else if (strstr(message, "\"SIREN_ON\"") || strstr(topic, "/siren_on")) {
-        set_buzzer(true);
-        currentState = STATE_ALARM;
-        isExecuted = true;
-        Serial.println("[Command] SIREN_ON executed (Buzzer ON)");
-    }
-    else if (strstr(message, "\"SIREN_OFF\"") || strstr(topic, "/siren_off")) {
-        set_buzzer(false);
-        if (currentState == STATE_ALARM) currentState = STATE_PARKED;
-        isExecuted = true;
-        Serial.println("[Command] SIREN_OFF executed (Buzzer OFF)");
-    }
-    else if (strstr(message, "\"REBOOT\"") || strstr(topic, "/reboot")) {
-        // RÀNG BUỘC AN TOÀN S-07: Tuyệt đối không cho phép REBOOT khi xe đang chạy (v > 0.5 km/h)
-        // để tránh vi điều khiển reset làm rơ-le ngắt nguồn đột ngột gây tai nạn!
-        float spd = 0.0f;
-        if (xSemaphoreTake(telemetryMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
-            spd = sharedTelemetry.speed;
-            xSemaphoreGive(telemetryMutex);
-        }
-
-        if (spd <= 0.5f) {
-            isExecuted = true;
-            Serial.println("[Command] REBOOT acknowledged (Speed = 0 km/h), restarting node...");
-            char ackJson[192];
-            snprintf(ackJson, sizeof(ackJson), 
-                     "{\"cmd_id\":\"%s\",\"result\":\"EXECUTED\",\"ts\":%lu}",
-                     cmdId, (unsigned long)(millis() / 1000));
-            mqttClient.publish(TOPIC_CMD_ACK, ackJson);
-            delay(600);
-            ESP.restart();
-            return;
-        } else {
-            isExecuted = false;
-            reasonIfFailed = "SPEED_NOT_ZERO";
-            Serial.printf("[Safety Block] REBOOT REJECTED: Speed = %.2f km/h > 0 (Safety Invariant S-07)\n", spd);
-        }
-    }
-
-    // Phản hồi Command ACK
-    char ackJson[192];
-    snprintf(ackJson, sizeof(ackJson), 
-             "{\"cmd_id\":\"%s\",\"result\":\"%s\",\"ts\":%lu,\"reason_if_failed\":%s%s%s}",
-             cmdId, isExecuted ? "EXECUTED" : "REJECTED",
-             (unsigned long)(millis() / 1000),
-             reasonIfFailed ? "\"" : "", reasonIfFailed ? reasonIfFailed : "null", reasonIfFailed ? "\"" : "");
-
-    mqttClient.publish(TOPIC_CMD_ACK, ackJson);
+    char json[176];snprintf(json,sizeof(json),"{\"cmd_id\":\"%s\",\"result\":\"REJECTED\",\"reason_if_failed\":\"UNSUPPORTED_COMMAND\"}",id);
+    mqttClient.publish(TOPIC_CMD_ACK,json);
 }
 
-// --- Task 1: Nhận và giải mã dữ liệu UART từ Node B (Core 0) ---
 void UARTRxTask(void *pvParameters) {
     UartPacket rxPacket;
     uint32_t lastHbTx = 0;
@@ -285,7 +182,10 @@ void UARTRxTask(void *pvParameters) {
                     case MSG_TELEMETRY: {
                         if (rxPacket.len == sizeof(TelemetryData)) {
                             if (xSemaphoreTake(telemetryMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
-                                memcpy(&sharedTelemetry, rxPacket.data, sizeof(TelemetryData));
+                                TelemetryData incoming;memcpy(&incoming,rxPacket.data,sizeof(incoming));
+                                if(isfinite(incoming.speed)&&incoming.speed>=0&&incoming.speed<=120) {
+                                    sharedTelemetry=incoming;telemetryReceived=millis();telemetrySeen=true;
+                                }
                                 xSemaphoreGive(telemetryMutex);
                             }
                         }
@@ -296,8 +196,8 @@ void UARTRxTask(void *pvParameters) {
                         if (rxPacket.len == sizeof(AccelEventData)) {
                             AccelEventData evt;
                             memcpy(&evt, rxPacket.data, sizeof(AccelEventData));
-                            Serial.printf("[Gateway] Sự kiện va chạm/rung: Type=%u, Accel=%.2f m/s2\n",
-                                          evt.event_type, evt.value);
+                            if(!isfinite(evt.value)||evt.event_type<1||evt.event_type>2||(evt.event_type==1&&currentState!=STATE_ARMED)) break;
+                            Serial.printf("[Gateway] Event type=%u value=%.2f %s\n", evt.event_type, evt.value, evt.event_type==2?"deg":"m/s2");
 
                             // Đẩy vào Queue gửi cảnh báo ngay lên MQTT
                             if (alertMqttQueue != NULL) {
@@ -306,8 +206,7 @@ void UARTRxTask(void *pvParameters) {
 
                             // Kích hoạt báo động nếu xe đang ở chế độ ARMED
                             if (currentState == STATE_ARMED) {
-                                currentState = STATE_ALARM;
-                                ControlCommand cmd = { .target_state = STATE_ALARM, .cut_power = false };
+                                ControlCommand cmd={};cmd.action=ACTION_ALARM;
                                 if (controlQueue != NULL) xQueueSend(controlQueue, &cmd, 0);
                             }
                         }
@@ -362,100 +261,47 @@ void UARTRxTask(void *pvParameters) {
 }
 
 // --- Task 2: Máy trạng thái và ràng buộc an toàn (Core 1) ---
-void SafetyTask(void *pvParameters) {
-    TickType_t xLastWakeTime = xTaskGetTickCount();
-    const TickType_t xFrequency = pdMS_TO_TICKS(100);
-    uint32_t alarmStartTime = 0;
-
-    for (;;) {
-        float currentSpeed = 0.0f;
-        if (xSemaphoreTake(telemetryMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
-            currentSpeed = sharedTelemetry.speed;
-            xSemaphoreGive(telemetryMutex);
-        }
-
-        switch (currentState) {
-            case STATE_PARKED:
-            case STATE_ARMED:
-                alarmStartTime = 0;
-                break;
-
-            case STATE_ALARM:
-                if (alarmStartTime == 0) {
-                    alarmStartTime = millis();
+void ControlTask(void*) {
+    ControlCommand c;CommandResult cache[8]={};uint8_t head=0;
+    uint32_t alarmStart=0;bool manualSiren=false;
+    for(;;) {
+        if(uxQueueSpacesAvailable(resultQueue)>0 && xQueueReceive(controlQueue,&c,pdMS_TO_TICKS(20))==pdTRUE) {
+            bool duplicate=false;
+            if(c.remote) for(const auto &r:cache) if(r.id[0]&&strcmp(r.id,c.id)==0) {xQueueSend(resultQueue,&r,0);duplicate=true;break;}
+            if(!duplicate) {
+                CommandResult r={};strlcpy(r.id,c.id,sizeof(r.id));r.executed=true;
+                const char *reason=(c.action==ACTION_LOCK||c.action==ACTION_REBOOT)?lock_block_reason():nullptr;
+                if(reason) {r.executed=false;strlcpy(r.reason,reason,sizeof(r.reason));}
+                else switch(c.action) {
+                    case ACTION_ARM:currentState=STATE_ARMED;manualSiren=false;set_motor(true);break;
+                    case ACTION_DISARM:case ACTION_UNLOCK:currentState=STATE_PARKED;manualSiren=false;set_motor(true);break;
+                    case ACTION_LOCK:currentState=STATE_THEFT_LOCK;set_motor(false);break;
+                    case ACTION_SIREN_ON:manualSiren=true;break;
+                    case ACTION_SIREN_OFF:manualSiren=false;if(currentState==STATE_ALARM)currentState=STATE_ARMED;break;
+                    case ACTION_ALARM:if(currentState==STATE_ARMED)currentState=STATE_ALARM;break;
+                    case ACTION_REBOOT:r.reboot=true;break;
                 }
-
-                // Cảnh báo quá 15s: Kiểm tra ràng buộc an toàn (v <= 0.5 km/h) trước khi ngắt rơ-le
-                if (millis() - alarmStartTime > 15000) {
-                    if (currentSpeed <= 0.5f) {
-                        currentState = STATE_THEFT_LOCK;
-                        alarmStartTime = 0;
-                        Serial.println("[Safety Task] Tốc độ an toàn (v=0) -> Kích hoạt THEFT_LOCK (Ngắt rơ-le)!");
-
-                        ControlCommand cmd = { .target_state = STATE_THEFT_LOCK, .cut_power = true };
-                        if (controlQueue != NULL) xQueueSend(controlQueue, &cmd, 0);
-
-                        CmdRelayData relayCmd = { .state = 0, .seq = 1 };
-                        send_msg(CommSerial, MSG_CMD_RELAY, relayCmd);
-                    } else {
-                        Serial.printf("[Safety Block] Xe đang chuyển động (v=%.2f km/h) -> Hoãn ngắt nguồn!\n", currentSpeed);
-                    }
-                }
-                break;
-
-            case STATE_THEFT_LOCK:
-                break;
-        }
-
-        vTaskDelayUntil(&xLastWakeTime, xFrequency);
-    }
-}
-
-// --- Task 3: Điều khiển ngoại vi Relay, Buzzer, LED (Core 1) ---
-void ControlTask(void *pvParameters) {
-    ControlCommand cmd;
-
-    for (;;) {
-        if (xQueueReceive(controlQueue, &cmd, pdMS_TO_TICKS(100)) == pdTRUE) {
-            if (cmd.cut_power) {
-                digitalWrite(PIN_RELAY, LOW);  // Ngắt nguồn
-                Serial.println("[Control Task] Rơ-le -> NGẮT NGUỒN (POWER CUT)");
-            } else {
-                digitalWrite(PIN_RELAY, HIGH); // Cấp nguồn
-                Serial.println("[Control Task] Rơ-le -> CẤP NGUỒN (POWER ON)");
+                digitalWrite(PIN_BUZZER,(manualSiren||currentState==STATE_ALARM||currentState==STATE_THEFT_LOCK)?HIGH:LOW);
+                Serial.printf("[CONTROL] cmd=%s action=%u result=%s reason=%s state=%s\n",c.id,unsigned(c.action),r.executed?"EXECUTED":"REJECTED",r.reason,state_to_string(currentState));
+                if(c.remote) {cache[head]=r;head=(head+1)%8;xQueueSend(resultQueue,&r,0);}
             }
         }
-
-        switch (currentState) {
-            case STATE_PARKED:
-                digitalWrite(PIN_LED, LOW);
-                set_buzzer(false);
-                break;
-
-            case STATE_ARMED:
-                digitalWrite(PIN_LED, (millis() / 1000) % 2); // Nháy chậm 1s
-                set_buzzer(false);
-                break;
-
-            case STATE_ALARM:
-                digitalWrite(PIN_LED, (millis() / 200) % 2);  // Nháy nhanh 200ms
-                set_buzzer((millis() / 200) % 2);            // Còi hú dồn dập
-                break;
-
-            case STATE_THEFT_LOCK:
-                digitalWrite(PIN_LED, HIGH);                 // Sáng cố định
-                set_buzzer((millis() / 500) % 2);            // Còi ngắt quãng
-                break;
-        }
-
-        vTaskDelay(pdMS_TO_TICKS(50));
+        if(currentState==STATE_ALARM) {
+            if(!alarmStart)alarmStart=millis();
+            if(millis()-alarmStart>=15000&&!lock_block_reason()) {set_motor(false);currentState=STATE_THEFT_LOCK;Serial.println("[CONTROL] automatic lock");}
+        } else alarmStart=0;
+        digitalWrite(PIN_BUZZER,(manualSiren||(currentState==STATE_ALARM&&(millis()/200)%2)||(currentState==STATE_THEFT_LOCK&&(millis()/500)%2))?HIGH:LOW);
+        digitalWrite(PIN_LED,(currentState==STATE_THEFT_LOCK||(currentState==STATE_ARMED&&(millis()/1000)%2)||(currentState==STATE_ALARM&&(millis()/200)%2))?HIGH:LOW);
+        vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
 
-// --- Task 4: Quản lý kết nối Wi-Fi & MQTT Client (Core 0) ---
 void MQTTTask(void *pvParameters) {
     mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
     mqttClient.setCallback(mqtt_callback);
+    if(!mqttClient.setBufferSize(768)) Serial.println("[MQTT] buffer allocation failed");
+    mqttClient.setSocketTimeout(1);
+    CommandResult pendingAck={};bool hasAck=false;
 
     uint32_t lastTelemetryPub = 0;
     uint32_t lastHeartbeatPub = 0;
@@ -483,10 +329,10 @@ void MQTTTask(void *pvParameters) {
 
             if (mqttClient.connect(clientId, NULL, NULL, willTopic, willQos, willRetain, willMessage)) {
                 Serial.println("[MQTT] Kết nối thành công tới Broker!");
-                
+
                 // Báo Online
                 char onlineMsg[128];
-                snprintf(onlineMsg, sizeof(onlineMsg), "{\"status\":\"online\",\"ip\":\"%s\",\"fw\":\"v1.0.0\"}",
+                snprintf(onlineMsg, sizeof(onlineMsg), "{\"status\":\"online\",\"ip\":\"%s\",\"fw\":\"v2-gps\"}",
                          WiFi.localIP().toString().c_str());
                 mqttClient.publish(TOPIC_STATUS, onlineMsg, true);
 
@@ -507,11 +353,11 @@ void MQTTTask(void *pvParameters) {
             const char* reason = (evt.event_type >= 2) ? "FALL_DETECTED" : "MOTION_WHILE_ARMED";
             const char* severity = (evt.event_type >= 2) ? "CRITICAL" : "HIGH";
 
-            char alertJson[256];
+            char alertJson[320];
             snprintf(alertJson, sizeof(alertJson),
-                     "{\"device_id\":\"%s\",\"ts\":%lu,\"alert_id\":\"a%lu\",\"reason\":\"%s\",\"severity\":\"%s\",\"details\":\"Gia toc vuot nguong: %.2f m/s2\"}",
-                     DEVICE_ID, (unsigned long)(millis() / 1000), (unsigned long)millis(), reason, severity, evt.value);
-            
+                     "{\"device_id\":\"%s\",\"ts\":%lu,\"alert_id\":\"a%08lx-%lu\",\"reason\":\"%s\",\"severity\":\"%s\",\"details\":\"Sensor event: %.2f %s\"}",
+                     DEVICE_ID, (unsigned long)(millis() / 1000), (unsigned long)bootNonce, (unsigned long)evt.timestamp, reason, severity, evt.value, evt.event_type==2?"deg":"m/s2");
+
             // Tự động publish nếu có mạng, hoặc lưu vào Offline Buffer nếu đang mất mạng
             publish_or_buffer(TOPIC_ALERT, alertJson, 1);
         }
@@ -519,25 +365,35 @@ void MQTTTask(void *pvParameters) {
         // 4. Xử lý truyền nhận tin định kỳ khi có kết nối
         if (mqttClient.connected()) {
             mqttClient.loop();
+            flush_offline_messages();
+            if(!hasAck) hasAck=xQueueReceive(resultQueue,&pendingAck,0)==pdTRUE;
+            if(hasAck) {
+                StaticJsonDocument<256> doc;doc["cmd_id"]=pendingAck.id;doc["result"]=pendingAck.executed?"EXECUTED":"REJECTED";
+                if(pendingAck.reason[0])doc["reason_if_failed"]=pendingAck.reason;else doc["reason_if_failed"]=nullptr;
+                doc["ts"]=millis()/1000;char json[320];serializeJson(doc,json,sizeof(json));
+                if(mqttClient.publish(TOPIC_CMD_ACK,json)) {hasAck=false;if(pendingAck.reboot){delay(200);ESP.restart();}}
+            }
 
             // Định kỳ 3s gửi Telemetry chuẩn hóa (đầy đủ accel_x, accel_y, accel_z và battery_v)
-            if (millis() - lastTelemetryPub >= 3000) {
+            if (millis() - lastTelemetryPub >= 1000) {
                 lastTelemetryPub = millis();
 
-                float spd = 0.0f, ax = 0.0f, ay = 0.0f, az = 0.0f;
-                if (xSemaphoreTake(telemetryMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
-                    spd = sharedTelemetry.speed;
-                    ax = sharedTelemetry.ax; ay = sharedTelemetry.ay; az = sharedTelemetry.az;
-                    xSemaphoreGive(telemetryMutex);
-                }
-
-                char telemJson[320];
-                snprintf(telemJson, sizeof(telemJson),
-                         "{\"device_id\":\"%s\",\"ts\":%lu,\"speed_kmh\":%.2f,\"state\":\"%s\","
-                         "\"accel\":[%.2f,%.2f,%.2f],\"accel_x\":%.2f,\"accel_y\":%.2f,\"accel_z\":%.2f,\"battery_v\":12.6}",
-                         DEVICE_ID, (unsigned long)(millis() / 1000), spd, state_to_string(currentState),
-                         ax, ay, az, ax, ay, az);
-                mqttClient.publish(TOPIC_TELEMETRY, telemJson);
+                TelemetryData t={};uint32_t received=0;
+                bool seen=get_snapshot(t,received);uint32_t age=seen?millis()-received:UINT32_MAX;
+                bool fresh=seen&&age<=SENSOR_STALE_MS&&sensorConnected&&millis()-lastSensorHeartbeat<=3000;
+                uint32_t gpsAge=t.gps_age_ms;
+                if(seen&&gpsAge!=UINT32_MAX)gpsAge=age>UINT32_MAX-gpsAge?UINT32_MAX:gpsAge+age;
+                bool gpsValid=fresh&&t.gps_valid&&gpsAge<=GPS_STALE_MS&&isfinite(t.latitude)&&isfinite(t.longitude)&&fabsf(t.latitude)<=90&&fabsf(t.longitude)<=180;
+                StaticJsonDocument<640> doc;
+                doc["device_id"]=DEVICE_ID;doc["ts"]=millis()/1000;doc["state"]=state_to_string(currentState);
+                doc["data_source"]="HARDWARE";doc["sensor_connected"]=fresh;doc["imu_valid"]=fresh&&t.imu_valid;
+                doc["speed_valid"]=fresh&&t.speed_valid;doc["gps_valid"]=gpsValid;doc["gps_age_ms"]=seen?gpsAge:UINT32_MAX;
+                if(fresh&&t.speed_valid)doc["speed_kmh"]=t.speed;
+                if(fresh&&t.imu_valid&&isfinite(t.ax)&&isfinite(t.ay)&&isfinite(t.az)) {doc["accel_x"]=t.ax;doc["accel_y"]=t.ay;doc["accel_z"]=t.az;}
+                if(gpsValid) {doc["latitude"]=t.latitude;doc["longitude"]=t.longitude;}
+                // No battery ADC yet: do not publish fabricated 12.6V.
+                char json[640];size_t len=serializeJson(doc,json,sizeof(json));
+                if(doc.overflowed()||len>=sizeof(json)-1||!mqttClient.publish(TOPIC_TELEMETRY,json)) Serial.println("[MQTT] telemetry publish failed");
             }
 
             // Định kỳ 15s gửi Heartbeat
@@ -560,11 +416,12 @@ void setup() {
     Serial.begin(115200);
     delay(500);
 
+    digitalWrite(PIN_RELAY,(RELAY_POWER_ON_AT_BOOT==RELAY_ACTIVE_LOW)?LOW:HIGH);
     pinMode(PIN_RELAY, OUTPUT);
     pinMode(PIN_BUZZER, OUTPUT);
     pinMode(PIN_LED, OUTPUT);
 
-    digitalWrite(PIN_RELAY, HIGH);
+    set_motor(RELAY_POWER_ON_AT_BOOT);
     digitalWrite(PIN_BUZZER, LOW);
     digitalWrite(PIN_LED, LOW);
 
@@ -576,85 +433,38 @@ void setup() {
     controlQueue    = xQueueCreate(5, sizeof(ControlCommand));
     alertMqttQueue  = xQueueCreate(10, sizeof(AccelEventData));
     bufferMutex     = xSemaphoreCreateMutex();
+    resultQueue=xQueueCreate(8,sizeof(CommandResult));
+    bootNonce=esp_random();
 
-    if (telemetryMutex == NULL || controlQueue == NULL || alertMqttQueue == NULL || bufferMutex == NULL) {
+    if (telemetryMutex == NULL || controlQueue == NULL || alertMqttQueue == NULL || bufferMutex == NULL || resultQueue == NULL) {
         Serial.println("[ERROR] Không thể tạo FreeRTOS primitives!");
         while (1) delay(1000);
     }
 
     // Khởi tạo các FreeRTOS Tasks
-    xTaskCreatePinnedToCore(UARTRxTask,   "UARTRxTask",   4096, NULL, 3, NULL, 0);
-    xTaskCreatePinnedToCore(SafetyTask,   "SafetyTask",   4096, NULL, 3, NULL, 1);
-    xTaskCreatePinnedToCore(ControlTask,  "ControlTask",  3072, NULL, 2, NULL, 1);
-    xTaskCreatePinnedToCore(MQTTTask,     "MQTTTask",     6144, NULL, 2, NULL, 0);
+    if(xTaskCreatePinnedToCore(UARTRxTask,   "UARTRxTask",   4096, NULL, 3, NULL, 0)!=pdPASS) {Serial.println("[FATAL] task creation failed"); while(true) delay(1000);}
+    if(xTaskCreatePinnedToCore(ControlTask,  "ControlTask",  6144, NULL, 2, NULL, 1)!=pdPASS) {Serial.println("[FATAL] task creation failed"); while(true) delay(1000);}
+    if(xTaskCreatePinnedToCore(MQTTTask,     "MQTTTask",     8192, NULL, 2, NULL, 0)!=pdPASS) {Serial.println("[FATAL] task creation failed"); while(true) delay(1000);}
 
     Serial.printf("[Node A] Free Heap: %u bytes\n", esp_get_free_heap_size());
 }
 
 // --- Vòng lặp chính: Nhận phím điều khiển & In trạng thái định kỳ ---
 void loop() {
-    // Nhận phím điều khiển test nhanh từ Serial Monitor
-    if (Serial.available()) {
-        char ch = Serial.read();
-        if (ch == '1' || ch == 'a' || ch == 'A') {
-            currentState = STATE_ARMED;
-            Serial.println("\n>>> Chế độ: ARMED (Bật chống trộm) <<<");
-            ControlCommand cmd = { .target_state = STATE_ARMED, .cut_power = false };
-            if (controlQueue != NULL) xQueueSend(controlQueue, &cmd, 0);
-        } else if (ch == '2') {
-            currentState = STATE_ALARM;
-            Serial.println("\n>>> Chế độ: Test ALARM (Còi hú) <<<");
-            ControlCommand cmd = { .target_state = STATE_ALARM, .cut_power = false };
-            if (controlQueue != NULL) xQueueSend(controlQueue, &cmd, 0);
-        } else if (ch == 'b' || ch == 'B') {
-            Serial.println("\n>>> Test còi 500ms... <<<");
-            set_buzzer(true);
-            delay(500);
-            set_buzzer(false);
-        } else if (ch == '0' || ch == 'd' || ch == 'D') {
-            currentState = STATE_PARKED;
-            Serial.println("\n>>> Chế độ: PARKED (Mở khóa / Bình thường) <<<");
-            ControlCommand cmd = { .target_state = STATE_PARKED, .cut_power = false };
-            if (controlQueue != NULL) xQueueSend(controlQueue, &cmd, 0);
-        } else if (ch == 'k' || ch == 'K') {
-            Serial.println("\n>>> Lệnh: Khóa khẩn cấp (Emergency Lock)... <<<");
-            float spd = 0.0f;
-            if (xSemaphoreTake(telemetryMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
-                spd = sharedTelemetry.speed;
-                xSemaphoreGive(telemetryMutex);
-            }
-            if (spd <= 0.5f) {
-                currentState = STATE_THEFT_LOCK;
-                Serial.println("[Safety] Vận tốc an toàn -> Chấp nhận khóa xe, ngắt rơ-le.");
-                ControlCommand cmd = { .target_state = STATE_THEFT_LOCK, .cut_power = true };
-                if (controlQueue != NULL) xQueueSend(controlQueue, &cmd, 0);
-            } else {
-                Serial.printf("[Safety Reject] Xe đang chạy (v=%.2f km/h) -> Từ chối ngắt nguồn!\n", spd);
-            }
-        }
+    if(Serial.available()) {
+        char ch=Serial.read();ControlCommand c={};bool known=true;
+        switch(ch) {case 'a':case 'A':case '1':c.action=ACTION_ARM;break;
+            case 'd':case 'D':case '0':c.action=ACTION_DISARM;break;
+            case 'k':case 'K':c.action=ACTION_LOCK;break;case 'u':case 'U':c.action=ACTION_UNLOCK;break;
+            case 'b':case '2':c.action=ACTION_SIREN_ON;break;case 's':c.action=ACTION_SIREN_OFF;break;default:known=false;}
+        if(known&&xQueueSend(controlQueue,&c,0)!=pdTRUE)Serial.println("[CONTROL] queue full");
     }
-
-    // In log giám sát định kỳ mỗi 3 giây
-    static uint32_t lastLog = 0;
-    if (millis() - lastLog >= 3000) {
-        lastLog = millis();
-
-        float spd = 0.0f, ax = 0.0f, ay = 0.0f, az = 0.0f;
-        if (xSemaphoreTake(telemetryMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
-            spd = sharedTelemetry.speed;
-            ax = sharedTelemetry.ax;
-            ay = sharedTelemetry.ay;
-            az = sharedTelemetry.az;
-            xSemaphoreGive(telemetryMutex);
-        }
-
-        Serial.printf("[Trạng thái] Mode: %s | Sensor: %s | WiFi: %s | Spd: %.2f km/h | Heap: %u B\n",
-                      state_to_string(currentState),
-                      sensorConnected ? "CONNECTED" : "DISCONNECTED",
-                      WiFi.status() == WL_CONNECTED ? "CONNECTED" : "DISCONNECTED",
-                      spd,
-                      esp_get_free_heap_size());
+    static uint32_t log=0;
+    if(millis()-log>=3000) {
+        log=millis();TelemetryData t={};uint32_t received=0;bool seen=get_snapshot(t,received);
+        Serial.printf("[Node A UART v2] size=%u state=%s speed=%.2f fresh=%u gps_valid=%u age=%lu heap=%u\n",
+            unsigned(sizeof(TelemetryData)),state_to_string(currentState),t.speed,
+            seen&&millis()-received<=SENSOR_STALE_MS,t.gps_valid,(unsigned long)t.gps_age_ms,esp_get_free_heap_size());
     }
-
-    vTaskDelay(pdMS_TO_TICKS(100));
+    vTaskDelay(pdMS_TO_TICKS(20));
 }

@@ -64,3 +64,6 @@ postgres_data/
 *.db
 *.sqlite
 *.sqlite3
+
+# Local firmware Wi-Fi credentials
+network_config.h

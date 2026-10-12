@@ -1,6 +1,8 @@
 #include "uart_protocol.h"
 #include <Wire.h>
-#include <esp_task_wdt.h>
+#include "guardian_config.h"
+#include <TinyGPS++.h>
+#include <math.h>
 
 // --- Cấu hình phần cứng & Chân giao tiếp (Node B Sensor - ESP32-S3) ---
 #define RXD1 18
@@ -11,16 +13,22 @@
 #define PIN_I2C_SCL 9
 
 #define PIN_HALL 4
-#define WHEEL_CIRCUMFERENCE_METERS 0.5f // Chu vi bánh xe (0.5m)
-#define PULSES_PER_REV 1                // 1 nam châm = 1 xung/vòng
 
 HardwareSerial CommSerial(1);
+HardwareSerial GpsSerial(2);
+struct GpsSnapshot {float lat, lon; uint32_t lastFix; bool hasFix;};
+static GpsSnapshot gpsSnapshot={};
+static SemaphoreHandle_t gpsMutex;
+static volatile uint32_t droppedSamples=0;
+
 
 // --- Cấu trúc dữ liệu & Biến chia sẻ FreeRTOS ---
 struct RawSensorSample {
     float raw_speed;
     float raw_ax, raw_ay, raw_az;
     uint32_t timestamp;
+    uint32_t wheel_idle_ms;
+    bool imu_valid;
 };
 
 static QueueHandle_t sensorQueue = NULL;
@@ -31,24 +39,24 @@ static TelemetryData latestTelemetry = { .speed = 0.0f, .ax = 0.0f, .ay = 0.0f, 
 
 static volatile uint32_t lastGatewayHeartbeat = 0;
 static volatile bool gatewayConnected = false;
-static uint8_t nodeState = 0;
+static volatile uint8_t nodeState = 0;
 
 static bool mpuDetected = false;
 static uint8_t actualMpuAddr = 0x68;
 
 // Biến đếm xung Hall (Ngắt ISR)
 static volatile uint32_t hallPulseCount = 0;
+static volatile uint32_t hallLastUs=0, hallPeriodUs=0;
 static portMUX_TYPE hallMux = portMUX_INITIALIZER_UNLOCKED;
 
 void IRAM_ATTR hall_isr() {
-    static uint32_t lastPulseTime = 0;
-    uint32_t now = millis();
-    if (now - lastPulseTime >= 10) { // Debounce 10ms
-        lastPulseTime = now;
-        portENTER_CRITICAL_ISR(&hallMux);
-        hallPulseCount++;
-        portEXIT_CRITICAL_ISR(&hallMux);
+    uint32_t now=micros();
+    portENTER_CRITICAL_ISR(&hallMux);
+    if (!hallPulseCount || uint32_t(now-hallLastUs)>=10000) {
+        hallPeriodUs=hallPulseCount?uint32_t(now-hallLastUs):0;
+        hallLastUs=now; ++hallPulseCount;
     }
+    portEXIT_CRITICAL_ISR(&hallMux);
 }
 
 // --- Khởi tạo và đọc I2C cảm biến MPU-6050 ---
@@ -67,7 +75,7 @@ bool init_mpu6050() {
         if (Wire.endTransmission() == 0) {
             Wire.requestFrom((int)addrs[i], 1);
             if (Wire.available()) {
-                Wire.read();
+                if ((Wire.read() & 0x7E) != 0x68) continue;
                 actualMpuAddr = addrs[i];
                 found = true;
                 break;
@@ -81,16 +89,14 @@ bool init_mpu6050() {
     Wire.beginTransmission(actualMpuAddr);
     Wire.write(0x6B);
     Wire.write(0x00);
-    Wire.endTransmission();
+    if(Wire.endTransmission()!=0) return false;
     delay(10);
 
     // Cấu hình dải đo gia tốc +/- 4g
     Wire.beginTransmission(actualMpuAddr);
     Wire.write(0x1C);
     Wire.write(0x08);
-    Wire.endTransmission();
-
-    return true;
+    return Wire.endTransmission()==0;
 }
 
 bool read_mpu6050(float &ax, float &ay, float &az) {
@@ -102,9 +108,9 @@ bool read_mpu6050(float &ax, float &ay, float &az) {
 
     if (Wire.requestFrom((int)actualMpuAddr, 6) != 6) return false;
 
-    int16_t raw_ax = (Wire.read() << 8) | Wire.read();
-    int16_t raw_ay = (Wire.read() << 8) | Wire.read();
-    int16_t raw_az = (Wire.read() << 8) | Wire.read();
+    int16_t raw[3];
+    for (int i=0;i<3;++i) { uint8_t hi=Wire.read(),lo=Wire.read(); raw[i]=int16_t((uint16_t(hi)<<8)|lo); }
+    int16_t raw_ax=raw[0],raw_ay=raw[1],raw_az=raw[2];
 
     const float SCALE_FACTOR = (9.80665f / 8192.0f);
     ax = raw_ax * SCALE_FACTOR;
@@ -115,81 +121,65 @@ bool read_mpu6050(float &ax, float &ay, float &az) {
 }
 
 // --- Task 1: Thu thập dữ liệu cảm biến định kỳ 50ms (Core 1) ---
-void SensorTask(void *pvParameters) {
-    TickType_t xLastWakeTime = xTaskGetTickCount();
-    const TickType_t xFrequency = pdMS_TO_TICKS(50);
-
-    uint32_t lastSpeedCalcTime = millis();
-    uint32_t lastPulseSample = 0;
-    float currentSpeed = 0.0f;
-    float simAngle = 0.0f;
-
+// Independent GPS task: only owner of UART2 and TinyGPSPlus.
+void GpsTask(void*) {
+    TinyGPSPlus gps; uint32_t lastLog=0;
     for (;;) {
-        uint32_t now = millis();
-
-        // Tính tốc độ từ cảm biến Hall mỗi 200ms
-        if (now - lastSpeedCalcTime >= 200) {
-            uint32_t currentPulses = 0;
-            portENTER_CRITICAL(&hallMux);
-            currentPulses = hallPulseCount;
-            portEXIT_CRITICAL(&hallMux);
-
-            uint32_t deltaPulses = currentPulses - lastPulseSample;
-            lastPulseSample = currentPulses;
-
-            float dtSeconds = (now - lastSpeedCalcTime) / 1000.0f;
-            lastSpeedCalcTime = now;
-
-            if (dtSeconds > 0.0f) {
-                float speed_mps = ((float)deltaPulses / (float)PULSES_PER_REV) * WHEEL_CIRCUMFERENCE_METERS / dtSeconds;
-                currentSpeed = speed_mps * 3.6f;
-                if (currentSpeed > 120.0f) currentSpeed = 120.0f;
-            }
-        }
-
-        // Đọc gia tốc từ MPU-6050
-        float ax = 0.0f, ay = 0.0f, az = 9.81f;
-        if (mpuDetected) {
-            read_mpu6050(ax, ay, az);
-        } else {
-            // Tự động quét lại I2C mỗi 3 giây nếu chưa kết nối
-            static uint32_t lastMpuRetry = 0;
-            if (now - lastMpuRetry >= 3000) {
-                lastMpuRetry = now;
-                if (init_mpu6050()) {
-                    mpuDetected = true;
-                    Serial.println("\n>>> [Node B] Đã phát hiện MPU-6050 I2C! <<<");
+        unsigned budget=512;
+        while(budget-- && GpsSerial.available()) {
+            gps.encode(char(GpsSerial.read()));
+            if(gps.location.isUpdated() && gps.location.isValid()) {
+                float lat=gps.location.lat(),lon=gps.location.lng();
+                if(isfinite(lat)&&isfinite(lon)&&fabsf(lat)<=90&&fabsf(lon)<=180 &&
+                   xSemaphoreTake(gpsMutex,pdMS_TO_TICKS(5))==pdTRUE) {
+                    gpsSnapshot={lat,lon,millis(),true}; xSemaphoreGive(gpsMutex);
                 }
             }
-
-            simAngle += 0.05f;
-            ax = 0.1f * sin(simAngle);
-            ay = 0.1f * cos(simAngle);
-            az = 9.81f + 0.05f * sin(simAngle * 2.0f);
         }
-
-        RawSensorSample sample = {
-            .raw_speed = currentSpeed,
-            .raw_ax = ax,
-            .raw_ay = ay,
-            .raw_az = az,
-            .timestamp = now
-        };
-
-        if (sensorQueue != NULL) {
-            xQueueSend(sensorQueue, &sample, pdMS_TO_TICKS(10));
+        if(millis()-lastLog>=2000) {
+            lastLog=millis(); GpsSnapshot g={};
+            if(xSemaphoreTake(gpsMutex,pdMS_TO_TICKS(5))==pdTRUE) {g=gpsSnapshot;xSemaphoreGive(gpsMutex);}
+            Serial.printf("[GPS %s] lat=%.6f lon=%.6f age=%lu chars=%lu checksum_errors=%lu\n",
+                !g.hasFix?"NO_FIX":(millis()-g.lastFix<=GPS_STALE_MS?"FIX":"STALE"),g.lat,g.lon,
+                (unsigned long)(g.hasFix?millis()-g.lastFix:UINT32_MAX),
+                (unsigned long)gps.charsProcessed(),(unsigned long)gps.failedChecksum());
         }
-
-        vTaskDelayUntil(&xLastWakeTime, xFrequency);
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+void SensorTask(void*) {
+    TickType_t wake=xTaskGetTickCount(); uint32_t retry=0,lastCount=0,lastPulseMs=0;
+    for (;;) {
+        uint32_t now=millis(),count,last,period,nowUs;
+        portENTER_CRITICAL(&hallMux);
+        count=hallPulseCount;last=hallLastUs;period=hallPeriodUs;nowUs=micros();
+        portEXIT_CRITICAL(&hallMux);
+        if(count!=lastCount) {lastCount=count;lastPulseMs=now-uint32_t(nowUs-last)/1000;}
+        uint32_t idle=now-lastPulseMs; // millis avoids resurrecting motion after micros wraps (~71 min).
+        float speed=0;
+        if(count && idle<WHEEL_STOP_MS) {
+            uint32_t elapsed=uint32_t(nowUs-last),effective=period>elapsed?period:elapsed;
+            if(effective<10000) effective=10000;
+            speed=WHEEL_CIRCUMFERENCE_M*3600000.0f/(WHEEL_PULSES_PER_REV*effective);
+            if(speed>120) speed=120;
+        }
+        float ax=NAN,ay=NAN,az=NAN;
+        bool valid=mpuDetected && read_mpu6050(ax,ay,az);
+        if(!valid) {
+            mpuDetected=false;
+            if(now-retry>=3000) {retry=now;mpuDetected=init_mpu6050();}
+        }
+        RawSensorSample s={speed,ax,ay,az,now,idle,valid};
+        if(xQueueSend(sensorQueue,&s,0)!=pdTRUE) ++droppedSamples;
+        vTaskDelayUntil(&wake,pdMS_TO_TICKS(50));
     }
 }
 
-// --- Task 2: Xử lý dữ liệu và phát hiện va chạm / trộm / ngã xe (Core 1) ---
 void ProcessingTask(void *pvParameters) {
     RawSensorSample sample;
     const float ACCEL_EVENT_THRESHOLD = 3.5f;   // Ngưỡng gia tốc động rung lắc
     const float TILT_FALL_THRESHOLD = 50.0f;    // Ngưỡng góc nghiêng đổ xe (50 độ)
-    
+
     uint8_t consecutiveVibeCount = 0;           // Bộ đếm mẫu liên tiếp vượt ngưỡng (Debounce)
     uint32_t lastAlertTriggerTime = 0;          // Cooldown chống spam cảnh báo
     uint32_t tiltStartTime = 0;                 // Thời điểm bắt đầu nghiêng quá ngưỡng
@@ -204,12 +194,16 @@ void ProcessingTask(void *pvParameters) {
                 latestTelemetry.ay = sample.raw_ay;
                 latestTelemetry.az = sample.raw_az;
                 latestTelemetry.timestamp = sample.timestamp;
+                latestTelemetry.wheel_idle_ms=sample.wheel_idle_ms;
+                latestTelemetry.imu_valid=sample.imu_valid;
+                latestTelemetry.speed_valid=1;
                 xSemaphoreGive(telemMutex);
             }
 
+            if(!sample.imu_valid) {consecutiveVibeCount=0;tiltStartTime=0;continue;}
             // 1. Tính toán góc nghiêng (Tilt Angle)
-            float tiltDeg = atan2(sqrt(sample.raw_ax * sample.raw_ax + sample.raw_ay * sample.raw_ay), 
-                                  fabs(sample.raw_az > 0.01f ? sample.raw_az : 1.0f)) * (180.0f / 3.14159265f);
+            float tiltDeg = atan2(sqrt(sample.raw_ax * sample.raw_ax + sample.raw_ay * sample.raw_ay),
+                                  sample.raw_az) * (180.0f / 3.14159265f);
 
             // 2. Thuật toán phát hiện Ngã xe thông minh (Phân biệt Ôm cua vs Ngã xe thật)
             // Xe ôm cua: Nghiêng nhưng tốc độ > 5 km/h và chỉ nghiêng tạm thời < 2 giây.
@@ -218,8 +212,8 @@ void ProcessingTask(void *pvParameters) {
                 if (tiltStartTime == 0) {
                     tiltStartTime = now;
                 }
-                
-                bool isRealCrash = (sample.raw_speed <= 2.0f && (now - tiltStartTime >= 500)) || 
+
+                bool isRealCrash = (sample.raw_speed <= 2.0f && (now - tiltStartTime >= 500)) ||
                                    (now - tiltStartTime >= 2000); // Nghiêng liên tục > 2s
 
                 if (isRealCrash && (now - lastAlertTriggerTime >= 5000)) { // Cooldown 5s
@@ -232,7 +226,7 @@ void ProcessingTask(void *pvParameters) {
                     if (eventQueue != NULL) {
                         xQueueSend(eventQueue, &evt, 0);
                     }
-                    Serial.printf("[Node B] ⚠️ PHÁT HIỆN NGÃ XE THẬT: Nghiêng = %.1f độ, Vận tốc = %.1f km/h\n", 
+                    Serial.printf("[Node B] ⚠️ PHÁT HIỆN NGÃ XE THẬT: Nghiêng = %.1f độ, Vận tốc = %.1f km/h\n",
                                   tiltDeg, sample.raw_speed);
                 }
             } else {
@@ -240,11 +234,9 @@ void ProcessingTask(void *pvParameters) {
             }
 
             // 3. Phát hiện gia tốc động vượt ngưỡng rung lắc (Kèm Debounce 3 mẫu liên tiếp & Cooldown 4s)
-            float dynamicAccel = sqrt(sample.raw_ax * sample.raw_ax + 
-                                      sample.raw_ay * sample.raw_ay + 
-                                      (sample.raw_az - 9.81f) * (sample.raw_az - 9.81f));
+            float dynamicAccel = fabsf(sqrtf(sample.raw_ax*sample.raw_ax + sample.raw_ay*sample.raw_ay + sample.raw_az*sample.raw_az)-9.80665f);
 
-            if (dynamicAccel > ACCEL_EVENT_THRESHOLD) {
+            if (gatewayConnected && nodeState==1 && dynamicAccel > ACCEL_EVENT_THRESHOLD) {
                 consecutiveVibeCount++;
                 // Yêu cầu 3 mẫu liên tiếp vượt ngưỡng (chống nảy tiếp điểm, gió thổi hoặc va chạm nhẹ thoáng qua)
                 if (consecutiveVibeCount >= 3) {
@@ -263,7 +255,7 @@ void ProcessingTask(void *pvParameters) {
                     consecutiveVibeCount = 0;
                 }
             } else {
-                if (consecutiveVibeCount > 0) consecutiveVibeCount--;
+                consecutiveVibeCount=0;
             }
         }
     }
@@ -337,6 +329,12 @@ void UARTTxRxTask(void *pvParameters) {
             if (xSemaphoreTake(telemMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
                 telemToSend = latestTelemetry;
                 xSemaphoreGive(telemMutex);
+                GpsSnapshot g={};
+                if(xSemaphoreTake(gpsMutex,pdMS_TO_TICKS(5))==pdTRUE) {g=gpsSnapshot;xSemaphoreGive(gpsMutex);}
+                telemToSend.latitude=g.lat;telemToSend.longitude=g.lon;
+                telemToSend.gps_age_ms=g.hasFix?millis()-g.lastFix:UINT32_MAX;
+                telemToSend.gps_valid=g.hasFix && telemToSend.gps_age_ms<=GPS_STALE_MS;
+                telemToSend.speed_valid=telemToSend.speed_valid && millis()-telemToSend.timestamp<=SENSOR_STALE_MS;
                 send_msg(CommSerial, MSG_TELEMETRY, telemToSend);
             }
         }
@@ -366,6 +364,7 @@ void setup() {
     delay(200);
 
     CommSerial.begin(UART_BAUD, SERIAL_8N1, RXD1, TXD1);
+    GpsSerial.begin(GPS_BAUD,SERIAL_8N1,GPS_RX_PIN,GPS_TX_PIN);
 
     Serial.println("\n--- ESP32-S3 Sensor Node (Node B) Initializing ---");
 
@@ -382,15 +381,18 @@ void setup() {
     sensorQueue = xQueueCreate(10, sizeof(RawSensorSample));
     eventQueue  = xQueueCreate(5, sizeof(AccelEventData));
     telemMutex  = xSemaphoreCreateMutex();
+    gpsMutex=xSemaphoreCreateMutex();
 
-    if (sensorQueue == NULL || eventQueue == NULL || telemMutex == NULL) {
+    if (sensorQueue == NULL || eventQueue == NULL || telemMutex == NULL || gpsMutex == NULL) {
         Serial.println("[ERROR] Không thể tạo FreeRTOS primitives!");
         while (1) delay(1000);
     }
 
-    xTaskCreatePinnedToCore(SensorTask,     "SensorTask",     4096, NULL, 3, NULL, 1);
-    xTaskCreatePinnedToCore(ProcessingTask, "ProcessingTask", 4096, NULL, 2, NULL, 1);
-    xTaskCreatePinnedToCore(UARTTxRxTask,   "UARTTxRxTask",   4096, NULL, 2, NULL, 0);
+    if(xTaskCreatePinnedToCore(GpsTask,"GPS",4096,NULL,1,NULL,0)!=pdPASS) {Serial.println("[FATAL] task creation failed"); while(true) delay(1000);}
+    Serial.printf("[UART v2] payload=%u GPS RX=%d TX=%d baud=%lu\n",unsigned(sizeof(TelemetryData)),GPS_RX_PIN,GPS_TX_PIN,(unsigned long)GPS_BAUD);
+    if(xTaskCreatePinnedToCore(SensorTask,     "SensorTask",     4096, NULL, 3, NULL, 1)!=pdPASS) {Serial.println("[FATAL] task creation failed"); while(true) delay(1000);}
+    if(xTaskCreatePinnedToCore(ProcessingTask, "ProcessingTask", 4096, NULL, 2, NULL, 1)!=pdPASS) {Serial.println("[FATAL] task creation failed"); while(true) delay(1000);}
+    if(xTaskCreatePinnedToCore(UARTTxRxTask,   "UARTTxRxTask",   4096, NULL, 2, NULL, 0)!=pdPASS) {Serial.println("[FATAL] task creation failed"); while(true) delay(1000);}
 
     Serial.printf("[Node B] Free Heap: %u bytes\n", esp_get_free_heap_size());
 }
@@ -400,7 +402,7 @@ void loop() {
     static uint32_t lastHealthLog = 0;
     if (millis() - lastHealthLog >= 5000) {
         lastHealthLog = millis();
-        
+
         float spd = 0.0f, ax = 0.0f, ay = 0.0f, az = 0.0f;
         if (xSemaphoreTake(telemMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
             spd = latestTelemetry.speed;
@@ -412,7 +414,7 @@ void loop() {
 
         Serial.printf("[Node B Live] Tốc độ: %.2f km/h | Accel: [%.2f, %.2f, %.2f] | MPU: %s | Node A: %s | Heap: %u B\n",
                       spd, ax, ay, az,
-                      mpuDetected ? "REAL (I2C)" : "FALLBACK",
+                      mpuDetected ? "REAL (I2C)" : "MISSING/INVALID",
                       gatewayConnected ? "CONNECTED" : "DISCONNECTED",
                       esp_get_free_heap_size());
     }
