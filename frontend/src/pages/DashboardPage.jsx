@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useDevice } from '../context/DeviceContext';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../services/api';
 import SpeedometerGauge from '../components/dashboard/SpeedometerGauge';
 import BatteryIndicator from '../components/dashboard/BatteryIndicator';
 import AccelLiveChart from '../components/dashboard/AccelLiveChart';
@@ -12,29 +11,8 @@ import { Shield, AlertTriangle, Radio, CheckCircle, RefreshCw, Bike, BellRing, S
 import { Link } from 'react-router-dom';
 
 export default function DashboardPage() {
-  const { selectedDevice, alerts, loading } = useDevice();
+  const { selectedDevice, alerts, loading, telemetry, telemetryHistory, realtimeStatus, error } = useDevice();
   const { user, role } = useAuth();
-  const [telemetryHistory, setTelemetryHistory] = useState([]);
-
-  useEffect(() => {
-    async function loadTelemetry() {
-      if (selectedDevice) {
-        try {
-          const res = await api.getTelemetryHistory(selectedDevice.deviceId);
-          if (res.success && res.data) {
-            const sorted = [...res.data].sort((a, b) => (a.ts || 0) - (b.ts || 0));
-            setTelemetryHistory(sorted);
-          }
-        } catch (err) {
-          console.error(err);
-        }
-      }
-    }
-    loadTelemetry();
-    const interval = setInterval(loadTelemetry, 2500);
-    return () => clearInterval(interval);
-  }, [selectedDevice]);
-
   if (loading && !selectedDevice) {
     return (
       <div style={{ padding: '3rem', textAlign: 'center', color: '#0284c7' }}>
@@ -59,15 +37,20 @@ export default function DashboardPage() {
     );
   }
 
-  const latestTel = telemetryHistory.length > 0 ? telemetryHistory[telemetryHistory.length - 1] : null;
-  const speed = latestTel?.speedKmh ?? selectedDevice.lastSpeedKmh ?? 0;
-  const battery = latestTel?.batteryV ?? selectedDevice.lastBatteryV ?? 12.6;
+  const latestTel = telemetry;
+  const speed = selectedDevice.speedValid === true ? selectedDevice.lastSpeedKmh : null;
+  const battery = selectedDevice.lastBatteryV;
   const state = selectedDevice.securityState || 'PARKED';
-  const openAlerts = alerts.filter(a => a.status === 'OPEN');
+  const openAlerts = alerts.filter(a => a.status === 'OPEN' && a.deviceId === selectedDevice.deviceId);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       
+      <div className="glass-card" style={{ padding: '0.75rem 1rem' }} role="status">
+        WebSocket: <strong>{realtimeStatus}</strong> · Nguồn: <strong>{selectedDevice.dataSource || 'UNKNOWN'}</strong> · Cảm biến Node B: <strong>{selectedDevice.sensorConnected ? 'Đang nhận' : 'Chưa có dữ liệu / stale'}</strong>
+        <div>Nhận telemetry: {selectedDevice.lastTelemetryAt ? new Date(selectedDevice.lastTelemetryAt).toLocaleString() : 'Chưa nhận'}</div>
+        {error && <div style={{ color: '#dc2626' }}>{error}</div>}
+      </div>
       {/* Top Banner: Device Info & Security Mode Alert */}
       <div className="glass-card" style={{
         padding: '1.15rem 1.5rem',
@@ -86,7 +69,7 @@ export default function DashboardPage() {
               <span className={`badge badge-${state.toLowerCase().replace('_', '-')}`}>
                 {state === 'ARMED' ? '🛡️ ĐANG CANH GIỮ' :
                  state === 'ALARM' ? '🚨 ĐANG BÁO ĐỘNG!' :
-                 state === 'THEFT_LOCK' ? '🔒 ĐÃ KHOÁ ĐỘNG CƠ' : 'PARKED (BÌNH THƯỜNG)'}
+                 state === 'THEFT_LOCK' ? '🔒 ĐÃ KHOÁ ĐỘNG CƠ' : 'PARKED (TẮT BẢO VỆ)'}
               </span>
             </div>
             <div style={{ fontSize: '0.825rem', color: '#475569', marginTop: '0.35rem', display: 'flex', flexWrap: 'wrap', gap: '0.85rem' }}>
@@ -101,7 +84,7 @@ export default function DashboardPage() {
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '0.725rem', color: '#64748b' }}>Trạng thái mạng Gateway</div>
               <div style={{ fontSize: '0.825rem', fontWeight: '800', color: selectedDevice.lifecycleState === 'ACTIVE' ? '#16a34a' : '#dc2626' }}>
-                MQTT TLS: {selectedDevice.lifecycleState}
+                Gateway MQTT: {selectedDevice.lifecycleState}
               </div>
             </div>
           </div>
@@ -150,9 +133,9 @@ export default function DashboardPage() {
         {/* Accelerometer Waveform & Tilt */}
         <AccelLiveChart
           telemetryHistory={telemetryHistory}
-          currentX={telemetryHistory.length > 0 ? telemetryHistory[telemetryHistory.length - 1].accelX : 0}
-          currentY={telemetryHistory.length > 0 ? telemetryHistory[telemetryHistory.length - 1].accelY : 0}
-          currentZ={telemetryHistory.length > 0 ? telemetryHistory[telemetryHistory.length - 1].accelZ : 1}
+          currentX={selectedDevice.imuValid ? latestTel?.accelX : null}
+          currentY={selectedDevice.imuValid ? latestTel?.accelY : null}
+          currentZ={selectedDevice.imuValid ? latestTel?.accelZ : null}
         />
       </div>
 
@@ -167,6 +150,8 @@ export default function DashboardPage() {
         {/* Right Column: Live GPS Map Mini Widget & Recent Alerts */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <LiveGpsMap
+            gpsValid={selectedDevice.gpsValid}
+            lastLocationReceivedAt={selectedDevice.lastLocationReceivedAt}
             latitude={selectedDevice.lastLatitude}
             longitude={selectedDevice.lastLongitude}
             deviceName={selectedDevice.name}
@@ -189,7 +174,7 @@ export default function DashboardPage() {
 
             {openAlerts.length === 0 ? (
               <div style={{ fontSize: '0.8rem', color: '#10b981', textAlign: 'center', padding: '1rem 0' }}>
-                ✓ Không có sự cố nào chưa xử lý. Xe đang an toàn.
+                Không có cảnh báo chưa xử lý.
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>

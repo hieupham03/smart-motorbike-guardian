@@ -3,6 +3,14 @@ package com.guardian.dto;
 import com.guardian.entity.TelemetryReading;
 
 public class TelemetryDto {
+    private String dataSource;
+    private Boolean sensorConnected;
+    private Boolean imuValid;
+    private Boolean speedValid;
+    private Boolean gpsValid;
+    private Long gpsAgeMs;
+    private Long deviceUptimeS;
+    private java.time.Instant receivedAt;
     private String readingId;
     private String deviceId;
     private Double speedKmh;
@@ -19,6 +27,14 @@ public class TelemetryDto {
 
     public TelemetryDto(TelemetryReading reading) {
         if (reading != null) {
+            this.dataSource = reading.getDataSource();
+            this.sensorConnected = reading.getSensorConnected();
+            this.imuValid = reading.getImuValid();
+            this.speedValid = reading.getSpeedValid();
+            this.gpsValid = reading.getGpsValid();
+            this.gpsAgeMs = reading.getGpsAgeMs();
+            this.deviceUptimeS = reading.getDeviceUptimeS();
+            this.receivedAt = reading.getReceivedAt();
             this.readingId = reading.getReadingId();
             if (reading.getDevice() != null) {
                 this.deviceId = reading.getDevice().getDeviceId();
@@ -67,4 +83,20 @@ public class TelemetryDto {
 
     public Long getTs() { return ts; }
     public void setTs(Long ts) { this.ts = ts; }
+    public String getDataSource() { return dataSource; }
+    public void setDataSource(String value) { this.dataSource = value; }
+    public Boolean getSensorConnected() { return sensorConnected; }
+    public void setSensorConnected(Boolean value) { this.sensorConnected = value; }
+    public Boolean getImuValid() { return imuValid; }
+    public void setImuValid(Boolean value) { this.imuValid = value; }
+    public Boolean getSpeedValid() { return speedValid; }
+    public void setSpeedValid(Boolean value) { this.speedValid = value; }
+    public Boolean getGpsValid() { return gpsValid; }
+    public void setGpsValid(Boolean value) { this.gpsValid = value; }
+    public Long getGpsAgeMs() { return gpsAgeMs; }
+    public void setGpsAgeMs(Long value) { this.gpsAgeMs = value; }
+    public Long getDeviceUptimeS() { return deviceUptimeS; }
+    public void setDeviceUptimeS(Long value) { this.deviceUptimeS = value; }
+    public java.time.Instant getReceivedAt() { return receivedAt; }
+    public void setReceivedAt(java.time.Instant value) { this.receivedAt = value; }
 }

@@ -5,7 +5,7 @@ import { Shield, Bell, User, LogOut, ChevronDown, Radio, Bike, KeyRound } from '
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Navbar() {
-  const { user, role, logout, quickLogin } = useAuth();
+  const { user, role, logout } = useAuth();
   const { devices, selectedDevice, selectDeviceById, unreadAlertsCount } = useDevice();
   const navigate = useNavigate();
 
@@ -101,7 +101,7 @@ export default function Navbar() {
                 backgroundColor: selectedDevice?.lifecycleState === 'ACTIVE' ? '#22c55e' : '#94a3b8',
                 display: 'inline-block'
               }} />
-              {selectedDevice?.lifecycleState === 'ACTIVE' ? 'Node Online (2s)' : (selectedDevice?.lifecycleState || 'Offline')}
+              {selectedDevice?.lifecycleState === 'ACTIVE' ? 'Gateway Online' : (selectedDevice?.lifecycleState || 'Offline')}
             </div>
           </div>
         )}
@@ -109,39 +109,6 @@ export default function Navbar() {
         {/* Right: Quick Role Switcher + Alerts + Profile */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           
-          {/* Demo Quick Role Switcher Buttons */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '3px',
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '8px',
-            padding: '2px'
-          }} title="Chuyển đổi nhanh vai trò để demo phân quyền RBAC">
-            <button
-              onClick={() => quickLogin('owner')}
-              className={`btn btn-sm ${role === 'OWNER' ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ fontSize: '0.725rem', padding: '3px 7px' }}
-            >
-              Chủ xe (Owner)
-            </button>
-            <button
-              onClick={() => quickLogin('viewer')}
-              className={`btn btn-sm ${role === 'VIEWER' ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ fontSize: '0.725rem', padding: '3px 7px' }}
-            >
-              Người thân (Viewer)
-            </button>
-            <button
-              onClick={() => quickLogin('admin')}
-              className={`btn btn-sm ${role === 'ADMIN' ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ fontSize: '0.725rem', padding: '3px 7px' }}
-            >
-              Quản trị (Admin)
-            </button>
-          </div>
-
           {/* Alerts Notification Bell */}
           <Link to="/alerts" style={{ position: 'relative', color: '#475569', textDecoration: 'none' }}>
             <div style={{

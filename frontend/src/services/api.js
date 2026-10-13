@@ -1,54 +1,51 @@
 const API_BASE = '/api';
-
-export async function request(endpoint, options = {}) {
+let refreshing;
+export async function refreshAccessToken() {
+  if (!refreshing) refreshing = (async () => {
+    const response = await fetch(API_BASE + '/auth/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: localStorage.getItem('refreshToken') }) });
+    const result = await response.json();
+    if (!response.ok || !result.data?.accessToken) {
+      const error = new Error(result.message || 'Không thể làm mới phiên đăng nhập');
+      error.status = response.status;
+      throw error;
+    }
+    localStorage.setItem('accessToken', result.data.accessToken); localStorage.setItem('refreshToken', result.data.refreshToken);
+    return result.data.accessToken;
+  })().finally(() => { refreshing = null; });
+  return refreshing;
+}
+export async function ensureAccessToken() {
   const token = localStorage.getItem('accessToken');
-  
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(options.headers || {})
-  };
-
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
-    headers
-  });
-
-  // Handle Token Expiry / 401 Unauthorized
-  if (response.status === 401 && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/refresh')) {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (refreshToken) {
-      try {
-        const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refreshToken })
-        });
-        const refreshData = await refreshRes.json();
-        if (refreshData.success && refreshData.data?.accessToken) {
-          localStorage.setItem('accessToken', refreshData.data.accessToken);
-          localStorage.setItem('refreshToken', refreshData.data.refreshToken);
-          // Retry original request
-          headers.Authorization = `Bearer ${refreshData.data.accessToken}`;
-          const retryRes = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
-          return retryRes.json();
-        }
-      } catch (err) {
-        localStorage.clear();
-        window.location.href = '/login';
+  try {
+    const { exp } = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (exp * 1000 > Date.now() + 45000) return token;
+  } catch { /* renew below */ }
+  return refreshAccessToken();
+}
+export async function request(endpoint, options = {}) {
+  const headers = { 'Content-Type': 'application/json', ...options.headers };
+  const token = localStorage.getItem('accessToken');
+  if (token) headers.Authorization = 'Bearer ' + token;
+  let response = await fetch(API_BASE + endpoint, { ...options, headers });
+  if (response.status === 401 && !endpoint.startsWith('/auth/')) {
+    try {
+      headers.Authorization = 'Bearer ' + await refreshAccessToken();
+      response = await fetch(API_BASE + endpoint, { ...options, headers });
+    } catch (error) {
+      if ([401, 403].includes(error.status)) {
+        ['accessToken', 'refreshToken', 'currentUser'].forEach(key => localStorage.removeItem(key));
+        window.dispatchEvent(new Event('guardian:logout'));
       }
+      throw error;
     }
   }
-
-  if (response.headers.get('content-type')?.includes('text/csv')) {
-    return response.blob();
-  }
-
+  if (response.ok && response.headers.get('content-type')?.includes('text/csv')) return response.blob();
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.message || 'Đã xảy ra lỗi trong quá trình xử lý');
+    const error = new Error(data.message || 'Không thể xử lý yêu cầu');
+    error.status = response.status;
+    throw error;
   }
-
   return data;
 }
 
@@ -75,19 +72,22 @@ export const api = {
   getCommands: (deviceId) => request(`/devices/${deviceId}/commands`),
 
   // Telemetry
-  getTelemetryHistory: (deviceId, from, to) => {
+  getLatestTelemetry: id => request(`/devices/${id}/telemetry/latest`),
+  getTelemetryHistory: (deviceId, from, to, page = 0, size = 5000) => {
     let url = `/devices/${deviceId}/telemetry`;
     const params = new URLSearchParams();
-    if (from) params.append('from', from);
-    if (to) params.append('to', to);
+    params.append('page', page);
+    params.append('size', size);
+    if (from != null) params.append('from', from);
+    if (to != null) params.append('to', to);
     if (params.toString()) url += `?${params.toString()}`;
     return request(url);
   },
   exportTelemetryCsv: async (deviceId, from, to) => {
     let url = `/devices/${deviceId}/telemetry/export`;
     const params = new URLSearchParams();
-    if (from) params.append('from', from);
-    if (to) params.append('to', to);
+    if (from != null) params.append('from', from);
+    if (to != null) params.append('to', to);
     if (params.toString()) url += `?${params.toString()}`;
     
     const blob = await request(url);
@@ -98,6 +98,7 @@ export const api = {
     document.body.appendChild(a);
     a.click();
     a.remove();
+    window.URL.revokeObjectURL(downloadUrl);
   },
 
   // Alerts

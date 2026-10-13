@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useDevice } from '../../context/DeviceContext';
 import { ShieldCheck, ShieldOff, Lock, Unlock, Volume2, RotateCcw, AlertCircle, CheckCircle2 } from 'lucide-react';
@@ -6,32 +6,30 @@ import StepUpConfirmModal from './StepUpConfirmModal';
 
 export default function QuickControlPanel() {
   const { role } = useAuth();
-  const { selectedDevice, sendDeviceCommand, isArming } = useDevice();
+  const { selectedDevice, sendDeviceCommand, isArming, commands } = useDevice();
   const [isLockModalOpen, setIsLockModalOpen] = useState(false);
   const [commandFeedback, setCommandFeedback] = useState(null);
 
-  const isViewer = role === 'VIEWER';
+  const isViewer = !['OWNER', 'ADMIN'].includes(selectedDevice?.currentUserRole);
+  const [activeCommandId, setActiveCommandId] = useState(null);
+  const activeCommand = commands.find(c => c.cmdId === activeCommandId);
+  useEffect(() => {
+    if (!activeCommand) return;
+    const status = activeCommand.status;
+    setCommandFeedback({ type: status === 'EXECUTED' ? 'success' : status === 'PENDING' ? 'info' : 'error', message: status === 'PENDING' ? `Đã gửi ${activeCommand.type} · PENDING, đang chờ ACK` : `${activeCommand.type}: ${status}${activeCommand.reasonIfFailed ? ' · ' + activeCommand.reasonIfFailed : ''}${activeCommand.lateAckAt ? ' · ACK muộn: ' + activeCommand.lateAckResult : ''}` });
+  }, [activeCommand]);
+  useEffect(() => { setActiveCommandId(null); setCommandFeedback(null); }, [selectedDevice?.deviceId]);
   const currentState = selectedDevice?.securityState || 'PARKED';
-  const speed = selectedDevice?.lastSpeedKmh || 0;
+  const speed = selectedDevice?.speedValid ? selectedDevice.lastSpeedKmh : null;
 
   const handleCommand = async (type, payload = null, password = null) => {
     try {
       setCommandFeedback({ type: 'info', message: `Đang gửi lệnh ${type} xuống thiết bị qua MQTT...` });
       const res = await sendDeviceCommand(type, payload, password);
       
-      if (res?.success) {
-        const cmdData = res.data;
-        if (cmdData?.status === 'REJECTED') {
-          setCommandFeedback({
-            type: 'error',
-            message: `Lệnh ${type} bị từ chối bởi Gateway Node! Lý do: ${cmdData.reasonIfFailed || 'Vi phạm ràng buộc an toàn'}`
-          });
-        } else {
-          setCommandFeedback({
-            type: 'success',
-            message: `Lệnh ${type} đã thực thi thành công (ACK EXECUTED)!`
-          });
-        }
+      if (res?.success && res.data) {
+        setActiveCommandId(res.data.cmdId);
+        setCommandFeedback({ type: 'info', message: 'Đã gửi lệnh · ' + res.data.status + ', đang chờ phản hồi thiết bị' });
       }
     } catch (err) {
       setCommandFeedback({
@@ -40,9 +38,7 @@ export default function QuickControlPanel() {
       });
     }
 
-    setTimeout(() => {
-      setCommandFeedback(null);
-    }, 5000);
+
   };
 
   return (
@@ -70,7 +66,7 @@ export default function QuickControlPanel() {
         <button
           className="btn btn-secondary"
           onClick={() => handleCommand('ARM')}
-          disabled={isViewer || isArming || currentState === 'ARMED'}
+          disabled={isViewer || isArming || activeCommand?.status === 'PENDING' || currentState === 'ARMED'}
           style={{
             flexDirection: 'column',
             padding: '1rem 0.5rem',
@@ -89,7 +85,7 @@ export default function QuickControlPanel() {
         <button
           className="btn btn-secondary"
           onClick={() => handleCommand('DISARM')}
-          disabled={isViewer || isArming || currentState === 'PARKED'}
+          disabled={isViewer || isArming || activeCommand?.status === 'PENDING' || currentState === 'PARKED'}
           style={{
             flexDirection: 'column',
             padding: '1rem 0.5rem',
@@ -108,7 +104,7 @@ export default function QuickControlPanel() {
         <button
           className="btn btn-danger"
           onClick={() => setIsLockModalOpen(true)}
-          disabled={isViewer || isArming || currentState === 'THEFT_LOCK'}
+          disabled={isViewer || isArming || activeCommand?.status === 'PENDING' || currentState === 'THEFT_LOCK'}
           style={{
             flexDirection: 'column',
             padding: '1rem 0.5rem',
@@ -124,7 +120,7 @@ export default function QuickControlPanel() {
         <button
           className="btn btn-success"
           onClick={() => handleCommand('UNLOCK_ENGINE')}
-          disabled={isViewer || isArming || currentState !== 'THEFT_LOCK'}
+          disabled={isViewer || isArming || activeCommand?.status === 'PENDING' || currentState !== 'THEFT_LOCK'}
           style={{
             flexDirection: 'column',
             padding: '1rem 0.5rem',
@@ -139,7 +135,7 @@ export default function QuickControlPanel() {
         {/* Siren Alert Button */}
         <button
           className="btn btn-secondary"
-          onClick={() => handleCommand(currentState === 'ALARM' ? 'SIREN_OFF' : 'SIREN_ON')}
+          onClick={() => handleCommand('SIREN_ON')}
           disabled={isViewer || isArming}
           style={{
             flexDirection: 'column',
@@ -152,9 +148,14 @@ export default function QuickControlPanel() {
         >
           <Volume2 size={26} color={currentState === 'ALARM' ? '#ef4444' : '#0284c7'} />
           <span style={{ marginTop: '6px', fontWeight: '700' }}>
-            {currentState === 'ALARM' ? 'Tắt Còi Hú' : 'Bật Còi Báo Động'}
+            Bật Còi Báo Động
           </span>
           <span style={{ fontSize: '0.7rem', color: '#64748b' }}>SIREN BUZZER</span>
+        </button>
+
+        <button className="btn btn-secondary" onClick={() => handleCommand('SIREN_OFF')}
+          disabled={isViewer || isArming || activeCommand?.status === 'PENDING'} style={{ flexDirection: 'column', padding: '1rem 0.5rem' }}>
+          <Volume2 size={26} /><span>Tắt Còi</span><span style={{ fontSize: '0.7rem' }}>SIREN_OFF</span>
         </button>
 
         {/* Reboot Gateway Button */}

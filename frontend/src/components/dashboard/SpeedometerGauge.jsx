@@ -1,7 +1,8 @@
 import React from 'react';
 import { Gauge, Activity } from 'lucide-react';
 
-export default function SpeedometerGauge({ speed = 0, maxSpeed = 120 }) {
+export default function SpeedometerGauge({ speed = null, maxSpeed = 120 }) {
+  if (!Number.isFinite(speed)) return <div className="glass-card dashboard-card" style={{ padding: '1.5rem' }}><h3>TỐC ĐỘ XE (HALL)</h3><p>Chưa có dữ liệu hợp lệ</p><strong>— km/h</strong></div>;
   const clampedSpeed = Math.min(Math.max(speed, 0), maxSpeed);
   const percentage = clampedSpeed / maxSpeed;
   

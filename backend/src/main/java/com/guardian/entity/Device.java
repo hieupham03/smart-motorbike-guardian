@@ -4,8 +4,17 @@ import jakarta.persistence.*;
 import java.time.Instant;
 
 @Entity
+@org.hibernate.annotations.DynamicUpdate
 @Table(name = "devices")
 public class Device {
+    private String dataSource = "HARDWARE";
+    private Boolean sensorConnected;
+    private Boolean imuValid;
+    private Boolean speedValid;
+    private Boolean gpsValid;
+    private Long gpsAgeMs;
+    private java.time.Instant lastTelemetryAt;
+    private java.time.Instant lastLocationReceivedAt;
 
     @Id
     @Column(name = "device_id", length = 36)
@@ -50,16 +59,16 @@ public class Device {
     private String mqttPasswordHash;
 
     @Column(name = "last_speed_kmh")
-    private Double lastSpeedKmh = 0.0;
+    private Double lastSpeedKmh;
 
     @Column(name = "last_battery_v")
-    private Double lastBatteryV = 12.6;
+    private Double lastBatteryV;
 
     @Column(name = "last_latitude")
-    private Double lastLatitude = 21.028511;
+    private Double lastLatitude;
 
     @Column(name = "last_longitude")
-    private Double lastLongitude = 105.854444;
+    private Double lastLongitude;
 
     @Column(name = "speed_threshold_kmh")
     private Double speedThresholdKmh = 80.0;
@@ -167,4 +176,20 @@ public class Device {
 
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public String getDataSource() { return dataSource; }
+    public void setDataSource(String value) { this.dataSource = value; }
+    public Boolean getSensorConnected() { return sensorConnected; }
+    public void setSensorConnected(Boolean value) { this.sensorConnected = value; }
+    public Boolean getImuValid() { return imuValid; }
+    public void setImuValid(Boolean value) { this.imuValid = value; }
+    public Boolean getSpeedValid() { return speedValid; }
+    public void setSpeedValid(Boolean value) { this.speedValid = value; }
+    public Boolean getGpsValid() { return gpsValid; }
+    public void setGpsValid(Boolean value) { this.gpsValid = value; }
+    public Long getGpsAgeMs() { return gpsAgeMs; }
+    public void setGpsAgeMs(Long value) { this.gpsAgeMs = value; }
+    public java.time.Instant getLastTelemetryAt() { return lastTelemetryAt; }
+    public void setLastTelemetryAt(java.time.Instant value) { this.lastTelemetryAt = value; }
+    public java.time.Instant getLastLocationReceivedAt() { return lastLocationReceivedAt; }
+    public void setLastLocationReceivedAt(java.time.Instant value) { this.lastLocationReceivedAt = value; }
 }

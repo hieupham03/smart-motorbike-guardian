@@ -34,10 +34,10 @@ public class MqttSubscriberService implements MqttCallbackExtended {
     @Value("${app.mqtt.client-id:guardian-backend-service}")
     private String clientId;
 
-    @Value("${app.mqtt.username:backend_service}")
+    @Value("${app.mqtt.username:}")
     private String username;
 
-    @Value("${app.mqtt.password:BackendSecret@2026}")
+    @Value("${app.mqtt.password:}")
     private String password;
 
     private MqttClient mqttClient;
@@ -55,6 +55,9 @@ public class MqttSubscriberService implements MqttCallbackExtended {
     @Lazy
     private CommandService commandService;
 
+    @Autowired
+    private DevicePresenceService presenceService;
+
     @PostConstruct
     public void init() {
         if (!mqttEnabled) {
@@ -66,11 +69,14 @@ public class MqttSubscriberService implements MqttCallbackExtended {
     }
 
     public synchronized void connectToBroker() {
+        if (mqttClient != null && mqttClient.isConnected()) return;
         try {
+            if (mqttClient != null) mqttClient.close(true);
             mqttClient = new MqttClient(brokerUrl, clientId + "-" + System.currentTimeMillis(), new MemoryPersistence());
+            mqttClient.setTimeToWait(3000);
             MqttConnectOptions options = new MqttConnectOptions();
             options.setCleanSession(true);
-            options.setAutomaticReconnect(true);
+            options.setAutomaticReconnect(false); // One scheduled retry loop owns connection attempts.
             options.setConnectionTimeout(3);
             options.setKeepAliveInterval(30);
             if (username != null && !username.isBlank()) {
@@ -83,8 +89,13 @@ public class MqttSubscriberService implements MqttCallbackExtended {
             mqttClient.connect(options);
             log.info("Successfully connected to MQTT Broker!");
         } catch (Exception e) {
-            log.warn("Could not connect to MQTT Broker ({}): {}. System will run with internal simulation and fallback mode.", brokerUrl, e.getMessage());
+            log.warn("Could not connect to MQTT Broker ({}): {}. Hardware commands remain unavailable until reconnect.", brokerUrl, e.getMessage());
         }
+    }
+
+    @org.springframework.scheduling.annotation.Scheduled(fixedDelay = 5000)
+    public void reconnectIfNeeded() {
+        if (mqttEnabled && (mqttClient == null || !mqttClient.isConnected())) connectToBroker();
     }
 
     @Override
@@ -120,7 +131,9 @@ public class MqttSubscriberService implements MqttCallbackExtended {
             String deviceId = parts[1];
             String type = parts[2];
 
+            if (!"guardian".equals(parts[0])) return;
             JsonNode node = objectMapper.readTree(payload);
+            if (node.has("device_id") && !deviceId.equals(node.path("device_id").asText())) return;
 
             switch (type) {
                 case "telemetry":
@@ -149,36 +162,29 @@ public class MqttSubscriberService implements MqttCallbackExtended {
     private void handleTelemetry(String deviceId, JsonNode node) {
         TelemetryDto dto = new TelemetryDto();
         dto.setDeviceId(deviceId);
-        if (node.has("speed_kmh")) dto.setSpeedKmh(node.get("speed_kmh").asDouble());
-        if (node.has("battery_v")) {
-            dto.setBatteryV(node.get("battery_v").asDouble());
-        } else {
-            dto.setBatteryV(12.6); // Default 12.6V if hardware has not yet integrated ADC
-        }
-
-        // Support both separated fields and array format: "accel": [ax, ay, az]
-        if (node.has("accel_x")) dto.setAccelX(node.get("accel_x").asDouble());
-        if (node.has("accel_y")) dto.setAccelY(node.get("accel_y").asDouble());
-        if (node.has("accel_z")) dto.setAccelZ(node.get("accel_z").asDouble());
-        if (node.has("accel") && node.get("accel").isArray()) {
-            JsonNode arr = node.get("accel");
-            if (arr.size() >= 3) {
-                dto.setAccelX(arr.get(0).asDouble());
-                dto.setAccelY(arr.get(1).asDouble());
-                dto.setAccelZ(arr.get(2).asDouble());
-            }
-        }
-
-        if (node.has("state")) dto.setState(node.get("state").asText());
-        if (node.has("ts")) dto.setTs(node.get("ts").asLong());
-        if (node.has("latitude")) dto.setLatitude(node.get("latitude").asDouble());
-        if (node.has("longitude")) dto.setLongitude(node.get("longitude").asDouble());
+        dto.setDataSource("HARDWARE");
+        dto.setSensorConnected(node.path("sensor_connected").asBoolean(false));
+        dto.setImuValid(node.path("imu_valid").asBoolean(false));
+        dto.setSpeedValid(node.path("speed_valid").asBoolean(false));
+        dto.setGpsValid(node.path("gps_valid").asBoolean(false));
+        if (node.path("gps_age_ms").isIntegralNumber()) dto.setGpsAgeMs(node.path("gps_age_ms").asLong());
+        dto.setSpeedKmh(number(node, "speed_kmh")); dto.setBatteryV(number(node, "battery_v"));
+        dto.setAccelX(number(node, "accel_x")); dto.setAccelY(number(node, "accel_y")); dto.setAccelZ(number(node, "accel_z"));
+        dto.setLatitude(number(node, "latitude")); dto.setLongitude(number(node, "longitude"));
+        if (node.has("state")) dto.setState(node.path("state").asText());
+        if (node.path("ts").isIntegralNumber()) dto.setDeviceUptimeS(node.path("ts").asLong());
 
         telemetryService.recordTelemetry(deviceId, dto);
     }
 
+    private Double number(JsonNode node, String field) {
+        return node.path(field).isNumber() ? TelemetryService.finite(node.path(field).doubleValue()) : null;
+    }
+
     private void handleAlert(String deviceId, JsonNode node) {
         AlertDto dto = new AlertDto();
+        dto.setDataSource("HARDWARE");
+        if (node.path("ts").isIntegralNumber()) dto.setDeviceUptimeS(node.path("ts").asLong());
         dto.setDeviceId(deviceId);
         if (node.has("alert_id")) dto.setAlertId(node.get("alert_id").asText());
         
@@ -196,7 +202,7 @@ public class MqttSubscriberService implements MqttCallbackExtended {
             } catch (Exception ignored) {}
         }
         if (node.has("action_taken")) dto.setActionTaken(node.get("action_taken").asText());
-        if (node.has("details")) dto.setDetails(node.get("details").asText());
+        if (node.has("details")) dto.setDetails(node.get("details").isTextual() ? node.get("details").asText() : node.get("details").toString());
 
         alertService.processAlert(deviceId, dto);
     }
@@ -209,11 +215,13 @@ public class MqttSubscriberService implements MqttCallbackExtended {
         String reasonIfFailed = node.has("reason_if_failed") && !node.get("reason_if_failed").isNull()
                 ? node.get("reason_if_failed").asText() : null;
 
-        commandService.processCommandAck(cmdId, result, reasonIfFailed);
+        commandService.processCommandAck(deviceId, cmdId, result, reasonIfFailed);
     }
 
     private void handleStatus(String deviceId, JsonNode node) {
-        // Handled via heartbeats/telemetry
+        String status = node.isTextual() ? node.asText() : node.path("status").asText();
+        if ("online".equalsIgnoreCase(status) || "offline".equalsIgnoreCase(status))
+            presenceService.status(deviceId, "online".equalsIgnoreCase(status), node.has("fw") ? node.path("fw").asText() : null);
     }
 
     public boolean publishCommand(String deviceId, String cmdType, String jsonPayload) {
@@ -225,6 +233,7 @@ public class MqttSubscriberService implements MqttCallbackExtended {
             String topic = "guardian/" + deviceId + "/cmd/" + cmdType.toLowerCase();
             MqttMessage msg = new MqttMessage(jsonPayload.getBytes(StandardCharsets.UTF_8));
             msg.setQos(1);
+            msg.setRetained(false);
             mqttClient.publish(topic, msg);
             log.info("Published command to [{}] with payload: {}", topic, jsonPayload);
             return true;
@@ -234,14 +243,17 @@ public class MqttSubscriberService implements MqttCallbackExtended {
         }
     }
 
+    public boolean isConnected() { return mqttClient != null && mqttClient.isConnected(); }
+    public boolean isEnabled() { return mqttEnabled; }
+
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {}
 
     @PreDestroy
     public void cleanup() {
-        if (mqttClient != null && mqttClient.isConnected()) {
+        if (mqttClient != null) {
             try {
-                mqttClient.disconnect();
+                if (mqttClient.isConnected()) mqttClient.disconnect();
                 mqttClient.close();
             } catch (Exception ignored) {}
         }

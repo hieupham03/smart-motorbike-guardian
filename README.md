@@ -1,5 +1,7 @@
 # Smart Motorbike Guardian (IoT & Embedded System)
 
+Backend/frontend đã triển khai WebSocket realtime ngày 13/10/2026. Xem [hướng dẫn chạy và hợp đồng dữ liệu](docs/REALTIME-BACKEND-FRONTEND.md), [kết quả kiểm thử phần mềm](docs/evidence/realtime/README.md). Nghiệm thu với board/GPS/relay thật vẫn cần bằng chứng testbed.
+
 Hệ thống giám sát, cảnh báo chống trộm và điều khiển an toàn xe máy thông minh thời gian thực (Dual-Node Real-time IoT Architecture).
 
 ##  Cấu trúc thư mục dự án (Repository Structure)

@@ -1,5 +1,7 @@
 # Bàn giao phần còn lại — Smart Motorbike Guardian
 
+**Cập nhật 13/10/2026:** đã triển khai sửa backend/frontend và WebSocket theo yêu cầu mới. Xem [REALTIME-BACKEND-FRONTEND.md](REALTIME-BACKEND-FRONTEND.md) và [bằng chứng phần mềm](evidence/realtime/README.md). Các nhận xét hiện trạng dưới đây là mốc bàn giao 12/10; nghiệm thu hardware end-to-end vẫn chưa được tự nâng thành PASS.
+
 Cập nhật 12/10/2026. Mục tiêu: bài tập lớn IoT trên breadboard đạt chất lượng A/A+, chứng minh đủ các tầng bằng dữ liệu thật và điều khiển hai chiều. Không yêu cầu kiến trúc sản phẩm thương mại. Tài liệu này phân công và quy định nghiệm thu; không xác nhận backend/frontend đã được sửa.
 
 ## 1. Mốc hardware/firmware bàn giao

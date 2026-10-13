@@ -1,154 +1,89 @@
 package com.guardian.service;
 
 import com.guardian.dto.TelemetryDto;
-import com.guardian.entity.Device;
-import com.guardian.entity.LifecycleState;
-import com.guardian.entity.TelemetryReading;
-import com.guardian.entity.User;
-import com.guardian.repository.DeviceRepository;
-import com.guardian.repository.TelemetryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import com.guardian.entity.*;
+import com.guardian.exception.BadRequestException;
+import com.guardian.repository.*;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class TelemetryService {
+    private final TelemetryRepository readings;
+    private final DeviceRepository devices;
+    private final DeviceService access;
+    private final RealtimeService realtime;
+    public TelemetryService(TelemetryRepository readings, DeviceRepository devices, DeviceService access, RealtimeService realtime) {
+        this.readings = readings; this.devices = devices; this.access = access; this.realtime = realtime;
+    }
+    public static Double finite(Double value) { return value != null && Double.isFinite(value) ? value : null; }
+    public static boolean coordinates(Double lat, Double lon) {
+        return finite(lat) != null && finite(lon) != null && Math.abs(lat) <= 90 && Math.abs(lon) <= 180;
+    }
 
-    @Autowired
-    private TelemetryRepository telemetryRepository;
-
-    @Autowired
-    private DeviceRepository deviceRepository;
-
-    @Autowired
-    private DeviceService deviceService;
-
-    @Autowired(required = false)
-    private SimpMessagingTemplate messagingTemplate;
-
-    @Transactional
-    public TelemetryDto recordTelemetry(String deviceId, TelemetryDto dto) {
-        Device device = deviceRepository.findById(deviceId)
-                .orElseGet(() -> deviceRepository.findByDeviceUuid(deviceId).orElse(null));
-        if (device == null) {
-            return null;
+    @Transactional public TelemetryDto recordTelemetry(String id, TelemetryDto dto) {
+        Device device = devices.findLockedById(id).orElseGet(() -> devices.findLockedByUuid(id).orElse(null));
+        if (device == null || device.getLifecycleState() == LifecycleState.DECOMMISSIONED || device.getLifecycleState() == LifecycleState.FAULT) return null;
+        String source = "SIMULATED".equals(dto.getDataSource()) ? "SIMULATED" : "HARDWARE";
+        if (!source.equals(device.getDataSource())) return null;
+        Instant now = Instant.now();
+        boolean sensor = Boolean.TRUE.equals(dto.getSensorConnected());
+        boolean speedValid = sensor && Boolean.TRUE.equals(dto.getSpeedValid()) && finite(dto.getSpeedKmh()) != null && dto.getSpeedKmh() >= 0;
+        boolean imuValid = sensor && Boolean.TRUE.equals(dto.getImuValid()) && finite(dto.getAccelX()) != null && finite(dto.getAccelY()) != null && finite(dto.getAccelZ()) != null;
+        boolean gpsValid = sensor && Boolean.TRUE.equals(dto.getGpsValid()) && coordinates(dto.getLatitude(), dto.getLongitude())
+                && dto.getGpsAgeMs() != null && dto.getGpsAgeMs() >= 0 && dto.getGpsAgeMs() <= 5000;
+        device.setSensorConnected(sensor); device.setSpeedValid(speedValid); device.setImuValid(imuValid); device.setGpsValid(gpsValid);
+        device.setGpsAgeMs(dto.getGpsAgeMs()); device.setLastSeenAt(now); device.setLastTelemetryAt(now);
+        device.setLastSpeedKmh(speedValid ? dto.getSpeedKmh() : null); device.setLastBatteryV(finite(dto.getBatteryV()));
+        if (gpsValid) {
+            device.setLastLatitude(dto.getLatitude()); device.setLastLongitude(dto.getLongitude()); device.setLastLocationReceivedAt(now);
         }
-
-        if (device.getLifecycleState() == LifecycleState.DECOMMISSIONED) {
-            return null;
+        if (dto.getState() != null) {
+            try { device.setSecurityState(SecurityState.valueOf(dto.getState())); } catch (IllegalArgumentException ignored) {}
         }
-
-        // Auto recover from OFFLINE to ACTIVE on receiving telemetry
-        if (device.getLifecycleState() == LifecycleState.OFFLINE || device.getLifecycleState() == LifecycleState.REGISTERED) {
+        if (device.getLifecycleState() == LifecycleState.OFFLINE || device.getLifecycleState() == LifecycleState.REGISTERED)
             device.setLifecycleState(LifecycleState.ACTIVE);
-        }
-
-        if (dto.getSpeedKmh() != null) device.setLastSpeedKmh(dto.getSpeedKmh());
-        if (dto.getBatteryV() != null) device.setLastBatteryV(dto.getBatteryV());
-        if (dto.getLatitude() != null) device.setLastLatitude(dto.getLatitude());
-        if (dto.getLongitude() != null) device.setLastLongitude(dto.getLongitude());
-        device.setLastSeenAt(Instant.now());
-
-        deviceRepository.save(device);
-
-        String readingId = "tel-" + UUID.randomUUID().toString().substring(0, 8);
-        long nowEpoch = Instant.now().getEpochSecond();
-        long ts = (dto.getTs() != null && dto.getTs() > 1000000000L) ? dto.getTs() : nowEpoch;
-
-        TelemetryReading reading = new TelemetryReading(
-                readingId,
-                device,
-                dto.getSpeedKmh() != null ? dto.getSpeedKmh() : 0.0,
-                dto.getBatteryV() != null ? dto.getBatteryV() : 12.6,
-                dto.getAccelX() != null ? dto.getAccelX() : 0.0,
-                dto.getAccelY() != null ? dto.getAccelY() : 0.0,
-                dto.getAccelZ() != null ? dto.getAccelZ() : 1.0,
-                dto.getLatitude() != null ? dto.getLatitude() : device.getLastLatitude(),
-                dto.getLongitude() != null ? dto.getLongitude() : device.getLastLongitude(),
-                dto.getState() != null ? dto.getState() : device.getSecurityState().name(),
-                ts
-        );
-
-        telemetryRepository.save(reading);
-
-        TelemetryDto resultDto = new TelemetryDto(reading);
-
-        // Push real-time to WebSocket if available
-        if (messagingTemplate != null) {
-            try {
-                messagingTemplate.convertAndSend("/topic/devices/" + deviceId + "/telemetry", resultDto);
-            } catch (Exception ignored) {}
-        }
-
-        return resultDto;
+        devices.save(device);
+        TelemetryReading reading = new TelemetryReading(UUID.randomUUID().toString(), device, device.getLastSpeedKmh(), device.getLastBatteryV(),
+                imuValid ? dto.getAccelX() : null, imuValid ? dto.getAccelY() : null, imuValid ? dto.getAccelZ() : null,
+                gpsValid ? dto.getLatitude() : null, gpsValid ? dto.getLongitude() : null, device.getSecurityState().name(), now.getEpochSecond());
+        reading.setDataSource(source); reading.setSensorConnected(sensor); reading.setSpeedValid(speedValid); reading.setImuValid(imuValid);
+        reading.setGpsValid(gpsValid); reading.setGpsAgeMs(dto.getGpsAgeMs()); reading.setDeviceUptimeS(dto.getDeviceUptimeS()); reading.setReceivedAt(now);
+        readings.save(reading);
+        TelemetryDto result = new TelemetryDto(reading);
+        realtime.publish(device, "TELEMETRY", result); realtime.publish(device, "DEVICE", null);
+        return result;
     }
 
-    @Transactional(readOnly = true)
-    public List<TelemetryDto> getTelemetryHistory(String deviceId, Long fromTs, Long toTs, User user) {
-        Device device = deviceService.getDeviceEntityChecked(deviceId, user, false);
-
-        if (fromTs == null) {
-            fromTs = Instant.now().minusSeconds(86400).getEpochSecond(); // Default past 24 hours
-        }
-        if (toTs == null) {
-            toTs = Instant.now().getEpochSecond();
-        }
-
-        List<TelemetryReading> readings = telemetryRepository.findByDeviceAndTsRange(device, fromTs, toTs);
-        if (readings.isEmpty()) {
-            readings = telemetryRepository.findTop50ByDeviceOrderByTsDesc(device);
-        }
-
-        return readings.stream()
-                .map(TelemetryDto::new)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true) public TelemetryDto getLatest(String id, User user) {
+        return readings.findFirstByDeviceOrderByTsDescCreatedAtDesc(access.getDeviceEntityChecked(id, user, false)).map(TelemetryDto::new).orElse(null);
     }
 
-    @Transactional(readOnly = true)
-    public byte[] exportCsv(String deviceId, Long fromTs, Long toTs, User user) {
-        List<TelemetryDto> data = getTelemetryHistory(deviceId, fromTs, toTs, user);
+    @Transactional(readOnly = true) public List<TelemetryDto> getTelemetryHistory(String id, Long from, Long to, User user) {
+        return getTelemetryHistory(id, from, to, user, 0, 5000);
+    }
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        PrintWriter writer = new PrintWriter(out, true, StandardCharsets.UTF_8);
+    @Transactional(readOnly = true) public List<TelemetryDto> getTelemetryHistory(String id, Long from, Long to, User user, int page, int size) {
+        Device device = access.getDeviceEntityChecked(id, user, false);
+        long end = to != null ? to : Instant.now().getEpochSecond(); long start = from != null ? from : end - 86400;
+        if (start > end) throw new BadRequestException("from phải nhỏ hơn hoặc bằng to");
+        if (page < 0 || size < 1 || size > 5000) throw new BadRequestException("page >= 0; size từ 1 đến 5000");
+        var rows = readings.findByDeviceAndTsBetweenOrderByTsDescCreatedAtDesc(device, start, end, PageRequest.of(page, size));
+        java.util.Collections.reverse(rows);
+        return rows.stream().map(TelemetryDto::new).toList();
+    }
 
-        // CSV Header
-        writer.println("ReadingID,Timestamp,DateTimeUTC,Speed_kmh,Battery_V,Accel_X,Accel_Y,Accel_Z,Security_State,Latitude,Longitude");
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        for (TelemetryDto d : data) {
-            String formattedDate = "";
-            if (d.getTs() != null) {
-                formattedDate = LocalDateTime.ofInstant(Instant.ofEpochSecond(d.getTs()), ZoneId.of("UTC")).format(formatter);
-            }
-            writer.printf("%s,%d,%s,%.2f,%.2f,%.2f,%.2f,%.2f,%s,%.6f,%.6f%n",
-                    d.getReadingId() != null ? d.getReadingId() : "",
-                    d.getTs() != null ? d.getTs() : 0,
-                    formattedDate,
-                    d.getSpeedKmh() != null ? d.getSpeedKmh() : 0.0,
-                    d.getBatteryV() != null ? d.getBatteryV() : 0.0,
-                    d.getAccelX() != null ? d.getAccelX() : 0.0,
-                    d.getAccelY() != null ? d.getAccelY() : 0.0,
-                    d.getAccelZ() != null ? d.getAccelZ() : 1.0,
-                    d.getState() != null ? d.getState() : "",
-                    d.getLatitude() != null ? d.getLatitude() : 0.0,
-                    d.getLongitude() != null ? d.getLongitude() : 0.0
-            );
+    @Transactional(readOnly = true) public byte[] exportCsv(String id, Long from, Long to, User user) {
+        StringBuilder csv = new StringBuilder("ReadingID,ReceivedAt,DeviceUptimeS,Source,SensorConnected,SpeedValid,ImuValid,GpsValid,GpsAgeMs,Speed_kmh,Battery_V,Accel_X,Accel_Y,Accel_Z,State,Latitude,Longitude\n");
+        for (var d : getTelemetryHistory(id, from, to, user)) {
+            Object[] values = {d.getReadingId(), d.getReceivedAt(), d.getDeviceUptimeS(), d.getDataSource(), d.getSensorConnected(), d.getSpeedValid(), d.getImuValid(), d.getGpsValid(), d.getGpsAgeMs(), d.getSpeedKmh(), d.getBatteryV(), d.getAccelX(), d.getAccelY(), d.getAccelZ(), d.getState(), d.getLatitude(), d.getLongitude()};
+            csv.append(java.util.Arrays.stream(values).map(v -> v == null ? "" : v.toString()).collect(java.util.stream.Collectors.joining(","))).append('\n');
         }
-
-        writer.flush();
-        return out.toByteArray();
+        return csv.toString().getBytes(StandardCharsets.UTF_8);
     }
 }

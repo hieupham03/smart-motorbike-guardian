@@ -1,7 +1,8 @@
 import React from 'react';
 import { Zap, BatteryCharging, AlertCircle } from 'lucide-react';
 
-export default function BatteryIndicator({ voltage = 12.6, lowThreshold = 11.5 }) {
+export default function BatteryIndicator({ voltage = null, lowThreshold = 11.5 }) {
+  if (!Number.isFinite(voltage)) return <div className="glass-card dashboard-card" style={{ padding: '1.5rem' }}><h3>ĐIỆN ÁP ẮC QUY</h3><p>Chưa đo ADC / chưa có dữ liệu</p><strong>— V</strong></div>;
   // Mapping voltage (10.5V -> 0%, 13.0V -> 100%)
   const percentage = Math.min(100, Math.max(0, Math.round(((voltage - 10.5) / 2.5) * 100)));
   const isLow = voltage < lowThreshold;
@@ -25,7 +26,7 @@ export default function BatteryIndicator({ voltage = 12.6, lowThreshold = 11.5 }
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontSize: '0.825rem', fontWeight: '700', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Zap size={18} color="#0284c7" /> ĐIỆN ÁP ẮC QUY (LM2596 ADC)
+          <Zap size={18} color="#0284c7" /> ĐIỆN ÁP ẮC QUY
         </span>
         <span className={`badge ${badgeClass}`}>
           {statusText}
@@ -81,7 +82,7 @@ export default function BatteryIndicator({ voltage = 12.6, lowThreshold = 11.5 }
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px' }}>
             <span style={{ fontSize: '1.05rem', fontWeight: '800', color: '#0f172a' }}>{percentage}%</span>
-            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600' }}>Dung lượng</span>
+            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600' }}>Ước lượng theo điện áp</span>
           </div>
 
           <div style={{ fontSize: '0.725rem', color: isLow ? '#ef4444' : '#64748b', marginTop: '4px', fontWeight: '600' }}>
@@ -92,8 +93,8 @@ export default function BatteryIndicator({ voltage = 12.6, lowThreshold = 11.5 }
 
       {/* Footer Meta */}
       <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '0.5rem', fontSize: '0.75rem', color: '#94a3b8', display: 'flex', justifyContent: 'space-between' }}>
-        <span>ADC1_CH6 (GPIO34)</span>
-        <span>Phân áp LM2596</span>
+        <span>Điện áp nhận từ thiết bị</span>
+        <span>Chưa xác minh ADC hardware</span>
       </div>
     </div>
   );

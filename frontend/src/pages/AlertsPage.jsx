@@ -5,12 +5,12 @@ import { api } from '../services/api';
 import { AlertTriangle, CheckCircle, Clock, ShieldCheck, Filter, AlertOctagon } from 'lucide-react';
 
 export default function AlertsPage() {
-  const { alerts, fetchAlerts, fetchDevices } = useDevice();
+  const { alerts, devices, fetchAlerts, fetchDevices } = useDevice();
   const { role } = useAuth();
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [feedback, setFeedback] = useState(null);
 
-  const isViewer = role === 'VIEWER';
+  const canResolve = alert => ['OWNER', 'ADMIN'].includes(devices.find(d => d.deviceId === alert.deviceId)?.currentUserRole);
 
   const handleAcknowledge = async (alertId) => {
     try {
@@ -123,7 +123,7 @@ export default function AlertsPage() {
                   </p>
 
                   <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.5rem', display: 'flex', gap: '1.25rem' }}>
-                    <span>Thời gian: <strong>{new Date(alert.createdAt).toLocaleString()}</strong></span>
+                    <span>Nhận tại server ({alert.dataSource || 'LEGACY'}): <strong>{new Date(alert.createdAt).toLocaleString()}</strong></span>
                     {alert.actionTaken && <span>Hành động tự động: <strong>{alert.actionTaken}</strong></span>}
                     {alert.resolvedByEmail && <span>Xử lý bởi: <strong>{alert.resolvedByEmail}</strong></span>}
                   </div>
@@ -144,7 +144,7 @@ export default function AlertsPage() {
                     </button>
                   )}
 
-                  {alert.status !== 'RESOLVED' && !isViewer && (
+                  {alert.status !== 'RESOLVED' && canResolve(alert) && (
                     <button
                       className="btn btn-sm btn-success"
                       onClick={() => handleResolve(alert.alertId)}

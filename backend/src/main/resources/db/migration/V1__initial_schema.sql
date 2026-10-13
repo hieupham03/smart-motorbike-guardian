@@ -1,0 +1,114 @@
+-- =========================================================================
+-- MOTORBIKE GUARDIAN - DATABASE SCHEMA DDL
+-- Target: PostgreSQL / Relational DB
+-- =========================================================================
+
+-- 1. Users Table
+CREATE TABLE IF NOT EXISTS users (
+    user_id VARCHAR(36) PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'OWNER', -- ADMIN, OWNER, VIEWER
+    status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE', -- ACTIVE, SUSPENDED
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Devices Table
+CREATE TABLE IF NOT EXISTS devices (
+    device_id VARCHAR(36) PRIMARY KEY,
+    device_uuid VARCHAR(64) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    license_plate VARCHAR(50),
+    vehicle_model VARCHAR(100),
+    lifecycle_state VARCHAR(50) NOT NULL DEFAULT 'REGISTERED', -- REGISTERED, PROVISIONED, ACTIVE, OFFLINE, FAULT, MAINTENANCE, DECOMMISSIONED
+    security_state VARCHAR(50) NOT NULL DEFAULT 'PARKED', -- PARKED, ARMED, ALARM, THEFT_LOCK
+    firmware_version VARCHAR(50) DEFAULT 'v1.0.0',
+    hw_version VARCHAR(50) DEFAULT 'ESP32-WROOM-32',
+    claim_token VARCHAR(64),
+    claim_token_expiry TIMESTAMP WITH TIME ZONE,
+    mqtt_username VARCHAR(100),
+    mqtt_password_hash VARCHAR(255),
+    last_speed_kmh DOUBLE PRECISION DEFAULT 0.0,
+    last_battery_v DOUBLE PRECISION DEFAULT 12.6,
+    last_latitude DOUBLE PRECISION DEFAULT 21.028511,
+    last_longitude DOUBLE PRECISION DEFAULT 105.854444,
+    speed_threshold_kmh DOUBLE PRECISION DEFAULT 80.0,
+    battery_low_threshold_v DOUBLE PRECISION DEFAULT 11.5,
+    tilt_threshold_deg DOUBLE PRECISION DEFAULT 45.0,
+    last_seen_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 3. Ownership Table (Many-to-Many User <-> Device with role)
+CREATE TABLE IF NOT EXISTS ownership (
+    id VARCHAR(36) PRIMARY KEY,
+    user_id VARCHAR(36) NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    device_id VARCHAR(36) NOT NULL REFERENCES devices(device_id) ON DELETE CASCADE,
+    role VARCHAR(50) NOT NULL DEFAULT 'OWNER', -- OWNER, VIEWER
+    granted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_user_device UNIQUE(user_id, device_id)
+);
+
+-- 4. Commands Table
+CREATE TABLE IF NOT EXISTS commands (
+    cmd_id VARCHAR(36) PRIMARY KEY,
+    device_id VARCHAR(36) NOT NULL REFERENCES devices(device_id) ON DELETE CASCADE,
+    issued_by VARCHAR(36) NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    type VARCHAR(50) NOT NULL, -- ARM, DISARM, LOCK_ENGINE, UNLOCK_ENGINE, SIREN_ON, SIREN_OFF, CONFIG_THRESHOLDS, REBOOT
+    status VARCHAR(50) NOT NULL DEFAULT 'PENDING', -- PENDING, EXECUTED, REJECTED, TIMEOUT
+    payload TEXT,
+    reason_if_failed VARCHAR(255),
+    issued_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    ack_at TIMESTAMP WITH TIME ZONE
+);
+
+-- 5. Alerts Table
+CREATE TABLE IF NOT EXISTS alerts (
+    alert_id VARCHAR(36) PRIMARY KEY,
+    device_id VARCHAR(36) NOT NULL REFERENCES devices(device_id) ON DELETE CASCADE,
+    reason VARCHAR(100) NOT NULL, -- MOTION_WHILE_ARMED, FALL_DETECTED, SPEED_LIMIT_EXCEEDED, LOW_BATTERY, SYSTEM_TAMPERING, GEOFENCE_VIOLATION
+    severity VARCHAR(50) NOT NULL DEFAULT 'MEDIUM', -- LOW, MEDIUM, HIGH, CRITICAL
+    status VARCHAR(50) NOT NULL DEFAULT 'OPEN', -- OPEN, ACKNOWLEDGED, RESOLVED
+    action_taken VARCHAR(255),
+    details TEXT,
+    resolved_by VARCHAR(36) REFERENCES users(user_id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP WITH TIME ZONE
+);
+
+-- 6. Telemetry Readings (Time-series log)
+CREATE TABLE IF NOT EXISTS telemetry_readings (
+    reading_id VARCHAR(36) PRIMARY KEY,
+    device_id VARCHAR(36) NOT NULL REFERENCES devices(device_id) ON DELETE CASCADE,
+    speed_kmh DOUBLE PRECISION DEFAULT 0.0,
+    battery_v DOUBLE PRECISION DEFAULT 12.6,
+    accel_x DOUBLE PRECISION DEFAULT 0.0,
+    accel_y DOUBLE PRECISION DEFAULT 0.0,
+    accel_z DOUBLE PRECISION DEFAULT 1.0,
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
+    state VARCHAR(50) DEFAULT 'PARKED',
+    ts BIGINT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 7. Audit Logs Table
+CREATE TABLE IF NOT EXISTS audit_logs (
+    log_id VARCHAR(36) PRIMARY KEY,
+    user_id VARCHAR(36) REFERENCES users(user_id) ON DELETE SET NULL,
+    device_id VARCHAR(36) REFERENCES devices(device_id) ON DELETE SET NULL,
+    action VARCHAR(100) NOT NULL, -- LOGIN, LOGOUT, REGISTER, DEVICE_ONBOARD, DEVICE_REVOKED, DEVICE_DECOMMISSIONED, COMMAND_ISSUED, ALERT_RESOLVED, PASSWORD_CHANGED
+    result VARCHAR(50) NOT NULL, -- SUCCESS, FAILED, REJECTED
+    details TEXT,
+    source_ip VARCHAR(64),
+    ts BIGINT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_telemetry_device_ts ON telemetry_readings(device_id, ts DESC);
+CREATE INDEX IF NOT EXISTS idx_alerts_device_status ON alerts(device_id, status);
+CREATE INDEX IF NOT EXISTS idx_commands_device ON commands(device_id, issued_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_user_ts ON audit_logs(user_id, ts DESC);

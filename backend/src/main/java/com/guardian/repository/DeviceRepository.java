@@ -11,6 +11,14 @@ import java.util.Optional;
 @Repository
 public interface DeviceRepository extends JpaRepository<Device, String> {
     Optional<Device> findByDeviceUuid(String deviceUuid);
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select d from Device d where d.deviceUuid = :id")
+    Optional<Device> findLockedByUuid(@org.springframework.data.repository.query.Param("id") String id);
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select d from Device d where d.deviceId = :id")
+    Optional<Device> findLockedById(@org.springframework.data.repository.query.Param("id") String id);
     Optional<Device> findByClaimToken(String claimToken);
     List<Device> findByLifecycleState(LifecycleState lifecycleState);
+    @org.springframework.data.jpa.repository.Query("select d.deviceId from Device d where d.lifecycleState = com.guardian.entity.LifecycleState.ACTIVE order by d.deviceId")
+    List<String> findActiveIds();
 }

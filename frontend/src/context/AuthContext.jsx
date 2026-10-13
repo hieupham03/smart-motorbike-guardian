@@ -22,12 +22,18 @@ export function AuthProvider({ children }) {
           }
         } catch (err) {
           console.warn('Session expired:', err);
-          logout();
+          if ([401, 403].includes(err.status)) logout();
         }
       }
       setLoading(false);
     }
     checkAuth();
+  }, []);
+
+  useEffect(() => {
+    const expire = () => logout();
+    window.addEventListener('guardian:logout', expire);
+    return () => window.removeEventListener('guardian:logout', expire);
   }, []);
 
   const login = async (email, password) => {
@@ -54,16 +60,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const quickLogin = async (role) => {
-    const accounts = {
-      admin: { email: 'admin@guardian.iot', pass: 'Password@123' },
-      owner: { email: 'owner@guardian.iot', pass: 'Password@123' },
-      viewer: { email: 'viewer@guardian.iot', pass: 'Password@123' }
-    };
-    const target = accounts[role.toLowerCase()] || accounts.owner;
-    return await login(target.email, target.pass);
-  };
-
   const logout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
@@ -72,7 +68,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, role: user?.role, isAuthenticated: !!user, loading, login, register, quickLogin, logout }}>
+    <AuthContext.Provider value={{ user, role: user?.role, isAuthenticated: !!user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

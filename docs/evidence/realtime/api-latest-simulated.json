@@ -1,0 +1,26 @@
+{
+  "success": true,
+  "message": "Success",
+  "data": {
+    "dataSource": "SIMULATED",
+    "sensorConnected": true,
+    "imuValid": true,
+    "speedValid": true,
+    "gpsValid": true,
+    "gpsAgeMs": 0,
+    "deviceUptimeS": null,
+    "receivedAt": "2026-10-13T08:14:48.807248Z",
+    "readingId": "239b405c-f23c-4306-a0ec-843a6b101e37",
+    "deviceId": "dev-550e8400-0002",
+    "speedKmh": 0,
+    "batteryV": 12.4,
+    "accelX": 0,
+    "accelY": 0,
+    "accelZ": 9.81,
+    "latitude": 21.033333,
+    "longitude": 105.843333,
+    "state": "ARMED",
+    "ts": 1791879288
+  },
+  "timestamp": 1791879290048
+}

@@ -37,7 +37,8 @@ public class AuthService {
         }
 
         String userId = "usr-" + UUID.randomUUID().toString().substring(0, 8);
-        Role role = request.getRole() != null ? request.getRole() : Role.OWNER;
+        if (request.getRole() == Role.ADMIN) throw new BadRequestException("Không được tự đăng ký ADMIN");
+        Role role = request.getRole() == Role.VIEWER ? Role.VIEWER : Role.OWNER;
 
         User user = new User(
                 userId,
@@ -94,7 +95,7 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public AuthResponse refreshToken(String refreshToken) {
-        if (!jwtTokenProvider.validateToken(refreshToken)) {
+        if (!jwtTokenProvider.validateToken(refreshToken, "REFRESH")) {
             throw new UnauthorizedException("Refresh token không hợp lệ hoặc đã hết hạn");
         }
 

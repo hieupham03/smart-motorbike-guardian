@@ -21,6 +21,9 @@ import java.util.List;
 public class TelemetryController {
 
     @Autowired
+    private com.guardian.service.DeviceService deviceService;
+
+    @Autowired
     private TelemetryService telemetryService;
 
     @GetMapping
@@ -29,9 +32,16 @@ public class TelemetryController {
             @PathVariable("id") String deviceId,
             @RequestParam(value = "from", required = false) Long fromTs,
             @RequestParam(value = "to", required = false) Long toTs,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "5000") int size,
             @AuthenticationPrincipal User currentUser) {
-        List<TelemetryDto> readings = telemetryService.getTelemetryHistory(deviceId, fromTs, toTs, currentUser);
+        List<TelemetryDto> readings = telemetryService.getTelemetryHistory(deviceId, fromTs, toTs, currentUser, page, size);
         return ResponseEntity.ok(ApiResponse.ok(readings));
+    }
+
+    @GetMapping("/latest")
+    public ResponseEntity<ApiResponse<TelemetryDto>> latest(@PathVariable("id") String id, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(ApiResponse.ok(telemetryService.getLatest(id, user)));
     }
 
     @GetMapping("/export")
@@ -52,7 +62,12 @@ public class TelemetryController {
     @Operation(summary = "Ghi nhận bản tin telemetry trực tiếp qua REST API (Fallback)")
     public ResponseEntity<ApiResponse<TelemetryDto>> postTelemetry(
             @PathVariable("id") String deviceId,
-            @RequestBody TelemetryDto dto) {
+            @RequestBody TelemetryDto dto,
+            @AuthenticationPrincipal User currentUser) {
+        var device = deviceService.getDeviceEntityChecked(deviceId, currentUser, true);
+        if (!"SIMULATED".equals(device.getDataSource()))
+            throw new com.guardian.exception.BadRequestException("REST chỉ nhận dữ liệu SIMULATED; hardware dùng MQTT");
+        dto.setDataSource("SIMULATED");
         dto.setDeviceId(deviceId);
         TelemetryDto saved = telemetryService.recordTelemetry(deviceId, dto);
         return ResponseEntity.ok(ApiResponse.ok("Đã ghi nhận telemetry", saved));

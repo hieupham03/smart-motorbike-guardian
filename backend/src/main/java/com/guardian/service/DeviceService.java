@@ -31,6 +31,9 @@ public class DeviceService {
     @Autowired
     private AuditLogService auditLogService;
 
+    @Autowired
+    private RealtimeService realtime;
+
     @Transactional(readOnly = true)
     public List<DeviceDto> getDevicesForUser(User user) {
         if (user.getRole() == Role.ADMIN) {
@@ -84,7 +87,7 @@ public class DeviceService {
         Device device = deviceRepository.findByClaimToken(token)
                 .orElseThrow(() -> new BadRequestException("Mã Claim Token không hợp lệ hoặc không tồn tại"));
 
-        if (device.getLifecycleState() == LifecycleState.ACTIVE) {
+        if (!ownershipRepository.findByDevice(device).isEmpty()) {
             throw new BadRequestException("Thiết bị này đã được kích hoạt trước đó");
         }
         if (device.getLifecycleState() == LifecycleState.DECOMMISSIONED) {
@@ -148,6 +151,8 @@ public class DeviceService {
     @Transactional
     public void inviteViewer(String deviceId, InviteUserRequest request, User user, String sourceIp) {
         Device device = getDeviceEntityChecked(deviceId, user, true);
+        if (request.getRole() != null && request.getRole() != Role.VIEWER)
+            throw new BadRequestException("Lời mời chỉ cấp quyền VIEWER");
 
         User viewerUser = userRepository.findByEmail(request.getEmail().toLowerCase().trim())
                 .orElseThrow(() -> new BadRequestException("Không tìm thấy người dùng với email: " + request.getEmail()));
@@ -219,6 +224,7 @@ public class DeviceService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
 
         ownershipRepository.deleteByUserAndDevice(targetUser, device);
+        realtime.removeAccess(device, targetUser);
 
         auditLogService.log(user, device, "REMOVE_DEVICE_USER", "SUCCESS",
                 "Gỡ quyền truy cập của người dùng " + targetUser.getEmail() + " khỏi thiết bị " + device.getName(), sourceIp);
