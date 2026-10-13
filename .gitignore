@@ -5,7 +5,7 @@
 # Dependencies & Package Managers
 node_modules/
 frontend/node_modules/
-package-lock.json
+!frontend/package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
@@ -67,3 +67,6 @@ postgres_data/
 
 # Local firmware Wi-Fi credentials
 network_config.h
+
+# Local dependency caches
+.npm-cache/

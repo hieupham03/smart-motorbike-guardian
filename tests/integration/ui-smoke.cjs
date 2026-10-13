@@ -1,0 +1,63 @@
+const {chromium} = require('../../frontend/node_modules/playwright');
+const fs=require('fs'), assert=require('assert/strict');
+process.chdir(require('path').resolve(__dirname, '../..'));
+(async()=>{
+ const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+ const context=await browser.newContext({viewport:{width:1440,height:1000}});
+ const page=await context.newPage(); const errors=[];const events=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ page.on('websocket',ws=>ws.on('framereceived',frame=>{
+  const raw=String(frame.payload);if(raw.startsWith('MESSAGE')){const body=raw.slice(raw.indexOf('\n\n')+2).replace(/\0$/,'');try{events.push(JSON.parse(body));}catch{}}
+ }));
+ const {demoPassword}=JSON.parse(fs.readFileSync('.ui-credentials.tmp','utf8'));
+ try {
+  await page.goto('http://127.0.0.1:15173/login');
+  await page.locator('input[type=email]').fill('owner@guardian.iot');await page.locator('input[type=password]').fill(demoPassword);
+  await page.getByRole('button',{name:'Đăng Nhập',exact:true}).click();
+  await page.getByText('CONNECTED',{exact:true}).waitFor({timeout:20000});
+  await page.getByText('NO_FIX · Chưa có vị trí',{exact:false}).waitFor();
+  assert.ok((await page.locator('body').innerText()).includes('Chưa đo ADC'));
+  fs.mkdirSync('docs/evidence/realtime',{recursive:true});
+  await page.screenshot({path:'docs/evidence/realtime/dashboard-no-fix.png',fullPage:true});
+  await page.locator('select').first().selectOption('dev-550e8400-0002');
+  await page.getByText('SIMULATED',{exact:true}).waitFor();
+  await page.getByRole('button',{name:'Gửi tốc độ (0 km/h)',exact:true}).waitFor();
+  const slider = page.locator('input[type=range]').first();
+  await slider.focus();
+  await slider.press('Home');
+  for (let step = 0; step < 7; step++) await slider.press('ArrowRight');
+  const started=Date.now();
+  await page.getByRole('button',{name:'Gửi tốc độ (35 km/h)',exact:true}).click();
+  await page.getByText('35.0',{exact:true}).waitFor();
+  assert.ok(events.some(e=>e.type==='TELEMETRY'&&e.data.speedKmh===35));
+  fs.writeFileSync('docs/evidence/realtime/ws-telemetry-simulated.json',JSON.stringify(events.find(e=>e.type==='TELEMETRY'&&e.data.speedKmh===35),null,2));
+  const uiMs=Date.now()-started;
+  await page.getByRole('button',{name:'Dừng xe (0 km/h)',exact:true}).click();
+  await page.getByRole('button',{name:'Bật Canh Giữ ARM SYSTEM',exact:true}).click();
+  await page.getByText('ARM: EXECUTED',{exact:false}).waitFor({timeout:10000});
+  await page.getByRole('link',{name:'Lịch sử Lệnh',exact:true}).click();
+  await page.getByText('EXECUTED',{exact:true}).waitFor();
+  await page.screenshot({path:'docs/evidence/realtime/command-executed-simulated.png',fullPage:true});
+  await page.getByRole('link',{name:'Tổng quan Realtime',exact:true}).click();
+  await page.locator('select').first().selectOption('dev-550e8400-0001');
+  await page.getByRole('button',{name:'Bật Canh Giữ ARM SYSTEM',exact:true}).click();
+  await page.getByText('ARM: REJECTED · MQTT_UNAVAILABLE',{exact:false}).waitFor();
+  await page.screenshot({path:'docs/evidence/realtime/mqtt-unavailable.png',fullPage:true});
+  await page.getByRole('button',{name:'Đăng xuất',exact:true}).click();
+  await page.locator('input[type=email]').fill('viewer@guardian.iot');await page.locator('input[type=password]').fill(demoPassword);
+  await page.getByRole('button',{name:'Đăng Nhập',exact:true}).click();
+  await page.getByText('CONNECTED',{exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Bật Canh Giữ ARM SYSTEM',exact:true}).isDisabled(),true);
+  assert.equal(await page.locator('input[type=range]').count(),0);
+  await page.screenshot({path:'docs/evidence/realtime/viewer-disabled.png',fullPage:true});
+  await page.reload();
+  await page.getByText('CONNECTED',{exact:true}).waitFor();
+  const login = await fetch('http://127.0.0.1:18080/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'owner@guardian.iot',password:demoPassword})});
+  const accessToken = (await login.json()).data.accessToken;
+  const latest = await fetch('http://127.0.0.1:18080/api/devices/dev-550e8400-0002/telemetry/latest',{headers:{Authorization:'Bearer '+accessToken}});
+  fs.writeFileSync('docs/evidence/realtime/api-latest-simulated.json',JSON.stringify(await latest.json(),null,2));
+  assert.equal(errors.length,0,errors.join('; '));
+  fs.writeFileSync('docs/evidence/realtime/ui-smoke.json',JSON.stringify({type:'SOFTWARE_ONLY',browser:'Edge headless',checks:['authenticated websocket CONNECTED','hardware NO_FIX without marker','null ADC','simulated telemetry delivered via websocket','command ACK updates UI','command history EXECUTED','hardware MQTT unavailable shows REJECTED','viewer controls disabled and simulator hidden','reload restores authenticated websocket'],simulatedActionToUiMs:uiMs,pageErrors:errors},null,2));
+  console.log('UI_SMOKE_PASS; SIMULATED_ACTION_TO_UI_MS='+uiMs+'; PAGE_ERRORS='+errors.length);
+ } finally {await browser.close();}
+})().catch(e=>{console.error(e.message);process.exitCode=1;});

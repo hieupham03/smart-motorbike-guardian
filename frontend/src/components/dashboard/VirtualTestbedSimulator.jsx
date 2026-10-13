@@ -9,7 +9,7 @@ export default function VirtualTestbedSimulator() {
   const [voltSlider, setVoltSlider] = useState(12.6);
   const [msg, setMsg] = useState('');
 
-  if (!selectedDevice) return null;
+  if (!selectedDevice || selectedDevice.dataSource !== 'SIMULATED' || !['OWNER', 'ADMIN'].includes(selectedDevice.currentUserRole)) return null;
 
   const handleSimAction = async (action, value) => {
     try {

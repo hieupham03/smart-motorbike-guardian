@@ -1,0 +1,26 @@
+{
+  "type": "TELEMETRY",
+  "deviceId": "dev-550e8400-0002",
+  "data": {
+    "dataSource": "SIMULATED",
+    "sensorConnected": true,
+    "imuValid": true,
+    "speedValid": true,
+    "gpsValid": true,
+    "gpsAgeMs": 0,
+    "deviceUptimeS": null,
+    "receivedAt": "2026-10-13T08:14:48.487094600Z",
+    "readingId": "b0226d21-877d-4b64-a7f3-7df9d451b101",
+    "deviceId": "dev-550e8400-0002",
+    "speedKmh": 35,
+    "batteryV": 12.4,
+    "accelX": 0,
+    "accelY": 0,
+    "accelZ": 9.81,
+    "latitude": 21.033333,
+    "longitude": 105.843333,
+    "state": "PARKED",
+    "ts": 1791879288
+  },
+  "sentAt": "2026-10-13T08:14:48.495617300Z"
+}

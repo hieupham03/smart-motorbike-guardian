@@ -16,12 +16,17 @@ import java.util.Map;
 public class VirtualDeviceController {
 
     @Autowired
+    private com.guardian.service.DeviceService deviceService;
+
+    @Autowired
     private VirtualDeviceSimulatorService simulatorService;
 
     @PostMapping("/action")
     @Operation(summary = "Mô phỏng hành động phần cứng trên xe (SET_SPEED, TRIGGER_FALL, SET_BATTERY, TRIGGER_THEFT_TAMPER)")
-    public ResponseEntity<ApiResponse<String>> triggerSimulatedAction(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<ApiResponse<String>> triggerSimulatedAction(@RequestBody Map<String, Object> body,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.guardian.entity.User user) {
         String deviceId = (String) body.get("deviceId");
+        deviceService.getDeviceEntityChecked(deviceId, user, true);
         String action = (String) body.get("action");
         Double value = null;
         if (body.containsKey("value") && body.get("value") != null) {

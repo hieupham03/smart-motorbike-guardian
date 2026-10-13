@@ -16,5 +16,8 @@ public interface TelemetryRepository extends JpaRepository<TelemetryReading, Str
     @Query("SELECT t FROM TelemetryReading t WHERE t.device = :device AND t.ts >= :fromTs AND t.ts <= :toTs ORDER BY t.ts ASC")
     List<TelemetryReading> findByDeviceAndTsRange(@Param("device") Device device, @Param("fromTs") Long fromTs, @Param("toTs") Long toTs);
 
+    java.util.Optional<TelemetryReading> findFirstByDeviceOrderByTsDescCreatedAtDesc(Device device);
+    List<TelemetryReading> findByDeviceAndTsBetweenOrderByTsDescCreatedAtDesc(Device device, Long from, Long to, org.springframework.data.domain.Pageable page);
+
     void deleteByDevice(Device device);
 }

@@ -4,14 +4,10 @@ import com.guardian.dto.CommandRequest;
 import com.guardian.dto.CommandResponse;
 import com.guardian.entity.*;
 import com.guardian.exception.BadRequestException;
-import com.guardian.exception.ForbiddenException;
-import com.guardian.exception.ResourceNotFoundException;
 import com.guardian.repository.CommandRepository;
-import com.guardian.repository.DeviceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,16 +26,7 @@ public class CommandService {
     private CommandRepository commandRepository;
 
     @Autowired
-    private DeviceRepository deviceRepository;
-
-    @Autowired
     private DeviceService deviceService;
-
-    @Autowired
-    private MqttSubscriberService mqttSubscriberService;
-
-    @Autowired
-    private VirtualDeviceSimulatorService simulatorService;
 
     @Autowired
     private AuditLogService auditLogService;
@@ -47,8 +34,12 @@ public class CommandService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired(required = false)
-    private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private RealtimeService realtime;
+
+    @Autowired
+    @org.springframework.context.annotation.Lazy
+    private CommandDispatchService dispatch;
 
     @Transactional
     public CommandResponse sendCommand(String deviceId, CommandRequest request, User user, String sourceIp) {
@@ -61,6 +52,9 @@ public class CommandService {
             throw new BadRequestException("Thiết bị đang ở trạng thái lỗi/thu hồi (Revoked), không thể nhận lệnh");
         }
 
+        if (request.getType() == null || request.getType() == CommandType.CONFIG_THRESHOLDS)
+            throw new BadRequestException("Lệnh không được firmware hiện tại hỗ trợ");
+
         // Step-up confirmation for dangerous commands (LOCK_ENGINE)
         if (request.getType() == CommandType.LOCK_ENGINE) {
             if (request.getConfirmationPassword() == null || request.getConfirmationPassword().isBlank()) {
@@ -72,83 +66,59 @@ public class CommandService {
             }
         }
 
-        String cmdId = "cmd-" + UUID.randomUUID().toString().substring(0, 8);
+        String cmdId = UUID.randomUUID().toString();
         Command command = new Command(cmdId, device, user, request.getType(), request.getPayload());
         commandRepository.save(command);
 
         auditLogService.log(user, device, "COMMAND_ISSUED", "PENDING",
                 "Gửi lệnh " + request.getType().name() + " (" + cmdId + ")", sourceIp);
 
-        // Prepare JSON payload for MQTT
-        String payloadJson = String.format("{\"cmd_id\":\"%s\",\"type\":\"%s\",\"issued_by\":\"%s\",\"ts\":%d}",
-                cmdId, request.getType().name(), user.getUserId(), Instant.now().getEpochSecond());
-
-        String targetUuid = (device.getDeviceUuid() != null && !device.getDeviceUuid().isBlank())
-                ? device.getDeviceUuid() : device.getDeviceId();
-
-        boolean mqttSent = mqttSubscriberService.publishCommand(targetUuid, request.getType().name(), payloadJson);
-        if (!targetUuid.equals(device.getDeviceId())) {
-            mqttSubscriberService.publishCommand(device.getDeviceId(), request.getType().name(), payloadJson);
-        }
-
-        if (!mqttSent) {
-            // Broker unavailable or fallback: trigger virtual device simulator immediately
-            log.info("MQTT publish not available, delegating command [{}] to virtual testbed simulator", cmdId);
-            simulatorService.handleCommandSimulated(command);
-        }
+        realtime.publish(device, "COMMAND", new CommandResponse(command));
+        realtime.afterCommit(() -> dispatch.dispatch(cmdId));
 
         return new CommandResponse(command);
     }
 
     @Transactional
-    public void processCommandAck(String cmdId, String result, String reasonIfFailed) {
-        Command command = commandRepository.findById(cmdId).orElse(null);
-        if (command == null) {
-            log.warn("Received ACK for unknown cmd_id: {}", cmdId);
-            return;
-        }
-
-        CommandStatus newStatus = "EXECUTED".equalsIgnoreCase(result) ? CommandStatus.EXECUTED : CommandStatus.REJECTED;
-        command.setStatus(newStatus);
-        command.setReasonIfFailed(reasonIfFailed);
-        command.setAckAt(Instant.now());
+    public void processCommandAck(String deviceId, String cmdId, String result, String reason) {
+        Command command = commandRepository.findLockedById(cmdId).orElse(null);
+        if (command == null || !(command.getDevice().getDeviceUuid().equals(deviceId) || command.getDevice().getDeviceId().equals(deviceId))) return;
+        if (!"EXECUTED".equals(result) && !"REJECTED".equals(result)) return;
+        if (command.getStatus() == CommandStatus.TIMEOUT) {
+            if (command.getLateAckAt() != null) return;
+            command.setLateAckAt(Instant.now()); command.setLateAckResult(result); command.setLateAckReason(reason);
+        } else if (command.getStatus() == CommandStatus.PENDING) {
+            command.setStatus(CommandStatus.valueOf(result)); command.setReasonIfFailed(reason); command.setAckAt(Instant.now());
+        } else return;
         commandRepository.save(command);
+        auditLogService.log(command.getIssuedBy(), command.getDevice(), "COMMAND_ACK", result,
+                "ACK " + cmdId + (command.getStatus() == CommandStatus.TIMEOUT ? " (late)" : ""), "DEVICE");
+        // Device security state comes from telemetry; siren commands need not alter it.
+        realtime.publish(command.getDevice(), "COMMAND", new CommandResponse(command));
+    }
 
-        Device device = command.getDevice();
-        if (device != null) {
-            if (newStatus == CommandStatus.EXECUTED) {
-                if (command.getType() == CommandType.ARM) {
-                    device.setSecurityState(SecurityState.ARMED);
-                } else if (command.getType() == CommandType.DISARM || command.getType() == CommandType.UNLOCK_ENGINE) {
-                    device.setSecurityState(SecurityState.PARKED);
-                } else if (command.getType() == CommandType.LOCK_ENGINE) {
-                    device.setSecurityState(SecurityState.THEFT_LOCK);
-                } else if (command.getType() == CommandType.SIREN_ON) {
-                    device.setSecurityState(SecurityState.ALARM);
-                } else if (command.getType() == CommandType.SIREN_OFF && device.getSecurityState() == SecurityState.ALARM) {
-                    device.setSecurityState(SecurityState.PARKED);
-                }
-                deviceRepository.save(device);
-            }
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+    public void failPublish(String id) {
+        Command command = commandRepository.findLockedById(id).orElse(null);
+        if (command == null || command.getStatus() != CommandStatus.PENDING) return;
+        command.setStatus(CommandStatus.REJECTED); command.setReasonIfFailed("MQTT_UNAVAILABLE");
+        commandRepository.save(command);
+        realtime.publish(command.getDevice(), "COMMAND", new CommandResponse(command));
+    }
 
-            auditLogService.log(command.getIssuedBy(), device, "COMMAND_ACK", newStatus.name(),
-                    "Phản hồi lệnh " + command.getType() + ": " + newStatus.name() +
-                            (reasonIfFailed != null ? " (" + reasonIfFailed + ")" : ""), "DEVICE_HARDWARE");
-        }
-
-        CommandResponse response = new CommandResponse(command);
-
-        if (messagingTemplate != null && device != null) {
-            try {
-                messagingTemplate.convertAndSend("/topic/devices/" + device.getDeviceId() + "/commands", response);
-            } catch (Exception ignored) {}
-        }
+    @Transactional
+    public void timeout(String id, Instant cutoff) {
+        Command command = commandRepository.findLockedById(id).orElse(null);
+        if (command == null || command.getStatus() != CommandStatus.PENDING || !command.getIssuedAt().isBefore(cutoff)) return;
+        command.setStatus(CommandStatus.TIMEOUT); command.setReasonIfFailed("ACK_TIMEOUT");
+        commandRepository.save(command);
+        realtime.publish(command.getDevice(), "COMMAND", new CommandResponse(command));
     }
 
     @Transactional(readOnly = true)
     public List<CommandResponse> getCommandsForDevice(String deviceId, User user) {
         Device device = deviceService.getDeviceEntityChecked(deviceId, user, false);
-        return commandRepository.findByDeviceOrderByIssuedAtDesc(device).stream()
+        return commandRepository.findTop100ByDeviceOrderByIssuedAtDesc(device).stream()
                 .map(CommandResponse::new)
                 .collect(Collectors.toList());
     }

@@ -121,8 +121,8 @@ export default function DevicesPage() {
                   <div>Biển số: <strong>{device.licensePlate || 'Chưa cập nhật'}</strong></div>
                   <div>Dòng xe: <strong>{device.vehicleModel || 'ESP32 Dual-Node'}</strong></div>
                   <div>Trạng thái an ninh: <strong>{device.securityState}</strong></div>
-                  <div>Tốc độ gần nhất: <strong>{device.lastSpeedKmh?.toFixed(1) || 0} km/h</strong></div>
-                  <div>Điện áp ắc quy: <strong>{device.lastBatteryV?.toFixed(2) || 12.6} V</strong></div>
+                  <div>Tốc độ gần nhất: <strong>{device.lastSpeedKmh?.toFixed(1) ?? '—'} km/h</strong></div>
+                  <div>Điện áp ắc quy: <strong>{device.lastBatteryV?.toFixed(2) ?? 'Chưa đo'} V</strong></div>
                   <div>Firmware: <code>{device.firmwareVersion}</code> ({device.hwVersion})</div>
                   <div>Vai trò của bạn: <strong style={{ color: '#0284c7' }}>{device.currentUserRole || 'VIEWER'}</strong></div>
                 </div>

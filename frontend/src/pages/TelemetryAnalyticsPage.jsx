@@ -5,12 +5,14 @@ import { LineChart, Download, Calendar, Filter, Zap, Gauge, Award, Activity } fr
 import { ResponsiveContainer, LineChart as RechartsLineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
 
 export default function TelemetryAnalyticsPage() {
-  const { selectedDevice } = useDevice();
+  const { selectedDevice, telemetry } = useDevice();
   const [data, setData] = useState([]);
   const [range, setRange] = useState('24h');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    let active = true;
+    setData([]);
     async function loadHistory() {
       if (!selectedDevice) return;
       setLoading(true);
@@ -21,17 +23,22 @@ export default function TelemetryAnalyticsPage() {
         if (range === '7d') from = now - 7 * 86400;
 
         const res = await api.getTelemetryHistory(selectedDevice.deviceId, from, now);
-        if (res.success && res.data) {
-          setData(res.data);
+        if (active && res.success && res.data) {
+          setData(previous => {
+            const rows = new Map(res.data.map(d => [d.readingId,d]));
+            previous.filter(d => d.deviceId === selectedDevice.deviceId).forEach(d => rows.set(d.readingId,d));
+            return [...rows.values()].sort((a,b) => a.ts-b.ts).slice(-5000);
+          });
         }
       } catch (err) {
         console.error(err);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }
     loadHistory();
-  }, [selectedDevice, range]);
+    return () => { active = false; };
+  }, [selectedDevice?.deviceId, range]);
 
   const handleExport = async () => {
     if (!selectedDevice) return;
@@ -43,18 +50,23 @@ export default function TelemetryAnalyticsPage() {
     await api.exportTelemetryCsv(selectedDevice.deviceId, from, now);
   };
 
+  useEffect(() => {
+    if (!telemetry || telemetry.deviceId !== selectedDevice?.deviceId) return;
+    setData(previous => [...previous.filter(d => d.readingId !== telemetry.readingId), telemetry].sort((a,b) => a.ts - b.ts).slice(-5000));
+  }, [telemetry, selectedDevice?.deviceId]);
+
   const formattedChartData = data.map(d => ({
     time: d.ts ? new Date(d.ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
-    speed: d.speedKmh || 0,
-    battery: d.batteryV || 0,
-    accel: Math.sqrt((d.accelX || 0)**2 + (d.accelY || 0)**2 + (d.accelZ || 1)**2).toFixed(2)
+    speed: d.speedValid ? d.speedKmh : null,
+    battery: d.dataSource === 'LEGACY' ? null : d.batteryV ?? null,
   }));
 
   // Calculations
-  const speeds = data.map(d => d.speedKmh || 0);
-  const maxSpeed = speeds.length > 0 ? Math.max(...speeds) : 0;
-  const avgSpeed = speeds.length > 0 ? (speeds.reduce((a, b) => a + b, 0) / speeds.length) : 0;
-  const drivingScore = Math.max(70, Math.min(98, Math.round(95 - (maxSpeed > 60 ? 10 : 0))));
+  const speeds = data.filter(d => d.speedValid).map(d => d.speedKmh).filter(Number.isFinite);
+  const maxSpeed = speeds.length > 0 ? Math.max(...speeds) : null;
+  const avgSpeed = speeds.length > 0 ? (speeds.reduce((a, b) => a + b, 0) / speeds.length) : null;
+  const batterySamples = data.filter(d => d.dataSource !== 'LEGACY').map(d => d.batteryV).filter(Number.isFinite);
+  const averageBattery = batterySamples.length ? batterySamples.reduce((a,b) => a+b,0)/batterySamples.length : null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -66,7 +78,7 @@ export default function TelemetryAnalyticsPage() {
             <LineChart size={26} color="#0284c7" /> Lịch Sử Dữ Liệu &amp; Xuất Báo Cáo
           </h1>
           <p className="page-subtitle">
-            Phân tích số liệu cảm biến chuỗi thời gian (Time-series) của xe {selectedDevice?.name}
+            Tối đa 5.000 mẫu gần nhất trong khoảng thời gian của xe {selectedDevice?.name}; CSV dùng cùng giới hạn.
           </p>
         </div>
 
@@ -95,12 +107,12 @@ export default function TelemetryAnalyticsPage() {
       <div className="grid-4">
         <div className="glass-card">
           <div style={{ fontSize: '0.8rem', fontWeight: '700', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Award size={16} /> ĐIỂM LÁI XE (DRIVING SCORE)
+            <Award size={16} /> NGUỒN DỮ LIỆU
           </div>
           <div style={{ fontSize: '2rem', fontWeight: '800', color: '#059669', marginTop: '6px' }}>
-            {drivingScore} <span style={{ fontSize: '1rem', color: '#64748b' }}>/ 100</span>
+            {selectedDevice?.dataSource || 'UNKNOWN'}
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>Hành vi an toàn, ít phanh gấp</div>
+          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>Telemetry nhận qua MQTT / WebSocket</div>
         </div>
 
         <div className="glass-card">
@@ -108,7 +120,7 @@ export default function TelemetryAnalyticsPage() {
             <Gauge size={16} /> TỐC ĐỘ CAO NHẤT
           </div>
           <div style={{ fontSize: '2rem', fontWeight: '800', color: '#0284c7', marginTop: '6px' }}>
-            {maxSpeed.toFixed(1)} <span style={{ fontSize: '1rem', color: '#64748b' }}>km/h</span>
+            {maxSpeed?.toFixed(1) ?? '—'} <span style={{ fontSize: '1rem', color: '#64748b' }}>km/h</span>
           </div>
           <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>Ngưỡng cảnh báo: {selectedDevice?.speedThresholdKmh || 80} km/h</div>
         </div>
@@ -118,7 +130,7 @@ export default function TelemetryAnalyticsPage() {
             <Activity size={16} /> TỐC ĐỘ TRUNG BÌNH
           </div>
           <div style={{ fontSize: '2rem', fontWeight: '800', color: '#0f172a', marginTop: '6px' }}>
-            {avgSpeed.toFixed(1)} <span style={{ fontSize: '1rem', color: '#64748b' }}>km/h</span>
+            {avgSpeed?.toFixed(1) ?? '—'} <span style={{ fontSize: '1rem', color: '#64748b' }}>km/h</span>
           </div>
           <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>Tổng số mẫu đo: {data.length} records</div>
         </div>
@@ -128,9 +140,9 @@ export default function TelemetryAnalyticsPage() {
             <Zap size={16} /> ĐIỆN ÁP TRUNG BÌNH
           </div>
           <div style={{ fontSize: '2rem', fontWeight: '800', color: '#0f172a', marginTop: '6px' }}>
-            {(selectedDevice?.lastBatteryV || 12.6).toFixed(2)} <span style={{ fontSize: '1rem', color: '#64748b' }}>V</span>
+            {averageBattery?.toFixed(2) ?? 'Chưa đo'} <span style={{ fontSize: '1rem', color: '#64748b' }}>V</span>
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>Trạng thái ắc quy ổn định</div>
+          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>Đo ADC hardware chưa xác minh</div>
         </div>
       </div>
 
@@ -166,7 +178,7 @@ export default function TelemetryAnalyticsPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Thời gian (UTC)</th>
+                <th>Thời gian nhận</th><th>Nguồn</th>
                 <th>Tốc độ (km/h)</th>
                 <th>Điện áp (V)</th>
                 <th>Gia tốc (X / Y / Z)</th>
@@ -177,7 +189,7 @@ export default function TelemetryAnalyticsPage() {
             <tbody>
               {data.slice(-15).reverse().map((d) => (
                 <tr key={d.readingId || d.ts}>
-                  <td>{d.ts ? new Date(d.ts * 1000).toLocaleString() : 'N/A'}</td>
+                  <td>{d.receivedAt ? new Date(d.receivedAt).toLocaleString() : 'N/A'}</td><td>{d.dataSource || 'LEGACY'}</td>
                   <td style={{ fontWeight: '700', color: '#0284c7' }}>{d.speedKmh?.toFixed(1)} km/h</td>
                   <td>{d.batteryV?.toFixed(2)} V</td>
                   <td style={{ fontFamily: 'monospace' }}>

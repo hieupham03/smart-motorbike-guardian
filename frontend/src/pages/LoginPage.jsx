@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Shield, Lock, Mail, ArrowRight, UserCheck, KeyRound, Sparkles } from 'lucide-react';
 
 export default function LoginPage() {
-  const { login, quickLogin } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,18 +25,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleQuick = async (role) => {
-    setError('');
-    setLoading(true);
-    try {
-      await quickLogin(role);
-      navigate('/');
-    } catch (err) {
-      setError(err.message || 'Đăng nhập nhanh thất bại');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleQuick = role => { setEmail(role + '@guardian.iot'); setError('Nhập mật khẩu demo đã cấu hình rồi bấm Đăng nhập.'); };
 
   return (
     <div style={{
@@ -132,7 +121,7 @@ export default function LoginPage() {
         {/* Demo Fast Login Switcher */}
         <div style={{ marginTop: '1.75rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.25rem' }}>
           <div style={{ fontSize: '0.75rem', fontWeight: '800', color: '#0369a1', textTransform: 'uppercase', marginBottom: '0.75rem', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-            <Sparkles size={14} /> ĐĂNG NHẬP NHANH DEMO (1-CLICK)
+            <Sparkles size={14} /> CHỌN TÀI KHOẢN DEMO
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>

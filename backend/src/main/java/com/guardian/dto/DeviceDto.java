@@ -8,6 +8,14 @@ import com.guardian.entity.SecurityState;
 import java.time.Instant;
 
 public class DeviceDto {
+    private String dataSource;
+    private Boolean sensorConnected;
+    private Boolean imuValid;
+    private Boolean speedValid;
+    private Boolean gpsValid;
+    private Long gpsAgeMs;
+    private java.time.Instant lastTelemetryAt;
+    private java.time.Instant lastLocationReceivedAt;
     private String deviceId;
     private String deviceUuid;
     private String name;
@@ -33,6 +41,14 @@ public class DeviceDto {
 
     public DeviceDto(Device device) {
         if (device != null) {
+            this.dataSource = device.getDataSource();
+            this.sensorConnected = device.getSensorConnected();
+            this.imuValid = device.getImuValid();
+            this.speedValid = device.getSpeedValid();
+            this.gpsValid = device.getGpsValid();
+            this.gpsAgeMs = device.getGpsAgeMs();
+            this.lastTelemetryAt = device.getLastTelemetryAt();
+            this.lastLocationReceivedAt = device.getLastLocationReceivedAt();
             this.deviceId = device.getDeviceId();
             this.deviceUuid = device.getDeviceUuid();
             this.name = device.getName();
@@ -120,4 +136,20 @@ public class DeviceDto {
 
     public Role getCurrentUserRole() { return currentUserRole; }
     public void setCurrentUserRole(Role currentUserRole) { this.currentUserRole = currentUserRole; }
+    public String getDataSource() { return dataSource; }
+    public void setDataSource(String value) { this.dataSource = value; }
+    public Boolean getSensorConnected() { return sensorConnected; }
+    public void setSensorConnected(Boolean value) { this.sensorConnected = value; }
+    public Boolean getImuValid() { return imuValid; }
+    public void setImuValid(Boolean value) { this.imuValid = value; }
+    public Boolean getSpeedValid() { return speedValid; }
+    public void setSpeedValid(Boolean value) { this.speedValid = value; }
+    public Boolean getGpsValid() { return gpsValid; }
+    public void setGpsValid(Boolean value) { this.gpsValid = value; }
+    public Long getGpsAgeMs() { return gpsAgeMs; }
+    public void setGpsAgeMs(Long value) { this.gpsAgeMs = value; }
+    public java.time.Instant getLastTelemetryAt() { return lastTelemetryAt; }
+    public void setLastTelemetryAt(java.time.Instant value) { this.lastTelemetryAt = value; }
+    public java.time.Instant getLastLocationReceivedAt() { return lastLocationReceivedAt; }
+    public void setLastLocationReceivedAt(java.time.Instant value) { this.lastLocationReceivedAt = value; }
 }

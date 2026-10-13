@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, AlertOctagon, X, CheckCircle, ShieldAlert } from 'lucide-react';
 
-export default function StepUpConfirmModal({ isOpen, onClose, onConfirm, currentSpeed = 0 }) {
+export default function StepUpConfirmModal({ isOpen, onClose, onConfirm, currentSpeed = null }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -74,15 +74,15 @@ export default function StepUpConfirmModal({ isOpen, onClose, onConfirm, current
               fontSize: '0.825rem',
               color: currentSpeed > 0 ? '#991b1b' : '#0369a1'
             }}>
-              {currentSpeed > 0 ? (
+              {currentSpeed == null ? <p>Chưa có tốc độ hợp lệ. Firmware sẽ kiểm tra dữ liệu cảm biến trước khi thực thi.</p> : currentSpeed > 0 ? (
                 <div>
                   <strong>⚠️ CẢNH BÁO AN TOÀN (S-07 / FR-04):</strong><br />
-                  Tốc độ xe hiện tại là <strong>{currentSpeed.toFixed(1)} km/h</strong> (&gt; 0). Firmware Gateway Node sẽ <strong>TỪ CHỐI</strong> lệnh khoá để chống tai nạn khi xe đang lưu thông!
+                  Tốc độ xe gần nhất là <strong>{currentSpeed.toFixed(1)} km/h</strong> (&gt; 0). Firmware Gateway Node sẽ <strong>TỪ CHỐI</strong> lệnh khoá để chống tai nạn khi xe đang lưu thông!
                 </div>
               ) : (
                 <div>
-                  <strong>✓ RÀNG BUỘC AN TOÀN ĐẠT:</strong><br />
-                  Tốc độ xe = 0 km/h (đã dừng hẳn). Relay cắt nguồn motor DC sẽ được kích hoạt để ngăn chặn trộm cắp.
+                  <strong>Tốc độ gần nhất: 0 km/h.</strong><br />
+                  Firmware sẽ kiểm tra lại tốc độ và độ mới của dữ liệu trước khi quyết định thực thi.
                 </div>
               )}
             </div>

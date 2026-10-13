@@ -2,22 +2,18 @@ import React from 'react';
 import { Activity } from 'lucide-react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
-export default function AccelLiveChart({ telemetryHistory = [], currentX = 0, currentY = 0, currentZ = 1 }) {
+export default function AccelLiveChart({ telemetryHistory = [], currentX = null, currentY = null, currentZ = null }) {
   // Format data for chart
   const data = (telemetryHistory.slice(-15) || []).map((t, idx) => ({
     time: t.ts ? new Date(t.ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : `t-${idx}`,
-    X: t.accelX != null ? Number(t.accelX.toFixed(2)) : 0,
-    Y: t.accelY != null ? Number(t.accelY.toFixed(2)) : 0,
-    Z: t.accelZ != null ? Number(t.accelZ.toFixed(2)) : 1,
+    X: t.accelX != null ? Number(t.accelX.toFixed(2)) : null,
+    Y: t.accelY != null ? Number(t.accelY.toFixed(2)) : null,
+    Z: t.accelZ != null ? Number(t.accelZ.toFixed(2)) : null,
   }));
 
-  // Fallback if empty data
-  const chartData = data.length > 0 ? data : [
-    { time: '0s', X: currentX || 0, Y: currentY || 0, Z: currentZ || 1 }
-  ];
-
-  // Calculate approximate tilt angle in degrees: arctan(sqrt(X^2 + Y^2) / Z)
-  const tiltDeg = Math.round(Math.atan2(Math.sqrt(currentX * currentX + currentY * currentY), Math.abs(currentZ || 1)) * (180 / Math.PI));
+  const chartData = data;
+  const valid = [currentX, currentY, currentZ].every(Number.isFinite);
+  const tiltDeg = valid ? Math.round(Math.atan2(Math.hypot(currentX, currentY), currentZ) * 180 / Math.PI) : null;
   const isDangerousTilt = tiltDeg > 45;
 
   return (
@@ -27,8 +23,8 @@ export default function AccelLiveChart({ telemetryHistory = [], currentX = 0, cu
         <span style={{ fontSize: '0.825rem', fontWeight: '700', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Activity size={18} color="#0284c7" /> CẢM BIẾN GIA TỐC MPU6050
         </span>
-        <span className={`badge ${isDangerousTilt ? 'badge-critical' : 'badge-armed'}`}>
-          {isDangerousTilt ? `⚠️ NGÃ XE (${tiltDeg}°)` : `NGHIÊNG: ${tiltDeg}° ✓`}
+        <span className={`badge ${!valid ? 'badge-offline' : isDangerousTilt ? 'badge-critical' : 'badge-armed'}`}>
+          {!valid ? 'CHƯA CÓ DỮ LIỆU' : isDangerousTilt ? `⚠️ NGHIÊNG (${tiltDeg}°)` : `NGHIÊNG: ${tiltDeg}°`}
         </span>
       </div>
 
@@ -36,15 +32,15 @@ export default function AccelLiveChart({ telemetryHistory = [], currentX = 0, cu
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', margin: '0.5rem 0' }}>
         <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '8px', padding: '0.35rem 0.5rem', textAlign: 'center' }}>
           <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#0284c7' }}>TRỤC X</div>
-          <div style={{ fontSize: '1rem', fontWeight: '800', color: '#0c4a6e' }}>{Number(currentX || 0).toFixed(2)} <span style={{ fontSize: '0.7rem', color: '#64748b' }}>m/s²</span></div>
+          <div style={{ fontSize: '1rem', fontWeight: '800', color: '#0c4a6e' }}>{(Number.isFinite(currentX) ? currentX.toFixed(2) : '—')} <span style={{ fontSize: '0.7rem', color: '#64748b' }}>m/s²</span></div>
         </div>
         <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '0.35rem 0.5rem', textAlign: 'center' }}>
           <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#16a34a' }}>TRỤC Y</div>
-          <div style={{ fontSize: '1rem', fontWeight: '800', color: '#0c4a6e' }}>{Number(currentY || 0).toFixed(2)} <span style={{ fontSize: '0.7rem', color: '#64748b' }}>m/s²</span></div>
+          <div style={{ fontSize: '1rem', fontWeight: '800', color: '#0c4a6e' }}>{(Number.isFinite(currentY) ? currentY.toFixed(2) : '—')} <span style={{ fontSize: '0.7rem', color: '#64748b' }}>m/s²</span></div>
         </div>
         <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '0.35rem 0.5rem', textAlign: 'center' }}>
           <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#d97706' }}>TRỤC Z</div>
-          <div style={{ fontSize: '1rem', fontWeight: '800', color: '#0c4a6e' }}>{Number(currentZ || 1).toFixed(2)} <span style={{ fontSize: '0.7rem', color: '#64748b' }}>m/s²</span></div>
+          <div style={{ fontSize: '1rem', fontWeight: '800', color: '#0c4a6e' }}>{(Number.isFinite(currentZ) ? currentZ.toFixed(2) : '—')} <span style={{ fontSize: '0.7rem', color: '#64748b' }}>m/s²</span></div>
         </div>
       </div>
 

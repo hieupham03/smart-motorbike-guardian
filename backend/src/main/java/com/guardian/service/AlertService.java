@@ -32,8 +32,8 @@ public class AlertService {
     @Autowired
     private AuditLogService auditLogService;
 
-    @Autowired(required = false)
-    private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private RealtimeService realtime;
 
     @Transactional
     public AlertDto processAlert(String deviceId, AlertDto dto) {
@@ -41,29 +41,24 @@ public class AlertService {
                 .orElseGet(() -> deviceRepository.findByDeviceUuid(deviceId).orElse(null));
         if (device == null) return null;
 
-        String alertId = dto.getAlertId() != null ? dto.getAlertId() : "alt-" + UUID.randomUUID().toString().substring(0, 8);
-
-        // Check duplicate alertId
-        if (alertRepository.existsById(alertId)) {
-            return null; // Ignore duplicate alert according to specs
-        }
+        if (device.getLifecycleState() == LifecycleState.FAULT || device.getLifecycleState() == LifecycleState.DECOMMISSIONED) return null;
+        String source = "SIMULATED".equals(dto.getDataSource()) ? "SIMULATED" : "HARDWARE";
+        if (!source.equals(device.getDataSource())) return null;
+        String sourceId = dto.getAlertId();
+        if (sourceId != null && alertRepository.findByDeviceAndSourceAlertId(device, sourceId).isPresent()) return null;
+        String alertId = UUID.randomUUID().toString();
 
         AlertSeverity severity = dto.getSeverity() != null ? dto.getSeverity() : AlertSeverity.MEDIUM;
         String reason = dto.getReason() != null ? dto.getReason() : "UNSPECIFIED_ANOMALY";
         String actionTaken = dto.getActionTaken() != null ? dto.getActionTaken() : "LOGGED";
 
         Alert alert = new Alert(alertId, device, reason, severity, actionTaken, dto.getDetails());
+        alert.setSourceAlertId(sourceId); alert.setDeviceUptimeS(dto.getDeviceUptimeS()); alert.setDataSource(source);
         alertRepository.save(alert);
 
         AlertDto resultDto = new AlertDto(alert);
 
-        // Push real-time alert via WebSocket
-        if (messagingTemplate != null) {
-            try {
-                messagingTemplate.convertAndSend("/topic/devices/" + deviceId + "/alerts", resultDto);
-                messagingTemplate.convertAndSend("/topic/alerts", resultDto);
-            } catch (Exception ignored) {}
-        }
+        realtime.publish(device, "ALERT", resultDto);
 
         return resultDto;
     }
@@ -121,7 +116,9 @@ public class AlertService {
                     "Xác nhận đã đọc cảnh báo " + alert.getReason() + " (" + alert.getAlertId() + ")", sourceIp);
         }
 
-        return new AlertDto(alert);
+        AlertDto result = new AlertDto(alert);
+        realtime.publish(alert.getDevice(), "ALERT", result);
+        return result;
     }
 
     @Transactional
@@ -142,6 +139,8 @@ public class AlertService {
         auditLogService.log(user, alert.getDevice(), "ALERT_RESOLVED", "SUCCESS",
                 "Đánh dấu đã xử lý cảnh báo " + alert.getReason() + " (" + alert.getAlertId() + ")", sourceIp);
 
-        return new AlertDto(alert);
+        AlertDto result = new AlertDto(alert);
+        realtime.publish(alert.getDevice(), "ALERT", result);
+        return result;
     }
 }

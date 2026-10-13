@@ -97,6 +97,10 @@ public class JwtTokenProvider {
         }
     }
 
+    public boolean validateToken(String token, String type) {
+        return validateToken(token) && type.equals(extractAllClaims(token).get("type", String.class));
+    }
+
     public long getAccessTokenExpirationMs() {
         return accessTokenExpirationMs;
     }

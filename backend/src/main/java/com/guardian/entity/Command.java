@@ -6,6 +6,9 @@ import java.time.Instant;
 @Entity
 @Table(name = "commands")
 public class Command {
+    private String lateAckResult;
+    private String lateAckReason;
+    private java.time.Instant lateAckAt;
 
     @Id
     @Column(name = "cmd_id", length = 36)
@@ -77,4 +80,10 @@ public class Command {
 
     public Instant getAckAt() { return ackAt; }
     public void setAckAt(Instant ackAt) { this.ackAt = ackAt; }
+    public String getLateAckResult() { return lateAckResult; }
+    public void setLateAckResult(String value) { this.lateAckResult = value; }
+    public String getLateAckReason() { return lateAckReason; }
+    public void setLateAckReason(String value) { this.lateAckReason = value; }
+    public java.time.Instant getLateAckAt() { return lateAckAt; }
+    public void setLateAckAt(java.time.Instant value) { this.lateAckAt = value; }
 }

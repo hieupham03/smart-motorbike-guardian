@@ -4,8 +4,12 @@ import jakarta.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "alerts")
+@Table(name = "alerts", uniqueConstraints = @UniqueConstraint(columnNames = {"device_id", "source_alert_id"}))
 public class Alert {
+    private String sourceAlertId;
+    @Column(name = "device_uptime_s")
+    private Long deviceUptimeS;
+    private String dataSource;
 
     @Id
     @Column(name = "alert_id", length = 36)
@@ -84,4 +88,10 @@ public class Alert {
 
     public Instant getResolvedAt() { return resolvedAt; }
     public void setResolvedAt(Instant resolvedAt) { this.resolvedAt = resolvedAt; }
+    public String getSourceAlertId() { return sourceAlertId; }
+    public void setSourceAlertId(String value) { this.sourceAlertId = value; }
+    public Long getDeviceUptimeS() { return deviceUptimeS; }
+    public void setDeviceUptimeS(Long value) { this.deviceUptimeS = value; }
+    public String getDataSource() { return dataSource; }
+    public void setDataSource(String value) { this.dataSource = value; }
 }

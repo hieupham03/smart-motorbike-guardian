@@ -1,32 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useDevice } from '../context/DeviceContext';
-import { api } from '../services/api';
 import { Terminal, Clock, CheckCircle2, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function CommandHistoryPage() {
-  const { selectedDevice } = useDevice();
-  const [commands, setCommands] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    async function loadCommands() {
-      if (!selectedDevice) return;
-      setLoading(true);
-      try {
-        const res = await api.getCommands(selectedDevice.deviceId);
-        if (res.success && res.data) {
-          setCommands(res.data);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadCommands();
-    const interval = setInterval(loadCommands, 3000);
-    return () => clearInterval(interval);
-  }, [selectedDevice]);
+  const { selectedDevice, commands } = useDevice();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -73,7 +50,7 @@ export default function CommandHistoryPage() {
               ) : (
                 commands.map((cmd) => {
                   const isSuccess = cmd.status === 'EXECUTED';
-                  const isRejected = cmd.status === 'REJECTED';
+                  const isRejected = ['REJECTED', 'TIMEOUT'].includes(cmd.status);
                   const isPending = cmd.status === 'PENDING';
 
                   return (
@@ -91,13 +68,13 @@ export default function CommandHistoryPage() {
                         </span>
                       </td>
                       <td style={{ color: isRejected ? '#dc2626' : '#64748b', fontWeight: isRejected ? '700' : 'normal' }}>
-                        {cmd.reasonIfFailed || '—'}
+                        {cmd.reasonIfFailed || '—'}{cmd.lateAckAt && <div>ACK muộn: {cmd.lateAckResult} · {cmd.lateAckReason || '—'}</div>}
                       </td>
                       <td style={{ fontSize: '0.8rem' }}>
-                        {cmd.issuedAt ? new Date(cmd.issuedAt).toLocaleTimeString() : 'N/A'}
+                        {cmd.issuedAt ? new Date(cmd.issuedAt).toLocaleString() : 'N/A'}
                       </td>
                       <td style={{ fontSize: '0.8rem' }}>
-                        {cmd.ackAt ? new Date(cmd.ackAt).toLocaleTimeString() : 'Đang chờ...'}
+                        {cmd.ackAt ? new Date(cmd.ackAt).toLocaleString() : isPending ? 'Đang chờ...' : 'Không có ACK'}
                       </td>
                     </tr>
                   );

@@ -7,6 +7,9 @@ import com.guardian.entity.AlertStatus;
 import java.time.Instant;
 
 public class AlertDto {
+    private String sourceAlertId;
+    private Long deviceUptimeS;
+    private String dataSource;
     private String alertId;
     private String deviceId;
     private String deviceName;
@@ -23,6 +26,9 @@ public class AlertDto {
 
     public AlertDto(Alert alert) {
         if (alert != null) {
+            this.sourceAlertId = alert.getSourceAlertId();
+            this.deviceUptimeS = alert.getDeviceUptimeS();
+            this.dataSource = alert.getDataSource();
             this.alertId = alert.getAlertId();
             if (alert.getDevice() != null) {
                 this.deviceId = alert.getDevice().getDeviceId();
@@ -69,8 +75,15 @@ public class AlertDto {
     public void setResolvedByEmail(String resolvedByEmail) { this.resolvedByEmail = resolvedByEmail; }
 
     public Instant getCreatedAt() { return createdAt; }
+    public Instant getReceivedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 
     public Instant getResolvedAt() { return resolvedAt; }
     public void setResolvedAt(Instant resolvedAt) { this.resolvedAt = resolvedAt; }
+    public String getSourceAlertId() { return sourceAlertId; }
+    public void setSourceAlertId(String value) { this.sourceAlertId = value; }
+    public Long getDeviceUptimeS() { return deviceUptimeS; }
+    public void setDeviceUptimeS(Long value) { this.deviceUptimeS = value; }
+    public String getDataSource() { return dataSource; }
+    public void setDataSource(String value) { this.dataSource = value; }
 }
