@@ -70,3 +70,4 @@ network_config.h
 
 # Local dependency caches
 .npm-cache/
+.vite/
