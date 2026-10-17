@@ -86,7 +86,7 @@ export default function BatteryIndicator({ voltage = null, lowThreshold = 11.5 }
           </div>
 
           <div style={{ fontSize: '0.725rem', color: isLow ? '#ef4444' : '#64748b', marginTop: '4px', fontWeight: '600' }}>
-            Ngưỡng ngắt: &lt; {lowThreshold.toFixed(1)}V
+            Ngưỡng cảnh báo: &lt; {lowThreshold.toFixed(1)}V
           </div>
         </div>
       </div>

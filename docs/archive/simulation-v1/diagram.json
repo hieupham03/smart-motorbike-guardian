@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "author": "Smart Motorbike Guardian Team",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-mpu6050",
+      "id": "mpu1",
+      "top": -120,
+      "left": -220,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn-hall",
+      "top": 120,
+      "left": -220,
+      "attrs": {
+        "color": "green",
+        "label": "Hall Pulse (Vòng quay bánh xe)"
+      }
+    },
+    {
+      "type": "wokwi-relay-module",
+      "id": "relay1",
+      "top": -90,
+      "left": 280,
+      "attrs": {
+        "transistor": "pnp"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "res-motor",
+      "top": -70,
+      "left": 460,
+      "attrs": {
+        "value": "330"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led-motor",
+      "top": -80,
+      "left": 530,
+      "attrs": {
+        "color": "green",
+        "label": "Motor DC (Động cơ xe)"
+      }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "buzzer1",
+      "top": 110,
+      "left": 280,
+      "attrs": {
+        "volume": "0.8"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "res-led",
+      "top": 240,
+      "left": 230,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led-status",
+      "top": 230,
+      "left": 310,
+      "attrs": {
+        "color": "blue",
+        "label": "Đèn An Ninh (LED State)"
+      }
+    }
+  ],
+  "connections": [
+    [ "mpu1:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "mpu1:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "mpu1:SDA", "esp:21", "blue", [ "v0" ] ],
+    [ "mpu1:SCL", "esp:22", "yellow", [ "v0" ] ],
+
+    [ "btn-hall:1.l", "esp:4", "orange", [ "v0" ] ],
+    [ "btn-hall:2.l", "esp:GND.1", "black", [ "v0" ] ],
+
+    [ "relay1:VCC", "esp:5V", "red", [ "v0" ] ],
+    [ "relay1:GND", "esp:GND.2", "black", [ "v0" ] ],
+    [ "relay1:IN", "esp:23", "blue", [ "v0" ] ],
+
+    [ "relay1:COM", "esp:5V", "red", [ "h20", "v-20" ] ],
+    [ "relay1:NO", "res-motor:1", "green", [ "v0" ] ],
+    [ "res-motor:2", "led-motor:A", "green", [ "v0" ] ],
+    [ "led-motor:C", "esp:GND.2", "black", [ "h20", "v80" ] ],
+
+    [ "buzzer1:2", "esp:18", "purple", [ "v0" ] ],
+    [ "buzzer1:1", "esp:GND.2", "black", [ "v0" ] ],
+
+    [ "esp:19", "res-led:1", "blue", [ "v0" ] ],
+    [ "res-led:2", "led-status:A", "blue", [ "v0" ] ],
+    [ "led-status:C", "esp:GND.3", "black", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}

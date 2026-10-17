@@ -1,0 +1,61 @@
+GIAI ĐOẠN A — Hoàn thiện giao thức UART (làm chắc trước khi xây tiếp lên trên)
+#	Task	DoD
+A1	Định nghĩa đầy đủ struct/enum cho MSG_TYPE (TELEMETRY, ACCEL_EVENT, CMD_RELAY, DIAG_REQUEST, DIAG_RESPONSE, HEARTBEAT, NACK) trong file header dùng chung cho cả 2 node	File .h có đủ 7 loại bản tin, include được ở cả 2 project
+A2	Viết hàm send_frame(msg_type, payload, len) chuẩn, tính checksum tự động	Gọi 1 dòng là gửi được khung hoàn chỉnh, không phải tự tay ghép byte mỗi lần
+A3	Viết hàm parse_frame() dạng state machine đọc từng byte (không dùng delay() chờ đủ khung)	Nhận đúng khung ngay cả khi dữ liệu đến rải rác từng byte (test bằng cách gửi chậm tay qua Serial)
+A4	Test lỗi: sai checksum, cắt UART giữa khung, gửi rác trước khung thật	Bên nhận phát hiện đúng lỗi, gửi NACK, không bị treo/crash, tự động resync tìm START byte tiếp theo
+A5	Test HEARTBEAT 2 chiều, timeout 3 giây	Nếu 1 node bị tắt nguồn, node còn lại phát hiện mất kết nối trong ≤3s, in log rõ ràng
+Chốt Giai đoạn A khi: 2 node gửi/nhận ổn định cả 7 loại bản tin, tự phục hồi sau lỗi, không cần can thiệp tay.
+
+GIAI ĐOẠN B — Khung FreeRTOS đầy đủ trên cả 2 node
+#	Task	DoD
+B1	Sensor Node: tạo SensorTask, ProcessingTask, UARTTxTask + 1 QueueHandle_t giữa Sensor/Processing	3 task chạy song song, theo dõi qua Serial thấy đúng chu kỳ, không tràn queue
+B2	Gateway Node: tạo UARTRxTask, SafetyTask (state rỗng), ControlTask, WatchdogTask	4 task chạy song song ổn định
+B3	Cấu hình hardware watchdog (esp_task_wdt) trên cả 2 node	Cố tình treo 1 task (vòng lặp vô hạn) → board tự reset trong thời gian cấu hình, không "đứng hình" vĩnh viễn
+B4	Chạy soak test 30 phút không cảm biến thật (dữ liệu giả)	Không reset bất ngờ, không tràn heap (theo dõi esp_get_free_heap_size() không giảm dần theo thời gian — dấu hiệu memory leak)
+Chốt Giai đoạn B khi: khung task chạy ổn định ≥30 phút liên tục, không leak bộ nhớ, watchdog hoạt động đúng.
+
+GIAI ĐOẠN C — Tích hợp từng khối phần cứng (làm riêng lẻ trước khi ghép)
+#	Task	DoD
+C1	Lắp motor + bánh xe + Hall sensor + nam châm lên khay cố định	Motor quay ổn định, không rung xê dịch cảm biến
+C2	Đọc xung Hall qua GPIO interrupt, tính tốc độ (xung/giây → đơn vị quy ước)	Vặn PWM (qua L298N) thay đổi tốc độ motor → giá trị tính toán thay đổi tương ứng, mượt, không nhảy số vô lý
+C3	Lắp MPU6050 qua I2C, đọc accel_x/y/z	Lắc nhẹ/mạnh → giá trị đổi rõ rệt, ổn định khi để yên (không nhiễu loạn liên tục)
+C4	Lắp L298N điều khiển motor bằng PWM từ Gateway/Sensor (tuỳ thiết kế ai giữ chân điều khiển)	Tăng/giảm duty cycle → tốc độ motor đổi mượt
+C5	Lắp relay cắt nguồn động lực L298N/motor, xác nhận chân IN là logic 3.3-5V	GPIO HIGH/LOW đóng/ngắt relay nghe rõ tiếng "tách", motor dừng hẳn khi relay mở
+C6	Lắp buzzer + LED trạng thái trên Gateway	Bật/tắt độc lập bằng GPIO, không ảnh hưởng các task khác
+C7	(Nếu dùng) Lắp OLED qua I2C trên Gateway	Hiển thị chữ tĩnh, sau đó hiển thị số liệu động (ví dụ đếm giây) — xác nhận không xung đột địa chỉ I2C với MPU6050
+Chốt Giai đoạn C khi: mỗi khối hoạt động đúng độc lập, đã test riêng lẻ, chưa cần ghép vào state machine.
+
+GIAI ĐOẠN D — Ghép luồng dữ liệu Sensor Node hoàn chỉnh
+#	Task	DoD
+D1	SensorTask đọc đồng thời Hall + MPU6050, đẩy vào queue cho ProcessingTask	Không mất dữ liệu, không task nào bị đói CPU (kiểm tra bằng cách theo dõi tần suất đọc đủ đúng chu kỳ)
+D2	ProcessingTask lọc nhiễu (moving average cho gia tốc, debounce cho xung Hall)	Dữ liệu gửi đi mượt hơn dữ liệu thô, không dao động giả do nhiễu
+D3	ProcessingTask phát hiện sự kiện cục bộ (gia tốc vượt ngưỡng) trước khi gửi	In log "EVENT DETECTED" đúng lúc lắc mạnh, không báo khi để yên
+D4	UARTTxTask đóng gói đúng TELEMETRY/ACCEL_EVENT gửi sang Gateway theo giao thức Giai đoạn A	Gateway nhận đúng, giá trị khớp với những gì Sensor Node đo được
+Chốt Giai đoạn D khi: Sensor Node là một khối hoàn chỉnh — đọc cảm biến → xử lý → gửi UART — chạy tự động không cần can thiệp tay.
+
+GIAI ĐOẠN E — State machine an toàn trên Gateway (phần quan trọng nhất)
+#	Task	DoD
+E1	Cài đặt đầy đủ SafetyTask: PARKED→ARMED→ALARM→THEFT_LOCK theo đúng thiết kế đã chốt	Chuyển trạng thái đúng theo kịch bản test tay (giả lập lệnh arm bằng biến cứng trong code trước, chưa cần MQTT)
+E2	Cài đặt ràng buộc cứng: chỉ chuyển THEFT_LOCK khi tốc độ = 0	Test: cho motor chạy, ép trạng thái ALARM kéo dài quá thời gian quy định → phải KHÔNG chuyển THEFT_LOCK
+E3	ControlTask nhận lệnh từ SafetyTask, điều khiển relay, đồng bộ bằng mutex/event group	Không có race condition khi 2 task cùng truy cập biến relay
+E4	Gắn buzzer/LED theo đúng trạng thái (ARMED=bíp ngắn, ALARM=kêu liên tục)	Nghe/nhìn phân biệt rõ 4 trạng thái
+E5	WatchdogTask đảm bảo: nếu hệ thống treo → reset → relay về trạng thái mở (không khoá)	Test: cố tình treo SafetyTask (vòng lặp vô hạn) → sau reset, relay chắc chắn ở trạng thái mở
+Chốt Giai đoạn E khi: toàn bộ 7 test case an toàn (đã liệt kê ở phần "Kế hoạch kiểm thử riêng cho hệ thống bảo vệ" trước đó) chạy đúng bằng kịch bản thủ công (chưa cần MQTT thật).
+
+GIAI ĐOẠN F — Fail-safe & test biên (stress test firmware)
+#	Task	DoD
+F1	Rút dây UART giữa 2 node khi đang ARMED	Gateway phát hiện mất heartbeat trong 3s, không tự ý ra quyết định khoá vì thiếu dữ liệu tin cậy
+F2	Reset Gateway Node giữa lúc ARMED (nhấn nút EN)	Relay về trạng thái mở, Sensor Node vẫn tiếp tục gửi dữ liệu bình thường, Gateway tự phục hồi trạng thái đúng sau boot
+F3	Gửi dữ liệu cảm biến giả bất hợp lý (ví dụ cố tình gửi tốc độ âm/giá trị ngoài dải qua code test)	Gateway loại bỏ giá trị vô lý, không đưa vào quyết định an toàn
+F4	Chạy toàn hệ thống liên tục ≥ 6 giờ (lý tưởng 24h nếu kịp thời gian)	Không crash, không leak bộ nhớ, ghi log số lần reset watchdog (mục tiêu: 0 lần ngoài ý muốn)
+Chốt Giai đoạn F khi: hệ thống sống sót qua mọi kịch bản lỗi mà không hành xử sai (đặc biệt không bao giờ khoá sai lúc).
+
+GIAI ĐOẠN G — Bàn giao & tích hợp với Backend/MQTT
+#	Task	DoD
+G1	Gateway kết nối Wi-Fi, publish thử lên broker công cộng (test.mosquitto.org) trước khi có broker riêng	Thấy dữ liệu telemetry xuất hiện trên MQTT Explorer/app
+G2	Đổi sang broker thật của nhóm (Backend Lead cung cấp), dùng credential riêng cho device_id	Kết nối TLS thành công, không lỗi cert
+G3	Publish đúng schema JSON đã thống nhất (telemetry, event, alert, heartbeat, cmd/ack)	Backend Lead xác nhận parse đúng, không lỗi format
+G4	Subscribe nhận lệnh cmd/arm, cmd/disarm, cmd/lock_engine từ Backend, xử lý đúng qua SafetyTask	Gửi lệnh từ Postman/app test → thiết bị phản ứng đúng, trả ack đúng cmd_id
+G5	Quay video demo toàn bộ chuỗi: ARM → giả lập trộm → ALARM → dừng → THEFT_LOCK → reset (kèm step-up từ app)	Video mượt, không lỗi giữa chừng — đây là bằng chứng dự phòng nếu demo trực tiếp gặp sự cố
+Chốt Giai đoạn G khi: toàn bộ luồng đầu-cuối (vật lý → firmware → MQTT → có thể nhận lệnh ngược) chạy trơn tru — đây chính là mốc Tier 0/Tier 1 hoàn chỉnh.

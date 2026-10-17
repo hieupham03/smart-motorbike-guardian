@@ -1,13 +1,9 @@
 @echo off
-echo ========================================================
-echo   KHOI DONG REACTJS FRONTEND WEB (PORT 5173)
-echo ========================================================
-cd /d "%~dp0frontend"
-if not exist "node_modules" (
-    echo [INFO] Dang cai dat thu vien npm cho lan dau chay...
-    call npm install
+cd /d "%~dp0deployment"
+if not exist ".env" (
+  echo Copy deployment\.env.example to deployment\.env and configure secrets first.
+  exit /b 1
 )
-echo.
-echo [OK] Dang khoi dong Web Dashboard tai: http://localhost:5173
-npm run dev
-pause
+docker compose up --build -d frontend
+if errorlevel 1 exit /b 1
+echo Web: http://localhost:3000
