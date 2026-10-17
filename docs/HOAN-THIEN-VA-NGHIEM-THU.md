@@ -20,9 +20,12 @@ Cập nhật 18/10/2026, dựa trên test bf1d866 + firmware v2. Mục tiêu bà
 | Backend | 19 test PASS: 18 integration + 1 migration, gồm guardhardware và membershipoffline qua STOMP |
 | Frontend | 14 test PASS, production build PASS; thêm2 regression snapshot/regrant |
 | Host UART/Hall | PASS checksum/timeout/bounds, first pulse/stop/resume/freshness/wrap |
-| Node B S3 N16R8 | Build PASS; xem log build cuối trong phiên |
+| Node B S3 N16R8 | Build PASS; flash301609B/staticRAM20448B |
 | PostgreSQL 15 container riêng + backend host | DBUP, Flyway V1/V2; API ghi/đọc reading SIMULATED 12 km/h |
 | Edge headless | UI_SMOKE_PASS, 0 page errors; một phép đo local 208 ms, không phải latency hardware |
+| Docker Compose + Nginx + PostgreSQL | Build/up và browser smoke PASS; một phép đo local125ms, không phải latencyhardware |
+
+Bằng chứng phần mềm mới: [evidence/completion-2026-10-18/README.md](evidence/completion-2026-10-18/README.md).
 
 Log local: build/ và backend/target/surefire-reports/. Không commit secret/cache. Evidence13/10 trong evidence/realtime/ giữ nguyên nhãn lịch sử. Không điều khiển board qua publicbroker trong phiên kiểm thử. PostgreSQL thử riêng, không thay DB của nhóm.
 

@@ -1,0 +1,17 @@
+{
+  "type": "SOFTWARE_ONLY",
+  "browser": "Edge headless",
+  "checks": [
+    "authenticated websocket CONNECTED",
+    "hardware NO_FIX without marker",
+    "null ADC",
+    "simulated telemetry delivered via websocket",
+    "command ACK updates UI",
+    "command history EXECUTED",
+    "hardware MQTT unavailable shows REJECTED",
+    "viewer controls disabled and simulator hidden",
+    "reload restores authenticated websocket"
+  ],
+  "simulatedActionToUiMs": 125,
+  "pageErrors": []
+}

@@ -1,6 +1,8 @@
 const {chromium} = require('../../frontend/node_modules/playwright');
 const fs=require('fs'), assert=require('assert/strict');
 process.chdir(require('path').resolve(__dirname, '../..'));
+const webUrl=process.env.GUARDIAN_WEB_URL || 'http://127.0.0.1:15173';
+const apiUrl=process.env.GUARDIAN_API_URL || 'http://127.0.0.1:18080';
 (async()=>{
  const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
  const context=await browser.newContext({viewport:{width:1440,height:1000}});
@@ -9,9 +11,9 @@ process.chdir(require('path').resolve(__dirname, '../..'));
  page.on('websocket',ws=>ws.on('framereceived',frame=>{
   const raw=String(frame.payload);if(raw.startsWith('MESSAGE')){const body=raw.slice(raw.indexOf('\n\n')+2).replace(/\0$/,'');try{events.push(JSON.parse(body));}catch{}}
  }));
- const {demoPassword}=JSON.parse(fs.readFileSync('.ui-credentials.tmp','utf8'));
+ const {demoPassword}=JSON.parse(fs.readFileSync(process.env.GUARDIAN_CREDENTIALS_FILE || '.ui-credentials.tmp','utf8').replace(/^\uFEFF/,''));
  try {
-  await page.goto('http://127.0.0.1:15173/login');
+  await page.goto(webUrl+'/login');
   await page.locator('input[type=email]').fill('owner@guardian.iot');await page.locator('input[type=password]').fill(demoPassword);
   await page.getByRole('button',{name:'Đăng Nhập',exact:true}).click();
   await page.getByText('CONNECTED',{exact:true}).waitFor({timeout:20000});
@@ -36,7 +38,7 @@ process.chdir(require('path').resolve(__dirname, '../..'));
   await page.getByRole('button',{name:'Bật Canh Giữ ARM SYSTEM',exact:true}).click();
   await page.getByText('ARM: EXECUTED',{exact:false}).waitFor({timeout:10000});
   await page.getByRole('link',{name:'Lịch sử Lệnh',exact:true}).click();
-  await page.getByText('EXECUTED',{exact:true}).waitFor();
+  await page.getByText('EXECUTED',{exact:true}).first().waitFor();
   await page.screenshot({path:'docs/evidence/realtime/command-executed-simulated.png',fullPage:true});
   await page.getByRole('link',{name:'Tổng quan Realtime',exact:true}).click();
   await page.locator('select').first().selectOption('dev-550e8400-0001');
@@ -52,9 +54,9 @@ process.chdir(require('path').resolve(__dirname, '../..'));
   await page.screenshot({path:'docs/evidence/realtime/viewer-disabled.png',fullPage:true});
   await page.reload();
   await page.getByText('CONNECTED',{exact:true}).waitFor();
-  const login = await fetch('http://127.0.0.1:18080/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'owner@guardian.iot',password:demoPassword})});
+  const login = await fetch(apiUrl+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'owner@guardian.iot',password:demoPassword})});
   const accessToken = (await login.json()).data.accessToken;
-  const latest = await fetch('http://127.0.0.1:18080/api/devices/dev-550e8400-0002/telemetry/latest',{headers:{Authorization:'Bearer '+accessToken}});
+  const latest = await fetch(apiUrl+'/api/devices/dev-550e8400-0002/telemetry/latest',{headers:{Authorization:'Bearer '+accessToken}});
   fs.writeFileSync('docs/evidence/realtime/api-latest-simulated.json',JSON.stringify(await latest.json(),null,2));
   assert.equal(errors.length,0,errors.join('; '));
   fs.writeFileSync('docs/evidence/realtime/ui-smoke.json',JSON.stringify({type:'SOFTWARE_ONLY',browser:'Edge headless',checks:['authenticated websocket CONNECTED','hardware NO_FIX without marker','null ADC','simulated telemetry delivered via websocket','command ACK updates UI','command history EXECUTED','hardware MQTT unavailable shows REJECTED','viewer controls disabled and simulator hidden','reload restores authenticated websocket'],simulatedActionToUiMs:uiMs,pageErrors:errors},null,2));

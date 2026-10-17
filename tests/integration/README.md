@@ -13,3 +13,5 @@ UI smoke dành cho môi trường Windows có Microsoft Edge:
 5. Ctrl+C terminal runtime để dừng backend/Vite và xóa file credential/PID tạm. Không chạy helper khi những cổng này đã được dùng.
 
 Smoke login Owner/Viewer, xác nhận WebSocket, telemetry SIMULATED, ACK/command history, MQTT_UNAVAILABLE, NO_FIX/null ADC, quyền Viewer và reload. Ảnh/JSON phần mềm được ghi vào `docs/evidence/realtime/`; cần phân biệt với evidence hardware.
+
+Có thể dùng cùng smoke với stack Docker thử riêng bằng GUARDIAN_WEB_URL, GUARDIAN_API_URL và GUARDIAN_CREDENTIALS_FILE (JSON chứa demoPassword). Đặt CORS_ALLOWED_ORIGINS đúng origin web thử, giữ MQTT_ENABLED=false để không tác động board. Mặc định vẫn dùng runtime local ở các bước trên. Lưu evidence mới vào thư mục có ngày, không ghi đè nhãn bằng chứng cũ.
