@@ -1,3 +1,5 @@
+> Cập nhật 18/10/2026: tài liệu có các mục lịch sử. Xem [trạng thái tích hợp và nghiệm thu hiện tại](HOAN-THIEN-VA-NGHIEM-THU.md) trước khi dùng làm báo cáo.
+
 # Bàn giao phần còn lại — Smart Motorbike Guardian
 
 **Cập nhật 13/10/2026:** đã triển khai sửa backend/frontend và WebSocket theo yêu cầu mới. Xem [REALTIME-BACKEND-FRONTEND.md](REALTIME-BACKEND-FRONTEND.md) và [bằng chứng phần mềm](evidence/realtime/README.md). Các nhận xét hiện trạng dưới đây là mốc bàn giao 12/10; nghiệm thu hardware end-to-end vẫn chưa được tự nâng thành PASS.

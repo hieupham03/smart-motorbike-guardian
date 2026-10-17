@@ -50,3 +50,18 @@ test('GPS freshness includes age at gateway and elapsed time in the UI', () => {
   const expired = liveDeviceView(device, now + 6000);
   assert.equal(expired.sensorConnected, false); assert.equal(expired.imuValid, false);
 });
+
+test('an older REST list cannot remove a newly discovered live device', () => {
+  const state = reduce(initialRealtimeState, { type: 'DEVICE', deviceId: 'new', data: { deviceId: 'new' } });
+  assert.equal(reduce(state, { type: 'DEVICES', version: 0, data: [] }).devices[0]?.deviceId, 'new');
+});
+
+test('a fresh authorized snapshot restores access but an in-flight snapshot cannot', () => {
+  let state = reduce(initialRealtimeState, { type: 'DEVICE', deviceId: 'd', data: { deviceId: 'd' } });
+  const beforeRemoval = state.version;
+  state = reduce(state, { type: 'ACCESS_REMOVED', deviceId: 'd', data: { deviceId: 'd' } });
+  assert.equal(reduce(state, { type: 'DEVICES', version: beforeRemoval, data: [{ deviceId: 'd' }] }).devices.length, 0);
+  state = reduce(state, { type: 'DEVICES', version: state.version, data: [{ deviceId: 'd', currentUserRole: 'VIEWER' }] });
+  assert.equal(state.devices.length, 1);
+  assert.equal(state.revoked.d, false);
+});

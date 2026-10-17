@@ -1,5 +1,9 @@
 # Chot hardware/firmware breadboard
 
+## Cập nhật18/10/2026
+
+Người dùng xác nhận GPS đã fix ngoài trời, mấtfix khi vào nhà; chưa có log tọa độ trong repo. Nghiệm thu GPS quaUART/MQTT/DB/map vẫn mở. Firmware mới sửa spike Hall xungđầu và hết hạn IMU, hosttest/build đạt, cần nạp lại Node B và thử mạch. Xem [bản tích hợp](HOAN-THIEN-VA-NGHIEM-THU.md).
+
 ## Mốc chốt và bàn giao 12/10/2026
 
 Chốt baseline hardware/firmware cho demo trong nhà. Người phụ trách xác nhận "mọi thứ đã ổn" sau hướng dẫn thử MQTT command/ACK, relay/buzzer và phục hồi mạng. Đây là xác nhận tổng quát của người dùng; các hàng Actual bên dưới chưa có log riêng không được tự nâng thành PASS đo độc lập. Các ca UART/MPU đã có log được giữ nguyên kết quả.

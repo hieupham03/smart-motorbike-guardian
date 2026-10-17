@@ -2,6 +2,13 @@
 
 Checked 2026-10-08. The UART test uses a tiny Arduino/HardwareSerial host stub; it tests real uart_protocol.h, not an independent reimplementation. It does not test GPIO, RTOS scheduling, MQTT delivery or GPS RF reception.
 
+Additional regression (2026-10-18): first Hall pulse and first pulse after stop have unknown speed; both speed and IMU validity expire with the original sample. Re-test the breadboard after uploading.
+
+```powershell
+g++ -std=c++11 -Ifirmware/node_b_sensor tests/firmware/wheel_speed_test.cpp -o build/wheel_speed_test.exe
+& ./build/wheel_speed_test.exe
+```
+
 From repository root in PowerShell:
 
 ```powershell

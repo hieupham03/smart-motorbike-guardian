@@ -64,7 +64,11 @@ Seed mới: thiết bị UUID `550e8400-e29b-41d4-a716-446655440001` là HARDWAR
 Terminal PowerShell thứ nhất, từ repo:
 
 ```powershell
-$env:JWT_SECRET = [Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(48))
+$secretBytes = New-Object byte[] 48
+$rng = [Security.Cryptography.RandomNumberGenerator]::Create()
+$rng.GetBytes($secretBytes)
+$rng.Dispose()
+$env:JWT_SECRET = [Convert]::ToBase64String($secretBytes)
 $demoPassword = Read-Host 'Dat mat khau demo' -AsSecureString
 $env:DEMO_PASSWORD = [System.Net.NetworkCredential]::new('', $demoPassword).Password
 $env:DEMO_SEED_ENABLED = 'true'

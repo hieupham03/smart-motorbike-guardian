@@ -1,6 +1,7 @@
 #include "uart_protocol.h"
 #include <Wire.h>
 #include "guardian_config.h"
+#include "wheel_speed.h"
 #include <TinyGPS++.h>
 #include <math.h>
 
@@ -29,6 +30,7 @@ struct RawSensorSample {
     uint32_t timestamp;
     uint32_t wheel_idle_ms;
     bool imu_valid;
+    bool speed_valid;
 };
 
 static QueueHandle_t sensorQueue = NULL;
@@ -47,14 +49,17 @@ static uint8_t actualMpuAddr = 0x68;
 // Biến đếm xung Hall (Ngắt ISR)
 static volatile uint32_t hallPulseCount = 0;
 static volatile uint32_t hallLastUs=0, hallPeriodUs=0;
+static volatile uint32_t hallLastMs=0;
 static portMUX_TYPE hallMux = portMUX_INITIALIZER_UNLOCKED;
 
 void IRAM_ATTR hall_isr() {
     uint32_t now=micros();
+    uint32_t nowMs=millis();
     portENTER_CRITICAL_ISR(&hallMux);
-    if (!hallPulseCount || uint32_t(now-hallLastUs)>=10000) {
-        hallPeriodUs=hallPulseCount?uint32_t(now-hallLastUs):0;
-        hallLastUs=now; ++hallPulseCount;
+    if (!hallPulseCount || uint32_t(nowMs-hallLastMs)>=WHEEL_STOP_MS || uint32_t(now-hallLastUs)>=10000) {
+        uint32_t elapsed = uint32_t(now-hallLastUs);
+        hallPeriodUs = wheel_period_after_pulse(hallPulseCount != 0, uint32_t(nowMs-hallLastMs), elapsed);
+        hallLastUs=now; hallLastMs=nowMs; ++hallPulseCount;
     }
     portEXIT_CRITICAL_ISR(&hallMux);
 }
@@ -156,20 +161,15 @@ void SensorTask(void*) {
         portEXIT_CRITICAL(&hallMux);
         if(count!=lastCount) {lastCount=count;lastPulseMs=now-uint32_t(nowUs-last)/1000;}
         uint32_t idle=now-lastPulseMs; // millis avoids resurrecting motion after micros wraps (~71 min).
-        float speed=0;
-        if(count && idle<WHEEL_STOP_MS) {
-            uint32_t elapsed=uint32_t(nowUs-last),effective=period>elapsed?period:elapsed;
-            if(effective<10000) effective=10000;
-            speed=WHEEL_CIRCUMFERENCE_M*3600000.0f/(WHEEL_PULSES_PER_REV*effective);
-            if(speed>120) speed=120;
-        }
+        WheelSpeedEstimate wheel = estimate_wheel_speed(period, uint32_t(nowUs-last), idle);
+        float speed = wheel.kmh;
         float ax=NAN,ay=NAN,az=NAN;
         bool valid=mpuDetected && read_mpu6050(ax,ay,az);
         if(!valid) {
             mpuDetected=false;
             if(now-retry>=3000) {retry=now;mpuDetected=init_mpu6050();}
         }
-        RawSensorSample s={speed,ax,ay,az,now,idle,valid};
+        RawSensorSample s={speed,ax,ay,az,now,idle,valid,wheel.valid};
         if(xQueueSend(sensorQueue,&s,0)!=pdTRUE) ++droppedSamples;
         vTaskDelayUntil(&wake,pdMS_TO_TICKS(50));
     }
@@ -196,7 +196,7 @@ void ProcessingTask(void *pvParameters) {
                 latestTelemetry.timestamp = sample.timestamp;
                 latestTelemetry.wheel_idle_ms=sample.wheel_idle_ms;
                 latestTelemetry.imu_valid=sample.imu_valid;
-                latestTelemetry.speed_valid=1;
+                latestTelemetry.speed_valid=sample.speed_valid;
                 xSemaphoreGive(telemMutex);
             }
 
@@ -213,7 +213,7 @@ void ProcessingTask(void *pvParameters) {
                     tiltStartTime = now;
                 }
 
-                bool isRealCrash = (sample.raw_speed <= 2.0f && (now - tiltStartTime >= 500)) ||
+                bool isRealCrash = (sample.speed_valid && sample.raw_speed <= 2.0f && (now - tiltStartTime >= 500)) ||
                                    (now - tiltStartTime >= 2000); // Nghiêng liên tục > 2s
 
                 if (isRealCrash && (now - lastAlertTriggerTime >= 5000)) { // Cooldown 5s
@@ -334,7 +334,9 @@ void UARTTxRxTask(void *pvParameters) {
                 telemToSend.latitude=g.lat;telemToSend.longitude=g.lon;
                 telemToSend.gps_age_ms=g.hasFix?millis()-g.lastFix:UINT32_MAX;
                 telemToSend.gps_valid=g.hasFix && telemToSend.gps_age_ms<=GPS_STALE_MS;
-                telemToSend.speed_valid=telemToSend.speed_valid && millis()-telemToSend.timestamp<=SENSOR_STALE_MS;
+                bool sampleFresh = sensor_sample_fresh(millis(), telemToSend.timestamp);
+                telemToSend.speed_valid=telemToSend.speed_valid && sampleFresh;
+                telemToSend.imu_valid=telemToSend.imu_valid && sampleFresh;
                 send_msg(CommSerial, MSG_TELEMETRY, telemToSend);
             }
         }

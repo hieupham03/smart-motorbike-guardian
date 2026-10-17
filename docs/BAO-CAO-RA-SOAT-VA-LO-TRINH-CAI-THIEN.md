@@ -1,3 +1,5 @@
+> Cập nhật 18/10/2026: tài liệu có các mục lịch sử. Xem [trạng thái tích hợp và nghiệm thu hiện tại](HOAN-THIEN-VA-NGHIEM-THU.md) trước khi dùng làm báo cáo.
+
 # Rà soát thực trạng và lộ trình cải thiện đồ án
 
 **Dự án:** Smart Motorbike Guardian
@@ -207,9 +209,9 @@ Một câu trả lời thành thật kiểu “tính năng này hiện chưa tri
 ## 7. Tài liệu tham chiếu nội bộ
 
 - [Mô tả yêu cầu dự án](./PROJECT_SPECIFICATION.md)
-- [Báo cáo đồ án hiện tại](../BAO-CAO-DO-AN-IoT-Motorbike-Guardian.md)
+- [Báo cáo đồ án hiện tại](archive/BAO-CAO-DO-AN-ban-cu.md)
 - [Sơ đồ đấu nối phần cứng hiện tại](../SO-DO-DAU-NOI-PHAN-CUNG.md)
-- [Tổng hợp thay đổi và hướng dẫn vận hành](../TONG-HOP-THAY-DOI-VA-HUONG-DAN-VAN-HANH.md)
+- [Tổng hợp thay đổi và hướng dẫn vận hành](archive/TONG-HOP-ban-cu.md)
 - [Quy trình tích hợp NEO-6M-0-001](./NEO-6M-001-TICH-HOP.md)
 
 ## 8. Bổ sung ngày 08/10/2026: hướng tới A/A+ trong phạm vi bài tập lớn

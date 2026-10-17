@@ -120,11 +120,11 @@ export default function QuickControlPanel() {
         <button
           className="btn btn-success"
           onClick={() => handleCommand('UNLOCK_ENGINE')}
-          disabled={isViewer || isArming || activeCommand?.status === 'PENDING' || currentState !== 'THEFT_LOCK'}
+          disabled={isViewer || isArming || activeCommand?.status === 'PENDING'}
           style={{
             flexDirection: 'column',
             padding: '1rem 0.5rem',
-            opacity: (isViewer || currentState !== 'THEFT_LOCK') ? 0.6 : 1
+            opacity: isViewer ? 0.6 : 1
           }}
         >
           <Unlock size={26} />
