@@ -80,6 +80,9 @@ mobile/.kotlin/
 mobile/android/
 mobile/ios/
 mobile/web-build/
+mobile/.tmp-*/
+mobile/*.apk
+mobile/*.aab
 mobile/*.jks
 mobile/*.keystore
 mobile/*.p8
