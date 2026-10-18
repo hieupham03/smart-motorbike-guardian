@@ -1,7 +1,7 @@
 # 07 — Kiểm thử, tài liệu và bàn giao
 
 Status: ready-for-agent
-Progress: open
+Progress: claimed
 Type: task
 Scope: integration, documentation
 Branch: `task/mobile-07-release-handoff`
