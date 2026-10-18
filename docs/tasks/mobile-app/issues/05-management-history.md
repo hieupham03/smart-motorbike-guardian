@@ -1,7 +1,7 @@
 # 05 — Tính năng quản lý và lịch sử
 
 Status: ready-for-agent
-Progress: open
+Progress: claimed
 Type: task
 Scope: mobile
 Branch: `task/mobile-05-management-history`
