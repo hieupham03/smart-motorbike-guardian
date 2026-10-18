@@ -4,6 +4,7 @@ Status: ready-for-agent
 Progress: open
 Type: task
 Scope: integration, documentation
+Branch: `task/mobile-07-release-handoff`
 Blocked by: 01, 02, 03, 04, 05, 06
 
 ## Expected behavior

@@ -4,6 +4,7 @@ Status: ready-for-agent
 Progress: resolved
 Type: task
 Scope: mobile
+Branch: `task/mobile-02-auth-api`
 Blocked by: 01
 
 ## Expected behavior
