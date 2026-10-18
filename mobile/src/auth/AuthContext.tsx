@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import { authApi } from '@/api/auth.api';
 import { normalizeApiError } from '@/api/errors';
 import { tokenStore } from '@/storage/tokenStore';
+import { unregisterCurrentInstallation } from '@/push/registration';
 import type { LoginRequest, RegisterRequest, User } from '@/types/api';
 
 type AuthStatus = 'loading' | 'anonymous' | 'authenticated';
@@ -32,6 +33,7 @@ export function AuthProvider({
   const [error, setError] = useState<string | null>(null);
 
   const logout = useCallback(async () => {
+    try { await unregisterCurrentInstallation(); } catch { /* Local logout must still succeed offline. */ }
     await tokenStore.clear();
     queryClient.clear();
     setUser(null);

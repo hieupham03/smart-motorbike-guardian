@@ -3,6 +3,7 @@ import { Redirect, Stack } from 'expo-router';
 import { useAuth } from '@/auth/AuthContext';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { GuardianProvider } from '@/devices/GuardianContext';
+import { NotificationBridge } from '@/push/NotificationBridge';
 import { colors } from '@/theme/colors';
 
 export default function AppLayout() {
@@ -11,6 +12,7 @@ export default function AppLayout() {
   if (status !== 'authenticated') return <Redirect href="/(auth)/login" />;
   return (
     <GuardianProvider>
+      <NotificationBridge />
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: colors.surfaceDark },
