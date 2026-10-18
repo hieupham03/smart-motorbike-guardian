@@ -4,6 +4,7 @@ Status: ready-for-agent
 Progress: open
 Type: task
 Scope: mobile
+Branch: `task/mobile-05-management-history`
 Blocked by: 04
 
 ## Expected behavior

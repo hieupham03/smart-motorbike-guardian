@@ -1,9 +1,10 @@
 # 04 — GPS, lệnh và cảnh báo
 
 Status: ready-for-agent
-Progress: open
+Progress: claimed
 Type: task
 Scope: mobile, integration
+Branch: `task/mobile-04-control-alerts`
 Blocked by: 03
 
 ## Expected behavior
