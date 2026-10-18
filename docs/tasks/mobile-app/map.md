@@ -13,8 +13,8 @@ Mục tiêu: triển khai ứng dụng React Native/Expo theo `docs/KE-HOACH-TRI
 | ID | Task | Phạm vi | Phụ thuộc | Trạng thái |
 |---|---|---|---|---|
 | 01 | [Scaffold và chuẩn hóa dự án](issues/01-scaffold.md) | mobile, docs | Không | Hoàn thành |
-| 02 | [API client và xác thực](issues/02-auth-api.md) | mobile | 01 | Đang thực hiện |
-| 03 | [Thiết bị, realtime và dashboard](issues/03-realtime-dashboard.md) | mobile, integration | 02 | Chưa bắt đầu |
+| 02 | [API client và xác thực](issues/02-auth-api.md) | mobile | 01 | Hoàn thành |
+| 03 | [Thiết bị, realtime và dashboard](issues/03-realtime-dashboard.md) | mobile, integration | 02 | Đang thực hiện |
 | 04 | [GPS, lệnh và cảnh báo](issues/04-control-alerts.md) | mobile, integration | 03 | Chưa bắt đầu |
 | 05 | [Tính năng quản lý và lịch sử](issues/05-management-history.md) | mobile | 04 | Chưa bắt đầu |
 | 06 | [Push notification end-to-end](issues/06-push-notifications.md) | backend, mobile | 02, 04 | Chưa bắt đầu |
