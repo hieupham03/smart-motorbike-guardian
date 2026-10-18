@@ -5,6 +5,7 @@ import com.guardian.repository.*;
 import org.slf4j.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
@@ -13,6 +14,7 @@ import java.util.*;
 @Service
 public class PushNotificationService {
  private static final Logger log=LoggerFactory.getLogger(PushNotificationService.class);
+ @Value("${app.push.enabled:true}") private boolean enabled;
  private final PushTokenRepository tokens; private final PushDeliveryRepository deliveries; private final OwnershipRepository ownerships; private final UserRepository users; private final PushTransport transport;
  public PushNotificationService(PushTokenRepository t,PushDeliveryRepository d,OwnershipRepository o,UserRepository u,PushTransport p){tokens=t;deliveries=d;ownerships=o;users=u;transport=p;}
  @Transactional public void register(User user,String token,String platform,String installationId){
@@ -30,6 +32,7 @@ public class PushNotificationService {
  }
  @Transactional public void notifyUser(User user,String eventKey,String title,String body,Map<String,Object> data){send(List.of(user),eventKey,title,body,data);}
  private void send(Collection<User> recipients,String eventKey,String title,String body,Map<String,Object> data){
+  if(!enabled)return;
   for(PushToken token:tokens.findByUserInAndActiveTrue(recipients)){
    if(deliveries.existsByEventKeyAndPushTokenPushTokenId(eventKey,token.getPushTokenId()))continue;
    PushDelivery delivery=new PushDelivery(UUID.randomUUID().toString(),eventKey,token);
