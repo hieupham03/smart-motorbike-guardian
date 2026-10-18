@@ -16,13 +16,13 @@ Mục tiêu: triển khai ứng dụng React Native/Expo theo `docs/KE-HOACH-TRI
 | 02 | [API client và xác thực](issues/02-auth-api.md) | `task/mobile-02-auth-api` | mobile | 01 | Hoàn thành |
 | 03 | [Thiết bị, realtime và dashboard](issues/03-realtime-dashboard.md) | `task/mobile-03-realtime-dashboard` | mobile, integration | 02 | Hoàn thành |
 | 04 | [GPS, lệnh và cảnh báo](issues/04-control-alerts.md) | `task/mobile-04-control-alerts` | mobile, integration | 03 | Hoàn thành |
-| 05 | [Tính năng quản lý và lịch sử](issues/05-management-history.md) | `task/mobile-05-management-history` | mobile | 04 | Đang thực hiện |
-| 06 | [Push notification end-to-end](issues/06-push-notifications.md) | `task/mobile-06-push-notifications` | backend, mobile | 02, 04 | Chưa bắt đầu |
+| 05 | [Tính năng quản lý và lịch sử](issues/05-management-history.md) | `task/mobile-05-management-history` | mobile | 04 | Hoàn thành |
+| 06 | [Push notification end-to-end](issues/06-push-notifications.md) | `task/mobile-06-push-notifications` | backend, mobile | 02, 04 | Đang thực hiện |
 | 07 | [Kiểm thử, tài liệu và bàn giao](issues/07-release-handoff.md) | `task/mobile-07-release-handoff` | integration, documentation | 01–06 | Chưa bắt đầu |
 
 ## Quy tắc bằng chứng
 
-- Mỗi task có commit riêng và được push lên `origin/feature-mobile-app` sau khi kiểm tra.
+- Mỗi task có commit riêng và được push lên nhánh task tương ứng trên `origin` sau khi kiểm tra.
 - Chỉ ghi PASS cho lệnh test đã chạy thực tế.
 - Build/typecheck/simulator là bằng chứng phần mềm, không phải nghiệm thu breadboard, relay hoặc GPS thật.
 - Kiểm tra cần thiết bị vật lý được đánh dấu `ready-for-human` trong tài liệu bàn giao.
