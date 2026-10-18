@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { z } from 'zod';
 
 import { authApi } from '@/api/auth.api';
@@ -21,7 +21,7 @@ const schema = z.object({
 type Values = z.infer<typeof schema>;
 
 export default function ProfileScreen() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
   const { control, handleSubmit, formState, reset } = useForm<Values>({
     resolver: zodResolver(schema),
@@ -45,6 +45,7 @@ export default function ProfileScreen() {
         <Text style={styles.detail}>{user?.email}</Text>
         <Text style={styles.role}>{user?.role} · {user?.status}</Text>
       </View>
+      <Pressable style={styles.logout} onPress={() => void logout()}><Text style={styles.logoutText}>Đăng xuất khỏi thiết bị này</Text></Pressable>
       <View style={styles.card}>
         <Text style={styles.heading}>Đổi mật khẩu</Text>
         {!!feedback && <Text style={feedback.ok ? styles.success : styles.error}>{feedback.text}</Text>}
@@ -66,4 +67,6 @@ const styles = StyleSheet.create({
   role: { marginTop: 12, color: colors.primary, fontWeight: '800' },
   success: { marginBottom: 12, borderRadius: 8, backgroundColor: '#F0FDF4', color: '#166534', padding: 10 },
   error: { marginBottom: 12, borderRadius: 8, backgroundColor: '#FEF2F2', color: '#991B1B', padding: 10 },
+  logout: { alignItems: 'center', borderRadius: 12, borderWidth: 1, borderColor: colors.danger, padding: 13 },
+  logoutText: { color: colors.danger, fontWeight: '800' },
 });

@@ -9,3 +9,4 @@ export function canAcknowledgeAlert(role: AccountRole | null | undefined) {
 }
 
 export const canResolveAlert = canControlDevice;
+export const canManageDevice = canControlDevice;

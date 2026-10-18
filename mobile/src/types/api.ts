@@ -141,3 +141,33 @@ export interface DeviceAlert {
   deviceUptimeS: number | null;
   dataSource: DataSource;
 }
+
+export interface OnboardRequest {
+  claimToken: string;
+  name: string;
+  licensePlate?: string;
+  vehicleModel?: string;
+}
+
+export interface DeviceConfigRequest {
+  name?: string;
+  licensePlate?: string;
+  vehicleModel?: string;
+  speedThresholdKmh?: number;
+  batteryLowThresholdV?: number;
+  tiltThresholdDeg?: number;
+}
+
+export interface AuditLog {
+  logId: string;
+  userEmail: string | null;
+  userName: string | null;
+  deviceId: string | null;
+  deviceName: string | null;
+  action: string;
+  result: string;
+  details: string | null;
+  sourceIp: string | null;
+  ts: number;
+  createdAt: string;
+}
