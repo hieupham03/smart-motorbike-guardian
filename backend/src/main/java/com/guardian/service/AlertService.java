@@ -35,6 +35,9 @@ public class AlertService {
     @Autowired
     private RealtimeService realtime;
 
+    @Autowired
+    private PushNotificationService push;
+
     @Transactional
     public AlertDto processAlert(String deviceId, AlertDto dto) {
         Device device = deviceRepository.findById(deviceId)
@@ -59,6 +62,9 @@ public class AlertService {
         AlertDto resultDto = new AlertDto(alert);
 
         realtime.publish(device, "ALERT", resultDto);
+        realtime.afterCommit(() -> push.notifyDevice(device, "alert:" + alertId,
+                "Cảnh báo " + device.getName(), reason,
+                java.util.Map.of("type", "ALERT", "deviceId", device.getDeviceId(), "alertId", alertId)));
 
         return resultDto;
     }
