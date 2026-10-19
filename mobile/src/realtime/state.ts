@@ -1,4 +1,4 @@
-import type { Device, DeviceCommand, Telemetry } from '@/types/api';
+import type { Device, DeviceAlert, DeviceCommand, Telemetry } from '@/types/api';
 
 function eventTime(item: { receivedAt?: string; createdAt?: string; issuedAt?: string; ts?: number }) {
   const iso = item.receivedAt ?? item.createdAt ?? item.issuedAt;
@@ -21,6 +21,12 @@ export function mergeCommands(oldRows: DeviceCommand[] = [], incoming: DeviceCom
     rows.set(row.cmdId, row);
   });
   return [...rows.values()].sort((a, b) => eventTime(b) - eventTime(a)).slice(0, 100);
+}
+
+export function mergeAlerts(oldRows: DeviceAlert[] = [], incoming: DeviceAlert[] = []) {
+  const rows = new Map(oldRows.map((row) => [row.alertId, row]));
+  incoming.forEach((row) => rows.set(row.alertId, row));
+  return [...rows.values()].sort((a, b) => eventTime(b) - eventTime(a));
 }
 
 export function liveDeviceView(device: Device | null | undefined, now = Date.now()) {

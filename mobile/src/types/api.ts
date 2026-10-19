@@ -116,6 +116,12 @@ export interface DeviceCommand {
   lateAckAt: string | null;
 }
 
+export interface CommandRequest {
+  type: CommandType;
+  payload?: string | null;
+  confirmationPassword?: string | null;
+}
+
 export type AlertStatus = 'OPEN' | 'ACKNOWLEDGED' | 'RESOLVED';
 export type AlertSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
