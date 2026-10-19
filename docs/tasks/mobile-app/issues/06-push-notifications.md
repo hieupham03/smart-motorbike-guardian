@@ -1,7 +1,7 @@
 # 06 — Push notification end-to-end
 
 Status: ready-for-agent
-Progress: open
+Progress: claimed
 Type: task
 Scope: backend, mobile, integration
 Branch: `task/mobile-06-push-notifications`
