@@ -55,7 +55,7 @@ Yêu cầu Java 17/Maven, Node 20+; PostgreSQL 15 hoặc profile H2. Broker mặ
 
 Mosquitto local giữ dưới profile `local-broker` để không dựng một broker khác với Node A mặc định. Muốn dùng broker riêng phải cấu hình đồng bộ firmware/backend, credential/ACL và bật profile rõ ràng.
 
-Flyway là nguồn migration: V1 tạo schema; V2 thêm metadata/null/late ACK/dedupe. DB cũ được baseline ở version 1 rồi chạy V2; giữ reading cũ dưới nhãn LEGACY và xóa các snapshot mặc định không có bằng chứng. Bản V1 cũ có default để nâng cấp tương thích; **schema cuối sau V2 đã bỏ default số đo**. Không chạy seed SQL cũ song song; compose đã bỏ mount schema/seed và dùng DataInitializer có cấu hình.
+Flyway là nguồn migration: V1 tạo schema; V2 thêm metadata/null/late ACK/dedupe; V3 thêm token và delivery cho Expo push. DB cũ được baseline ở version 1 rồi chạy các migration mới; giữ reading cũ dưới nhãn LEGACY và xóa các snapshot mặc định không có bằng chứng. Bản V1 cũ có default để nâng cấp tương thích; **schema cuối sau V2 đã bỏ default số đo**. Không chạy seed SQL cũ song song; compose đã bỏ mount schema/seed và dùng DataInitializer có cấu hình.
 
 Seed mới: thiết bị UUID `550e8400-e29b-41d4-a716-446655440001` là HARDWARE/OFFLINE, không seed số đo/vị trí/alert. `...0002` là SIMULATED riêng. DB có user sẵn không được seed lại. Với DB cũ, không tự suy diễn thiết bị ...0002 là simulator; đổi nguồn chỉ khi chủ dữ liệu xác nhận đó là thiết bị demo.
 

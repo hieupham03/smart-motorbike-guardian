@@ -38,6 +38,9 @@ public class CommandService {
     private RealtimeService realtime;
 
     @Autowired
+    private PushNotificationService push;
+
+    @Autowired
     @org.springframework.context.annotation.Lazy
     private CommandDispatchService dispatch;
 
@@ -95,6 +98,7 @@ public class CommandService {
                 "ACK " + cmdId + (command.getStatus() == CommandStatus.TIMEOUT ? " (late)" : ""), "DEVICE");
         // Device security state comes from telemetry; siren commands need not alter it.
         realtime.publish(command.getDevice(), "COMMAND", new CommandResponse(command));
+        notifyTerminal(command);
     }
 
     @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
@@ -104,6 +108,7 @@ public class CommandService {
         command.setStatus(CommandStatus.REJECTED); command.setReasonIfFailed("MQTT_UNAVAILABLE");
         commandRepository.save(command);
         realtime.publish(command.getDevice(), "COMMAND", new CommandResponse(command));
+        notifyTerminal(command);
     }
 
     @Transactional
@@ -113,6 +118,7 @@ public class CommandService {
         command.setStatus(CommandStatus.TIMEOUT); command.setReasonIfFailed("ACK_TIMEOUT");
         commandRepository.save(command);
         realtime.publish(command.getDevice(), "COMMAND", new CommandResponse(command));
+        notifyTerminal(command);
     }
 
     @Transactional(readOnly = true)
@@ -121,5 +127,12 @@ public class CommandService {
         return commandRepository.findTop100ByDeviceOrderByIssuedAtDesc(device).stream()
                 .map(CommandResponse::new)
                 .collect(Collectors.toList());
+    }
+
+    private void notifyTerminal(Command command) {
+        if (command.getStatus() == CommandStatus.PENDING) return;
+        realtime.afterCommit(() -> push.notifyUser(command.getIssuedBy(), "command:" + command.getCmdId() + ":" + command.getStatus(),
+                "Lệnh " + command.getType(), "Trạng thái: " + command.getStatus(),
+                java.util.Map.of("type", "COMMAND", "deviceId", command.getDevice().getDeviceId(), "cmdId", command.getCmdId())));
     }
 }

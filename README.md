@@ -1,3 +1,30 @@
+# Smart Motorbike Guardian (IoT & Embedded System)
+
+Backend/frontend đã triển khai WebSocket realtime ngày 13/10/2026. Xem [hướng dẫn chạy và hợp đồng dữ liệu](docs/REALTIME-BACKEND-FRONTEND.md), [kết quả kiểm thử phần mềm](docs/evidence/realtime/README.md). Nghiệm thu với board/GPS/relay thật vẫn cần bằng chứng testbed.
+
+Mobile Expo/React Native được triển khai theo từng task/nhánh. Bắt đầu tại [tổng quan triển khai mobile](docs/MOBILE-APP-IMPLEMENTATION.md), [hướng dẫn cài đặt và chạy](docs/HUONG-DAN-CAI-DAT-VA-CHAY-MOBILE.md), [checklist test trực tiếp](docs/NGHIEM-THU-MOBILE-TRUC-TIEP.md) và [bàn giao](docs/BAN-GIAO-MOBILE-APP.md).
+
+Hệ thống giám sát, cảnh báo chống trộm và điều khiển an toàn xe máy thông minh thời gian thực (Dual-Node Real-time IoT Architecture).
+
+##  Cấu trúc thư mục dự án (Repository Structure)
+
+Cấu trúc thư mục được tổ chức chuẩn hóa theo yêu cầu đề bài đồ án:
+
+```
+├── .env.example             # Mẫu cấu hình biến môi trường
+├── README.md                # Tài liệu tổng quan dự án
+├── firmware/                # Mã nguồn nhúng cho các bo ESP32
+│   ├── node_a_gateway/      # Node A Gateway (ESP32-WROOM-32D, FreeRTOS, Relay, Buzzer)
+│   └── node_b_sensor/       # Node B Sensor (ESP32-S3, MPU-6050 I2C, Hall Sensor)
+├── backend/                 # Backend tiếp nhận, xử lý telemetry và quản trị
+├── frontend/                # Giao diện Web dashboard
+├── mobile/                  # Ứng dụng Expo React Native Android/iOS
+├── database/                # Schema, migration và dữ liệu khởi tạo
+├── deployment/              # Cấu hình Docker, MQTT broker và hướng dẫn triển khai
+├── hardware/                # Sơ đồ nối dây, danh sách linh kiện và mạch thử nghiệm
+├── tests/                   # Kịch bản kiểm thử chức năng và phi chức năng
+└── docs/                    # Báo cáo đồ án, tài liệu thiết kế và slide thuyết trình
+```
 # Smart Motorbike Guardian
 
 Bài tập lớn IoT trên breadboard: ESP32-S3 đọc Hall/MPU6050/NEO-6M; ESP32 gateway điều khiển relay/buzzer và MQTT; Spring Boot + PostgreSQL + WebSocket + React giám sát/điều khiển hai chiều.
