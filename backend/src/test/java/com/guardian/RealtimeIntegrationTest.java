@@ -37,6 +37,7 @@ class RealtimeIntegrationTest {
     @Autowired TelemetryService telemetry;
     @Autowired CommandService commandService;
     @Autowired DevicePresenceService presence;
+    @Autowired DeviceService deviceService;
     @Autowired AlertService alertService;
     @Autowired AuthService auth;
     @Autowired DeviceRepository devices;
@@ -132,6 +133,88 @@ class RealtimeIntegrationTest {
     }
 
     HttpHeaders bearer(User user) { var h = new HttpHeaders(); h.setBearerAuth(tokens.generateAccessToken(user)); return h; }
+
+    @Test void simulatorCannotChangeHardwareEvenForItsOwner() {
+        device.setSecurityState(SecurityState.ARMED);
+        devices.save(device);
+        for (String action : new String[]{"SET_BATTERY", "SET_SPEED", "TRIGGER_FALL", "TRIGGER_THEFT_TAMPER"}) {
+            var response = rest.exchange("/api/simulator/action", HttpMethod.POST,
+                    new HttpEntity<>(java.util.Map.of("deviceId", device.getDeviceId(), "action", action, "value", 13.37), bearer(owner)), String.class);
+            assertThat(response.getStatusCode().is4xxClientError()).as(action).isTrue();
+        }
+        var saved = devices.findById(device.getDeviceId()).orElseThrow();
+        assertThat(saved.getLastBatteryV()).isNull();
+        assertThat(saved.getLastSpeedKmh()).isNull();
+        assertThat(saved.getSecurityState()).isEqualTo(SecurityState.ARMED);
+        assertThat(alerts.findByDeviceOrderByCreatedAtDesc(saved)).isEmpty();
+        assertThat(telemetry.getLatest(device.getDeviceId(), owner)).isNull();
+    }
+
+    @Test void simulatorStillAcceptsActionsForSimulatedDevices() {
+        device.setDataSource("SIMULATED");
+        devices.save(device);
+        var response = rest.exchange("/api/simulator/action", HttpMethod.POST,
+                new HttpEntity<>(java.util.Map.of("deviceId", device.getDeviceId(), "action", "SET_BATTERY", "value", 13.37), bearer(owner)), String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(telemetry.getLatest(device.getDeviceId(), owner).getBatteryV()).isEqualTo(13.37);
+    }
+
+    @Test void hardwareConfigurationNeverPretendsToUpdateFirmwareThresholds() {
+        DeviceConfigRequest config = new DeviceConfigRequest();
+        config.setName("Must not partially save"); config.setTiltThresholdDeg(65.0);
+        assertThatThrownBy(() -> deviceService.updateConfig(device.getDeviceId(), config, owner, "TEST"))
+                .isInstanceOf(com.guardian.exception.BadRequestException.class);
+        assertThat(devices.findById(device.getDeviceId()).orElseThrow().getName()).isEqualTo("Test hardware");
+        config.setTiltThresholdDeg(null); config.setName("New hardware name");
+        assertThat(deviceService.updateConfig(device.getDeviceId(), config, owner, "TEST").getName()).isEqualTo("New hardware name");
+    }
+
+    @Test void simulatorRejectsRevokedAndDecommissionedDevicesWithoutPartialWrites() {
+        device.setDataSource("SIMULATED");
+        for (LifecycleState lifecycle : new LifecycleState[]{LifecycleState.FAULT, LifecycleState.DECOMMISSIONED}) {
+            device.setLifecycleState(lifecycle); devices.save(device);
+            var response = rest.exchange("/api/simulator/action", HttpMethod.POST,
+                    new HttpEntity<>(java.util.Map.of("deviceId", device.getDeviceId(), "action", "SET_BATTERY", "value", 13.37), bearer(owner)), String.class);
+            assertThat(response.getStatusCode().is4xxClientError()).isTrue();
+            assertThat(devices.findById(device.getDeviceId()).orElseThrow().getLastBatteryV()).isNull();
+        }
+    }
+
+    @Test void offlineMembershipAndLifecycleChangesReachConnectedViewer() throws Exception {
+        device.setLifecycleState(LifecycleState.OFFLINE); devices.save(device);
+        new org.springframework.transaction.support.TransactionTemplate(transactions).execute(status -> {
+            ownerships.deleteByUserAndDevice(viewer, device); return null;
+        });
+        var stomp = new WebSocketStompClient(new StandardWebSocketClient());
+        stomp.setMessageConverter(new MappingJackson2MessageConverter());
+        StompHeaders headers = new StompHeaders(); headers.set("Authorization", "Bearer " + tokens.generateAccessToken(viewer));
+        var session = stomp.connectAsync("ws://localhost:" + port + "/ws", new org.springframework.web.socket.WebSocketHttpHeaders(), headers,
+                new StompSessionHandlerAdapter() {}).get(5, TimeUnit.SECONDS);
+        BlockingQueue<JsonNode> received = new LinkedBlockingQueue<>();
+        session.subscribe("/user/queue/events", new StompFrameHandler() {
+            @Override public Type getPayloadType(StompHeaders h) { return JsonNode.class; }
+            @Override public void handleFrame(StompHeaders h, Object p) { received.add((JsonNode)p); }
+        });
+        try {
+            Thread.sleep(150);
+            deviceService.inviteViewer(device.getDeviceId(), new InviteUserRequest(viewer.getEmail(), Role.VIEWER), owner, "TEST");
+            JsonNode event = received.poll(3, TimeUnit.SECONDS);
+            assertThat(event).isNotNull(); assertThat(event.path("type").asText()).isEqualTo("DEVICE");
+            assertThat(event.path("data").path("currentUserRole").asText()).isEqualTo("VIEWER");
+            assertThat(event.path("data").path("lifecycleState").asText()).isEqualTo("OFFLINE");
+            deviceService.removeUserFromDevice(device.getDeviceId(), viewer.getUserId(), owner, "TEST");
+            assertThat(received.poll(3, TimeUnit.SECONDS).path("type").asText()).isEqualTo("ACCESS_REMOVED");
+            deviceService.inviteViewer(device.getDeviceId(), new InviteUserRequest(viewer.getEmail(), Role.VIEWER), owner, "TEST");
+            assertThat(received.poll(3, TimeUnit.SECONDS).path("type").asText()).isEqualTo("DEVICE");
+            DeviceConfigRequest config = new DeviceConfigRequest(); config.setName("Renamed offline");
+            deviceService.updateConfig(device.getDeviceId(), config, owner, "TEST");
+            assertThat(received.poll(3, TimeUnit.SECONDS).path("data").path("name").asText()).isEqualTo("Renamed offline");
+            deviceService.revokeDevice(device.getDeviceId(), owner, "TEST");
+            assertThat(received.poll(3, TimeUnit.SECONDS).path("data").path("lifecycleState").asText()).isEqualTo("FAULT");
+            deviceService.decommissionDevice(device.getDeviceId(), owner, "TEST");
+            assertThat(received.poll(3, TimeUnit.SECONDS).path("data").path("lifecycleState").asText()).isEqualTo("DECOMMISSIONED");
+        } finally { session.disconnect(); stomp.stop(); }
+    }
     @Test void restBlocksViewerMutationStrangerReadAndRefreshAsAccess() {
         String path = "/api/devices/"+device.getDeviceId();
         assertThat(rest.exchange(path+"/command", HttpMethod.POST, new HttpEntity<>(new CommandRequest(CommandType.ARM,null,null), bearer(viewer)), String.class).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);

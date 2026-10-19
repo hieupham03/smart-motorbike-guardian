@@ -1,4 +1,6 @@
-﻿# Hardware/Firmware v2 GPS — hướng dẫn nạp và thử breadboard
+> Cập nhật 18/10/2026: tài liệu có các mục lịch sử. Xem [trạng thái tích hợp và nghiệm thu hiện tại](HOAN-THIEN-VA-NGHIEM-THU.md) trước khi dùng làm báo cáo.
+
+# Hardware/Firmware v2 GPS — hướng dẫn nạp và thử breadboard
 
 Cập nhật 08/10/2026 cho Node A ESP32-WROOM và Node B ESP32-S3 N16R8. Đây là cấu hình testbed môn học. Firmware v2 đã có đường GPS Node B → UART → Node A → MQTT; chưa có kết quả đo mạch thật trong phiên sửa code.
 
