@@ -17,8 +17,8 @@ Mục tiêu: triển khai ứng dụng React Native/Expo theo `docs/KE-HOACH-TRI
 | 03 | [Thiết bị, realtime và dashboard](issues/03-realtime-dashboard.md) | `task/mobile-03-realtime-dashboard` | mobile, integration | 02 | Hoàn thành |
 | 04 | [GPS, lệnh và cảnh báo](issues/04-control-alerts.md) | `task/mobile-04-control-alerts` | mobile, integration | 03 | Hoàn thành |
 | 05 | [Tính năng quản lý và lịch sử](issues/05-management-history.md) | `task/mobile-05-management-history` | mobile | 04 | Hoàn thành |
-| 06 | [Push notification end-to-end](issues/06-push-notifications.md) | `task/mobile-06-push-notifications` | backend, mobile | 02, 04 | Đang thực hiện |
-| 07 | [Kiểm thử, tài liệu và bàn giao](issues/07-release-handoff.md) | `task/mobile-07-release-handoff` | integration, documentation | 01–06 | Chưa bắt đầu |
+| 06 | [Push notification end-to-end](issues/06-push-notifications.md) | `task/mobile-06-push-notifications` | backend, mobile | 02, 04 | Hoàn thành |
+| 07 | [Kiểm thử, tài liệu và bàn giao](issues/07-release-handoff.md) | `task/mobile-07-release-handoff` | integration, documentation | 01–06 | Đang thực hiện |
 
 ## Quy tắc bằng chứng
 
