@@ -31,7 +31,21 @@ export function realtimeReducer(state, action) {
   if (action.type === 'RESET') return initialRealtimeState;
   if (action.type === 'DEVICES') {
     const old = new Map(state.devices.map(d => [d.deviceId, d]));
-    return { ...state, devices: action.data.filter(d => !state.revoked[d.deviceId]).map(d => (state.versions[d.deviceId] || 0) > action.version ? old.get(d.deviceId) || d : d) };
+    const rows = new Map();
+    const revoked = { ...state.revoked };
+    const requestedAt = action.version ?? 0;
+    action.data.forEach(device => {
+      const id = device.deviceId;
+      const newerEvent = (state.versions[id] || 0) > requestedAt;
+      if (newerEvent && state.revoked[id]) return;
+      rows.set(id, newerEvent ? old.get(id) || device : device);
+      if (!newerEvent) revoked[id] = false; // A new authorized REST snapshot can restore access.
+    });
+    state.devices.forEach(device => {
+      if ((state.versions[device.deviceId] || 0) > requestedAt && !state.revoked[device.deviceId])
+        rows.set(device.deviceId, device);
+    });
+    return { ...state, revoked, devices: [...rows.values()] };
   }
   if (action.type === 'ALERTS') {
     // Keep events received while the REST snapshot was in flight.
@@ -42,7 +56,8 @@ export function realtimeReducer(state, action) {
   const { type, deviceId: id, data } = action;
   if (!id || !data) return state;
   if (type === 'ACCESS_REMOVED') {
-    const next = { ...state, revoked: { ...state.revoked, [id]: true }, devices: state.devices.filter(d => d.deviceId !== id), alerts: state.alerts.filter(a => a.deviceId !== id), telemetry: { ...state.telemetry }, histories: { ...state.histories }, commands: { ...state.commands } };
+    const version = state.version + 1;
+    const next = { ...state, version, versions: { ...state.versions, [id]: version }, revoked: { ...state.revoked, [id]: true }, devices: state.devices.filter(d => d.deviceId !== id), alerts: state.alerts.filter(a => a.deviceId !== id), telemetry: { ...state.telemetry }, histories: { ...state.histories }, commands: { ...state.commands } };
     delete next.telemetry[id]; delete next.histories[id]; delete next.commands[id];
     return next;
   }

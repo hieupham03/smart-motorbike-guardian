@@ -18,7 +18,7 @@ export default function DevicesPage() {
   const isViewer = role === 'VIEWER';
 
   const handleRevoke = async (deviceId, name) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn THU HỒI (Revoke) quyền kết nối của thiết bị [${name}]? Broker sẽ ngắt kết nối ngay lập tức.`)) {
+    if (!window.confirm(`Thu hồi thiết bị [${name}]? Backend sẽ ngừng nhận dữ liệu và gửi lệnh cho thiết bị. Thao tác này không ngắt kết nối tại broker công cộng.`)) {
       return;
     }
     try {

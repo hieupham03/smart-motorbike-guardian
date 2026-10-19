@@ -91,3 +91,4 @@ mobile/*.mobileprovision
 mobile/google-services.json
 mobile/GoogleService-Info.plist
 mobile/*.tsbuildinfo
+.vite/

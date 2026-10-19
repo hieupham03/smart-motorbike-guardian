@@ -114,12 +114,16 @@ public class DeviceService {
         auditLogService.log(user, device, "DEVICE_ONBOARD", "SUCCESS",
                 "Kích hoạt thành công thiết bị " + device.getName() + " (" + device.getDeviceUuid() + ")", sourceIp);
 
+        realtime.publish(device, "DEVICE", null);
         return new DeviceDto(device, Role.OWNER);
     }
 
     @Transactional
     public DeviceDto updateConfig(String deviceId, DeviceConfigRequest request, User user, String sourceIp) {
         Device device = getDeviceEntityChecked(deviceId, user, true);
+        if (!"SIMULATED".equals(device.getDataSource()) &&
+                (request.getSpeedThresholdKmh() != null || request.getBatteryLowThresholdV() != null || request.getTiltThresholdDeg() != null))
+            throw new BadRequestException("Nguong HARDWARE hien cau hinh trong firmware, chua ho tro cap nhat tu xa");
 
         if (request.getName() != null && !request.getName().isBlank()) {
             device.setName(request.getName().trim());
@@ -145,6 +149,7 @@ public class DeviceService {
         auditLogService.log(user, device, "UPDATE_CONFIG", "SUCCESS",
                 "Cập nhật cấu hình ngưỡng thiết bị " + device.getName(), sourceIp);
 
+        realtime.publish(device, "DEVICE", null);
         return new DeviceDto(device, getUserRoleForDevice(user, device));
     }
 
@@ -175,6 +180,7 @@ public class DeviceService {
 
         auditLogService.log(user, device, "INVITE_USER", "SUCCESS",
                 "Cấp quyền " + request.getRole() + " cho " + viewerUser.getEmail() + " trên thiết bị " + device.getName(), sourceIp);
+        realtime.publish(device, "DEVICE", null);
     }
 
     @Transactional
@@ -188,6 +194,7 @@ public class DeviceService {
         auditLogService.log(user, device, "DEVICE_REVOKED", "SUCCESS",
                 "Thu hồi quyền kết nối của thiết bị " + device.getName(), sourceIp);
 
+        realtime.publish(device, "DEVICE", null);
         return new DeviceDto(device, getUserRoleForDevice(user, device));
     }
 
@@ -202,6 +209,7 @@ public class DeviceService {
         auditLogService.log(user, device, "DEVICE_DECOMMISSIONED", "SUCCESS",
                 "Ngừng sử dụng vĩnh viễn thiết bị " + device.getName(), sourceIp);
 
+        realtime.publish(device, "DEVICE", null);
         return new DeviceDto(device, getUserRoleForDevice(user, device));
     }
 

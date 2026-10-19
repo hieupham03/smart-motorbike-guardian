@@ -138,6 +138,10 @@ public class VirtualDeviceSimulatorService {
     public void simulateVehicleAction(String deviceId, String action, Double value) {
         Device device = deviceRepository.findById(deviceId).orElse(null);
         if (device == null) return;
+        if (!"SIMULATED".equals(device.getDataSource()))
+            throw new com.guardian.exception.BadRequestException("Simulator chi ho tro thiet bi SIMULATED");
+        if (device.getLifecycleState() == LifecycleState.FAULT || device.getLifecycleState() == LifecycleState.DECOMMISSIONED)
+            throw new com.guardian.exception.BadRequestException("Thiet bi da thu hoi/ngung su dung khong the mo phong");
 
         if (action == null) throw new com.guardian.exception.BadRequestException("Thiếu action");
         if (value != null && (!Double.isFinite(value) || value < 0)) throw new com.guardian.exception.BadRequestException("Giá trị không hợp lệ");

@@ -35,9 +35,11 @@ export default function DeviceConfigModal({ isOpen, onClose, device, onSuccess }
         name,
         licensePlate,
         vehicleModel,
-        speedThresholdKmh: Number(speedThresholdKmh),
-        batteryLowThresholdV: Number(batteryLowThresholdV),
-        tiltThresholdDeg: Number(tiltThresholdDeg)
+        ...(device.dataSource === 'SIMULATED' ? {
+          speedThresholdKmh: Number(speedThresholdKmh),
+          batteryLowThresholdV: Number(batteryLowThresholdV),
+          tiltThresholdDeg: Number(tiltThresholdDeg)
+        } : {})
       });
 
       if (res.success) {
@@ -70,7 +72,7 @@ export default function DeviceConfigModal({ isOpen, onClose, device, onSuccess }
             </div>
             <div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#0c4a6e' }}>
-                CẤU HÌNH THIẾT BỊ & NGƯỠNG AN TOÀN
+                CẤU HÌNH THIẾT BỊ
               </h3>
               <p style={{ fontSize: '0.75rem', color: '#64748b' }}>
                 {device.name} ({device.deviceUuid})
@@ -118,8 +120,11 @@ export default function DeviceConfigModal({ isOpen, onClose, device, onSuccess }
 
             <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '1rem', marginTop: '0.5rem' }}>
               <div style={{ fontSize: '0.85rem', fontWeight: '800', color: '#0369a1', marginBottom: '0.75rem' }}>
-                NGƯỠNG CẢNH BÁO TỰ ĐỘNG
+                NGƯỠNG MÔ PHỎNG
               </div>
+              {device.dataSource !== 'SIMULATED' && <p style={{ fontSize: '0.8rem', marginBottom: '0.75rem' }}>
+                Thiết bị thật hiện chỉnh ngưỡng trong firmware. Web chỉ lưu tên, biển số và dòng xe; các giá trị dưới đây không cập nhật xuống board.
+              </p>}
 
               <div className="form-group">
                 <label className="form-label">Ngưỡng cảnh báo quá tốc độ (km/h):</label>
@@ -128,6 +133,7 @@ export default function DeviceConfigModal({ isOpen, onClose, device, onSuccess }
                   className="form-input"
                   min="20"
                   max="150"
+                  disabled={device.dataSource !== 'SIMULATED'}
                   value={speedThresholdKmh}
                   onChange={(e) => setSpeedThresholdKmh(e.target.value)}
                   required
@@ -143,6 +149,7 @@ export default function DeviceConfigModal({ isOpen, onClose, device, onSuccess }
                     className="form-input"
                     min="10.0"
                     max="12.5"
+                    disabled={device.dataSource !== 'SIMULATED'}
                     value={batteryLowThresholdV}
                     onChange={(e) => setBatteryLowThresholdV(e.target.value)}
                     required
@@ -155,6 +162,7 @@ export default function DeviceConfigModal({ isOpen, onClose, device, onSuccess }
                     className="form-input"
                     min="30"
                     max="80"
+                    disabled={device.dataSource !== 'SIMULATED'}
                     value={tiltThresholdDeg}
                     onChange={(e) => setTiltThresholdDeg(e.target.value)}
                     required
