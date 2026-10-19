@@ -52,6 +52,7 @@ app:
     keep-alive-interval: 30
     auto-reconnect: true
   push:
+    enabled: ${EXPO_PUSH_ENABLED:true}
     base-url: ${EXPO_PUSH_BASE_URL:https://exp.host}
     access-token: ${EXPO_ACCESS_TOKEN:}
     receipt-poll-ms: ${PUSH_RECEIPT_POLL_MS:60000}
