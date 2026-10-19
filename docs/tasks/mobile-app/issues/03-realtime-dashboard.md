@@ -1,7 +1,7 @@
 # 03 — Thiết bị, realtime và dashboard
 
 Status: ready-for-agent
-Progress: open
+Progress: claimed
 Type: task
 Scope: mobile, integration
 Blocked by: 02
