@@ -4,6 +4,7 @@ Status: ready-for-agent
 Progress: resolved
 Type: task
 Scope: mobile, documentation
+Branch: `task/mobile-01-scaffold`
 Blocked by: none
 
 ## Expected behavior
