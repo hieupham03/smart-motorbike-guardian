@@ -18,6 +18,9 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: 'Tổng quan', tabBarIcon: ({ color }) => <Icon value="◉" color={color} /> }} />
+      <Tabs.Screen name="map" options={{ title: 'GPS', tabBarIcon: ({ color }) => <Icon value="⌖" color={color} /> }} />
+      <Tabs.Screen name="control" options={{ title: 'Điều khiển', tabBarIcon: ({ color }) => <Icon value="◆" color={color} /> }} />
+      <Tabs.Screen name="alerts" options={{ title: 'Cảnh báo', tabBarIcon: ({ color }) => <Icon value="!" color={color} /> }} />
       <Tabs.Screen name="devices" options={{ title: 'Thiết bị', tabBarIcon: ({ color }) => <Icon value="▣" color={color} /> }} />
     </Tabs>
   );

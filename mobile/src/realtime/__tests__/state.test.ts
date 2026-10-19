@@ -1,4 +1,4 @@
-import { liveDeviceView, mergeCommands, mergeDeviceSnapshot, mergeReadings } from '../state';
+import { liveDeviceView, mergeAlerts, mergeCommands, mergeDeviceSnapshot, mergeReadings } from '../state';
 import type { Device, DeviceCommand, Telemetry } from '@/types/api';
 
 const reading = (id: string, ts: number): Telemetry => ({
@@ -52,5 +52,11 @@ describe('realtime state helpers', () => {
   });
   it('filters a revoked device from a snapshot', () => {
     expect(mergeDeviceSnapshot([device()], [], new Map(), new Map(), new Set(['d']))).toEqual([]);
+  });
+
+  it('deduplicates alert updates by alertId', () => {
+    const first = { alertId: 'a', createdAt: '2026-10-18T00:00:00Z', status: 'OPEN' };
+    const updated = { ...first, status: 'ACKNOWLEDGED' };
+    expect(mergeAlerts([first as never], [updated as never])).toEqual([updated]);
   });
 });
