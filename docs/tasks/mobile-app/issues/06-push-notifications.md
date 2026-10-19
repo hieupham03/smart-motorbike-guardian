@@ -4,6 +4,7 @@ Status: ready-for-agent
 Progress: open
 Type: task
 Scope: backend, mobile, integration
+Branch: `task/mobile-06-push-notifications`
 Blocked by: 02, 04
 
 ## Expected behavior
