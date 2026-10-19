@@ -5,6 +5,7 @@ import { AndroidImportance } from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import { pushApi } from '@/api/push.api';
+import { env } from '@/config/env';
 
 const INSTALLATION_KEY = 'guardian.push.installation.v1';
 
@@ -26,7 +27,7 @@ export async function registerForPush() {
   const current = await Notifications.getPermissionsAsync();
   const permission = current.status === 'granted' ? current : await Notifications.requestPermissionsAsync();
   if (permission.status !== 'granted') return false;
-  const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
+  const projectId = env.easProjectId ?? Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
   const token = (await Notifications.getExpoPushTokenAsync(projectId ? { projectId } : undefined)).data;
   await pushApi.register({ token, platform: Platform.OS, installationId: await installationId() });
   return true;
