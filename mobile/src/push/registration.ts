@@ -1,7 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
-import * as Notifications from 'expo-notifications';
-import { AndroidImportance } from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import { pushApi } from '@/api/push.api';
@@ -19,9 +17,13 @@ async function installationId() {
 
 export async function registerForPush() {
   if (Platform.OS !== 'android' && Platform.OS !== 'ios') return false;
+  // Remote push is unavailable in Expo Go. Importing expo-notifications there can
+  // also fail when Expo Go does not bundle the exact native module version.
+  if (Constants.appOwnership === 'expo' || Constants.expoGoConfig) return false;
+  const Notifications = await import('expo-notifications');
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('guardian-alerts', {
-      name: 'Guardian alerts', importance: AndroidImportance.HIGH,
+      name: 'Guardian alerts', importance: Notifications.AndroidImportance.HIGH,
     });
   }
   const current = await Notifications.getPermissionsAsync();

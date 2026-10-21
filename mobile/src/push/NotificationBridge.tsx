@@ -1,4 +1,5 @@
-import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
+import type { NotificationResponse } from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef } from 'react';
 
@@ -6,15 +7,11 @@ import { useGuardian } from '@/devices/GuardianContext';
 import { registerForPush } from './registration';
 import { notificationRoute } from './routing';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: true, shouldSetBadge: false }),
-});
-
 export function NotificationBridge() {
   const router = useRouter();
   const { devices, selectDevice } = useGuardian();
   const lastHandled = useRef<string | null>(null);
-  const open = useCallback((response: Notifications.NotificationResponse | null) => {
+  const open = useCallback((response: NotificationResponse | null) => {
     if (!response) return;
     const identifier = response.notification.request.identifier;
     if (lastHandled.current === identifier) return;
@@ -26,9 +23,22 @@ export function NotificationBridge() {
     void registerForPush().catch((error: unknown) => console.warn('Push registration unavailable:', error instanceof Error ? error.message : error));
   }, []);
   useEffect(() => {
-    const subscription = Notifications.addNotificationResponseReceivedListener(open);
-    void Notifications.getLastNotificationResponseAsync().then(open);
-    return () => subscription.remove();
+    if (Constants.appOwnership === 'expo' || Constants.expoGoConfig) return;
+    let active = true;
+    let remove: (() => void) | undefined;
+    void import('expo-notifications').then((Notifications) => {
+      if (!active) return;
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: true, shouldSetBadge: false }),
+      });
+      const subscription = Notifications.addNotificationResponseReceivedListener(open);
+      remove = () => subscription.remove();
+      void Notifications.getLastNotificationResponseAsync().then(open);
+    });
+    return () => {
+      active = false;
+      remove?.();
+    };
   }, [open]);
   return null;
 }
