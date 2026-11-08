@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="792pt" height="396pt" viewBox="0 0 792 396" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-11-05T20:26:32.147392</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 396 
+L 792 396 
+L 792 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 35.9748 128.574 
+L 218.2572 128.574 
+Q 223.8444 128.574 223.8444 123.102 
+L 223.8444 60.858 
+Q 223.8444 55.386 218.2572 55.386 
+L 35.9748 55.386 
+Q 30.3876 55.386 30.3876 60.858 
+L 30.3876 123.102 
+Q 30.3876 128.574 35.9748 128.574 
+z
+" clip-path="url(#pf1425564fa)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 545.8068 128.574 
+L 742.0572 128.574 
+Q 747.6444 128.574 747.6444 123.102 
+L 747.6444 60.858 
+Q 747.6444 55.386 742.0572 55.386 
+L 545.8068 55.386 
+Q 540.2196 55.386 540.2196 60.858 
+L 540.2196 123.102 
+Q 540.2196 128.574 545.8068 128.574 
+z
+" clip-path="url(#pf1425564fa)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 545.8068 299.574 
+L 742.0572 299.574 
+Q 747.6444 299.574 747.6444 294.102 
+L 747.6444 231.858 
+Q 747.6444 226.386 742.0572 226.386 
+L 545.8068 226.386 
+Q 540.2196 226.386 540.2196 231.858 
+L 540.2196 294.102 
+Q 540.2196 299.574 545.8068 299.574 
+z
+" clip-path="url(#pf1425564fa)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 35.9748 299.574 
+L 218.2572 299.574 
+Q 223.8444 299.574 223.8444 294.102 
+L 223.8444 231.858 
+Q 223.8444 226.386 218.2572 226.386 
+L 35.9748 226.386 
+Q 30.3876 226.386 30.3876 231.858 
+L 30.3876 294.102 
+Q 30.3876 299.574 35.9748 299.574 
+z
+" clip-path="url(#pf1425564fa)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 15px; font-family: 'DejaVu Sans'" transform="translate(97.298813 86.197969)">PARKED</text>
+    <text style="font-size: 15px; font-family: 'DejaVu Sans'" transform="translate(88.487484 108.434297)">Bảo vệ tắt</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 15px; font-family: 'DejaVu Sans'" transform="translate(616.605047 86.197969)">ARMED</text>
+    <text style="font-size: 15px; font-family: 'DejaVu Sans'" transform="translate(610.610906 107.496797)">Canh giữ</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 15px; font-family: 'DejaVu Sans'" transform="translate(617.637469 257.197969)">ALARM</text>
+    <text style="font-size: 15px; font-family: 'DejaVu Sans'" transform="translate(608.352703 278.669062)">Báo động</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 15px; font-family: 'DejaVu Sans'" transform="translate(79.671469 255.528047)">THEFT_LOCK</text>
+    <text style="font-size: 15px; font-family: 'DejaVu Sans'" transform="translate(84.316781 279.247969)">Ngắt motor</text>
+   </g>
+   <g id="patch_6">
+    <path d="M 223.395155 81.72 
+Q 382.028452 81.72 539.320109 81.72 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 533.820109 78.97 
+L 539.320109 81.72 
+L 533.820109 84.47 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_5">
+    <g id="patch_7">
+     <path d="M 325.17907 74.0655 
+L 438.88493 74.0655 
+L 438.88493 59.362277 
+L 325.17907 59.362277 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="382.032" y="70.125363" transform="rotate(-0 382.032 70.125363)">ARM + đủ điều kiện</text>
+   </g>
+   <g id="patch_8">
+    <path d="M 540.668845 112.5 
+Q 382.035548 112.5 224.743891 112.5 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 230.243891 115.25 
+L 224.743891 112.5 
+L 230.243891 109.75 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_6">
+    <g id="patch_9">
+     <path d="M 329.744988 147.9375 
+L 434.319012 147.9375 
+L 434.319012 134.2125 
+L 329.744988 134.2125 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="382.032" y="143.997363" transform="rotate(-0 382.032 143.997363)">DISARM / UNLOCK</text>
+   </g>
+   <g id="patch_10">
+    <path d="M 643.932 128.180775 
+Q 643.932 177.481088 643.932 225.43976 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 646.682 219.93976 
+L 643.932 225.43976 
+L 641.182 219.93976 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_7">
+    <g id="patch_11">
+     <path d="M 593.019598 169.8255 
+L 694.844402 169.8255 
+L 694.844402 155.649621 
+L 593.019598 155.649621 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="643.932" y="165.885363" transform="rotate(-0 643.932 165.885363)">Rung / bánh quay</text>
+   </g>
+   <g id="patch_12">
+    <path d="M 540.668845 262.98 
+Q 382.035548 262.98 224.743891 262.98 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 230.243891 265.73 
+L 224.743891 262.98 
+L 230.243891 260.23 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_8">
+    <g id="patch_13">
+     <path d="M 312.763641 255.3255 
+L 451.300359 255.3255 
+L 451.300359 241.149621 
+L 312.763641 241.149621 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="382.032" y="251.385363" transform="rotate(-0 382.032 251.385363)">≥15s và guard khóa đạt</text>
+   </g>
+   <g id="patch_14">
+    <path d="M 127.116 226.779225 
+Q 127.116 177.478912 127.116 129.52024 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 124.366 135.02024 
+L 127.116 129.52024 
+L 129.866 135.02024 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_9">
+    <g id="patch_15">
+     <path d="M 102.57518 169.8255 
+L 151.65682 169.8255 
+L 151.65682 156.1005 
+L 102.57518 156.1005 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="127.116" y="165.885363" transform="rotate(-0 127.116 165.885363)">UNLOCK</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'; text-anchor: middle" x="396" y="362.16" transform="rotate(-0 396 362.16)">LOCK hợp lệ có thể đưa về THEFT_LOCK; lệnh nhạy cảm đều qua interlock.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pf1425564fa">
+   <rect x="11.88" y="9.9" width="768.24" height="376.2"/>
+  </clipPath>
+ </defs>
+</svg>

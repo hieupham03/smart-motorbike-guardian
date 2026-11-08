@@ -1,0 +1,7 @@
+flowchart LR
+ S[SensorTask50ms] -->|sensorQueue| P[ProcessingTask]
+ G[GpsTask] -->|gpsMutex snapshot| U[UARTTxRxTask]
+ P -->|telemMutex| U
+ U -->|UART| R[Node A UARTRxTask]
+ R --> C[ControlTask]
+ C --> Q[MQTTTask]

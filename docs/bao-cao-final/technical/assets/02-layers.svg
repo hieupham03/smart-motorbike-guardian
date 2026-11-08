@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="792pt" height="446.4pt" viewBox="0 0 792 446.4" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-11-05T20:26:31.780243</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 446.4 
+L 792 446.4 
+L 792 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 42.9588 92.214 
+L 749.0412 92.214 
+Q 754.6284 92.214 754.6284 86.742 
+L 754.6284 34.074 
+Q 754.6284 28.602 749.0412 28.602 
+L 42.9588 28.602 
+Q 37.3716 28.602 37.3716 34.074 
+L 37.3716 86.742 
+Q 37.3716 92.214 42.9588 92.214 
+z
+" clip-path="url(#pdf0021ba76)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 42.9588 165.402 
+L 749.0412 165.402 
+Q 754.6284 165.402 754.6284 159.93 
+L 754.6284 107.262 
+Q 754.6284 101.79 749.0412 101.79 
+L 42.9588 101.79 
+Q 37.3716 101.79 37.3716 107.262 
+L 37.3716 159.93 
+Q 37.3716 165.402 42.9588 165.402 
+z
+" clip-path="url(#pdf0021ba76)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 42.9588 238.59 
+L 749.0412 238.59 
+Q 754.6284 238.59 754.6284 233.118 
+L 754.6284 180.45 
+Q 754.6284 174.978 749.0412 174.978 
+L 42.9588 174.978 
+Q 37.3716 174.978 37.3716 180.45 
+L 37.3716 233.118 
+Q 37.3716 238.59 42.9588 238.59 
+z
+" clip-path="url(#pdf0021ba76)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 42.9588 311.778 
+L 749.0412 311.778 
+Q 754.6284 311.778 754.6284 306.306 
+L 754.6284 253.638 
+Q 754.6284 248.166 749.0412 248.166 
+L 42.9588 248.166 
+Q 37.3716 248.166 37.3716 253.638 
+L 37.3716 306.306 
+Q 37.3716 311.778 42.9588 311.778 
+z
+" clip-path="url(#pdf0021ba76)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 42.9588 384.966 
+L 749.0412 384.966 
+Q 754.6284 384.966 754.6284 379.494 
+L 754.6284 326.826 
+Q 754.6284 321.354 749.0412 321.354 
+L 42.9588 321.354 
+Q 37.3716 321.354 37.3716 326.826 
+L 37.3716 379.494 
+Q 37.3716 384.966 42.9588 384.966 
+z
+" clip-path="url(#pdf0021ba76)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(349.178027 55.218449)">5. NGHIỆP VỤ</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(190.837109 75.111906)">Bảo vệ, giám sát xe • chính sách quyền • quản lý vận hành</text>
+   </g>
+   <g id="patch_7">
+    <path d="M 378.54 91.822403 
+Q 378.54 97.002745 378.54 100.841446 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 381.29 95.341446 
+L 378.54 100.841446 
+L 375.79 95.341446 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 413.46 102.181597 
+Q 413.46 97.001255 413.46 93.162554 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 410.71 98.662554 
+L 413.46 93.162554 
+L 416.21 98.662554 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(347.906152 128.400004)">4. ỨNG DỤNG</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(179.148535 148.406254)">Web React • mobile Expo • dashboard, cảnh báo và điều khiển</text>
+   </g>
+   <g id="patch_9">
+    <path d="M 378.54 165.010403 
+Q 378.54 170.190745 378.54 174.029446 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 381.29 168.529446 
+L 378.54 174.029446 
+L 375.79 168.529446 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 413.46 175.369597 
+Q 413.46 170.189255 413.46 166.350554 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 410.71 171.850554 
+L 413.46 166.350554 
+L 416.21 171.850554 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(367.346289 203.195035)">3. XỬ LÝ</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(207.607812 220.890641)">Edge Node B / Node A • Spring Boot • PostgreSQL / H2</text>
+   </g>
+   <g id="patch_11">
+    <path d="M 378.54 238.198403 
+Q 378.54 243.378745 378.54 247.217446 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 381.29 241.717446 
+L 378.54 247.217446 
+L 375.79 241.717446 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 413.46 248.557597 
+Q 413.46 243.377255 413.46 239.538554 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 410.71 245.038554 
+L 413.46 239.538554 
+L 416.21 245.038554 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(366.150684 273.503055)">2. MẠNG</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(246.393555 294.524441)">UART nội bộ • Wi-Fi / MQTT • REST / STOMP</text>
+   </g>
+   <g id="patch_13">
+    <path d="M 378.54 311.386403 
+Q 378.54 316.566745 378.54 320.405446 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 381.29 314.905446 
+L 378.54 320.405446 
+L 375.79 314.905446 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 413.46 321.745597 
+Q 413.46 316.565255 413.46 312.726554 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 410.71 318.226554 
+L 413.46 312.726554 
+L 416.21 318.226554 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(301.59873 348.659023)">1. CẢM NHẬN / CHẤP HÀNH</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(252.233008 367.541641)">Hall • MPU-6050 • GPS • relay, motor, còi</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'; text-anchor: middle" x="396" y="424.296" transform="rotate(-0 396 424.296)">Năm tầng biểu thị trách nhiệm; không tương ứng năm thiết bị hoặc máy chủ riêng.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pdf0021ba76">
+   <rect x="11.88" y="11.16" width="768.24" height="424.08"/>
+  </clipPath>
+ </defs>
+</svg>

@@ -19,6 +19,7 @@
         <jjwt.version>0.12.5</jjwt.version>
         <springdoc.version>2.3.0</springdoc.version>
         <paho.version>1.2.5</paho.version>
+        <guardian.build.directory>${project.basedir}/target</guardian.build.directory>
     </properties>
 
     <dependencies>
@@ -107,6 +108,8 @@
     </dependencies>
 
     <build>
+        <!-- Allow an isolated build while Windows holds the running demo JAR open. -->
+        <directory>${guardian.build.directory}</directory>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

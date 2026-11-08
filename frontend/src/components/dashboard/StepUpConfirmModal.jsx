@@ -1,120 +1,130 @@
-import React, { useState } from 'react';
-import { Lock, AlertOctagon, X, CheckCircle, ShieldAlert } from 'lucide-react';
-
-export default function StepUpConfirmModal({ isOpen, onClose, onConfirm, currentSpeed = null }) {
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
+import React, { useEffect, useRef, useState } from "react";
+import { X, Lock } from "lucide-react";
+import { reasonLabel } from "../../services/presentation";
+export default function StepUpConfirmModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  currentSpeed = null,
+}) {
+  const [password, setPassword] = useState(""),
+    [error, setError] = useState(""),
+    [loading, setLoading] = useState(false);
+  const dialog = useRef(null),
+    input = useRef(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    setPassword("");
+    setError("");
+    const previous = document.activeElement;
+    input.current?.focus();
+    return () => previous?.focus();
+  }, [isOpen]);
   if (!isOpen) return null;
-
-  const handleSubmit = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    if (!password) {
-      setError('Vui lòng nhập mật khẩu tài khoản để xác nhận');
-      return;
-    }
-
-    setError('');
     setLoading(true);
+    setError("");
     try {
       await onConfirm(password);
-      setPassword('');
+      setPassword("");
       onClose();
-    } catch (err) {
-      setError(err.message || 'Mật khẩu không chính xác hoặc lệnh bị từ chối');
+    } catch (e) {
+      setError(reasonLabel(e.message));
     } finally {
       setLoading(false);
     }
   };
-
+  function keys(e) {
+    if (e.key === "Escape" && !loading) {
+      onClose();
+      return;
+    }
+    if (e.key !== "Tab") return;
+    const controls = [
+      ...dialog.current.querySelectorAll(
+        "button:not(:disabled),input:not(:disabled)",
+      ),
+    ];
+    const first = controls[0],
+      last = controls.at(-1);
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last?.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first?.focus();
+    }
+  }
   return (
     <div className="modal-overlay">
-      <div className="modal-content" style={{ maxWidth: '460px' }}>
-        <div className="modal-header" style={{ background: '#fef2f2', borderBottom: '1px solid #fecaca' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: '#ef4444',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff'
-            }}>
-              <ShieldAlert size={20} />
-            </div>
-            <div>
-              <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#991b1b' }}>
-                XÁC THỰC KHOÁ ĐỘNG CƠ KHẨN CẤP
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#b91c1c' }}>
-                Xác thực bước nâng cao (Step-up Re-authentication)
-              </div>
-            </div>
-          </div>
+      <div
+        ref={dialog}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="lock-title"
+        aria-describedby="lock-description"
+        className="modal-content"
+        style={{ maxWidth: 460 }}
+        onKeyDown={keys}
+      >
+        <div className="modal-header">
+          <h2 id="lock-title">
+            <Lock size={20} aria-hidden="true" /> Xác nhận khóa động cơ
+          </h2>
           <button
+            className="icon-button"
+            aria-label="Đóng xác nhận"
+            disabled={loading}
             onClick={onClose}
-            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#991b1b' }}
           >
-            <X size={20} />
+            <X size={21} aria-hidden="true" />
           </button>
         </div>
-
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={submit}>
           <div className="modal-body">
-            {/* Safety Notice */}
-            <div style={{
-              background: currentSpeed > 0 ? '#fef2f2' : '#f0f9ff',
-              border: `1px solid ${currentSpeed > 0 ? '#fca5a5' : '#bae6fd'}`,
-              borderRadius: '10px',
-              padding: '0.85rem',
-              marginBottom: '1rem',
-              fontSize: '0.825rem',
-              color: currentSpeed > 0 ? '#991b1b' : '#0369a1'
-            }}>
-              {currentSpeed == null ? <p>Chưa có tốc độ hợp lệ. Firmware sẽ kiểm tra dữ liệu cảm biến trước khi thực thi.</p> : currentSpeed > 0 ? (
-                <div>
-                  <strong>⚠️ CẢNH BÁO AN TOÀN (S-07 / FR-04):</strong><br />
-                  Tốc độ xe gần nhất là <strong>{currentSpeed.toFixed(1)} km/h</strong> (&gt; 0). Firmware Gateway Node sẽ <strong>TỪ CHỐI</strong> lệnh khoá để chống tai nạn khi xe đang lưu thông!
-                </div>
-              ) : (
-                <div>
-                  <strong>Tốc độ gần nhất: 0 km/h.</strong><br />
-                  Firmware sẽ kiểm tra lại tốc độ và độ mới của dữ liệu trước khi quyết định thực thi.
-                </div>
-              )}
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" style={{ fontWeight: '700' }}>
-                Nhập mật khẩu tài khoản của bạn để tiếp tục:
-              </label>
-              <input
-                type="password"
-                className="form-input"
-                placeholder="Nhập mật khẩu..."
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoFocus
-                required
-              />
-            </div>
-
+            <p id="lock-description" className="muted">
+              Chỉ khóa khi xe đã dừng. Nhập mật khẩu để xác nhận yêu cầu của
+              bạn.
+            </p>
+            <p className="notice notice-warning">
+              {currentSpeed == null
+                ? "Chưa có tốc độ mới. Thiết bị sẽ kiểm tra lại trước khi xử lý."
+                : currentSpeed > 0
+                  ? `Tốc độ gần nhất: ${currentSpeed.toFixed(1)} km/h. Yêu cầu có thể bị từ chối khi bánh chưa dừng đủ lâu.`
+                  : "Tốc độ gần nhất: 0 km/h. Thiết bị vẫn cần xác nhận bánh đã dừng đủ lâu."}
+            </p>
+            <label className="form-label" htmlFor="lock-password">
+              Mật khẩu
+            </label>
+            <input
+              ref={input}
+              id="lock-password"
+              className="form-input"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={loading}
+            />
             {error && (
-              <div style={{ color: '#ef4444', fontSize: '0.825rem', marginTop: '0.5rem', fontWeight: '600' }}>
+              <p role="alert" className="notice notice-danger">
                 {error}
-              </div>
+              </p>
             )}
           </div>
-
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>
-              Huỷ bỏ
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={loading}
+              onClick={onClose}
+            >
+              Hủy
             </button>
-            <button type="submit" className="btn btn-danger" disabled={loading}>
-              {loading ? 'Đang xác thực & gửi lệnh...' : 'Xác nhận Khoá Động Cơ'}
+            <button className="btn btn-danger" disabled={loading || !password}>
+              {loading ? "Đang gửi yêu cầu…" : "Xác nhận khóa động cơ"}
             </button>
           </div>
         </form>

@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { QrCode, Bike, X, CheckCircle } from 'lucide-react';
-import { api } from '../../services/api';
+import React, { useState } from "react";
+import { QrCode, Bike, X, CheckCircle } from "lucide-react";
+import { api } from "../../services/api";
 
 export default function OnboardModal({ isOpen, onClose, onSuccess }) {
-  const [claimToken, setClaimToken] = useState('GUARDIAN-QR-2026');
-  const [name, setName] = useState('');
-  const [licensePlate, setLicensePlate] = useState('');
-  const [vehicleModel, setVehicleModel] = useState('');
+  const [claimToken, setClaimToken] = useState("");
+  const [name, setName] = useState("");
+  const [licensePlate, setLicensePlate] = useState("");
+  const [vehicleModel, setVehicleModel] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
@@ -22,7 +22,7 @@ export default function OnboardModal({ isOpen, onClose, onSuccess }) {
         claimToken,
         name,
         licensePlate,
-        vehicleModel
+        vehicleModel,
       });
 
       if (res.success) {
@@ -30,7 +30,7 @@ export default function OnboardModal({ isOpen, onClose, onSuccess }) {
         onClose();
       }
     } catch (err) {
-      setError(err.message || 'Lỗi khi kích hoạt thiết bị');
+      setError(err.message || "Lỗi khi kích hoạt thiết bị");
     } finally {
       setLoading(false);
     }
@@ -40,49 +40,62 @@ export default function OnboardModal({ isOpen, onClose, onSuccess }) {
     <div className="modal-overlay">
       <div className="modal-content">
         <div className="modal-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: '#0284c7',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff'
-            }}>
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}
+          >
+            <div
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "10px",
+                background: "#0284c7",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#fff",
+              }}
+            >
               <QrCode size={20} />
             </div>
             <div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#0c4a6e' }}>
-                KÍCH HOẠT THIẾT BỊ MỚI (ONBOARDING)
+              <h3
+                style={{
+                  fontSize: "1.1rem",
+                  fontWeight: "800",
+                  color: "#0c4a6e",
+                }}
+              >
+                Kích hoạt thiết bị trên xe
               </h3>
-              <p style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                Nhập Claim Token từ mã QR in trên Gateway ESP32
+              <p style={{ fontSize: "0.75rem", color: "#64748b" }}>
+                Nhập mã kích hoạt đi kèm thiết bị trên xe
               </p>
             </div>
           </div>
-          <button onClick={onClose} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}>
+          <button
+            onClick={onClose}
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              color: "#64748b",
+            }}
+          >
             <X size={20} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
-            {/* Sample Token Helper Box */}
-            <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '10px', padding: '0.75rem', marginBottom: '1rem', fontSize: '0.8rem', color: '#0369a1' }}>
-              <strong>Mã Claim Token mẫu có sẵn để thử nghiệm:</strong><br />
-              • <code>GUARDIAN-QR-2026</code> (VinFast Theon S)<br />
-              • <code>CLAIM-SH150-2026</code> (Honda SH 150i)<br />
-              • <code>CLAIM-EX155-2026</code> (Yamaha Exciter 155)
-            </div>
-
             <div className="form-group">
-              <label className="form-label">Mã Claim Token (từ QR):</label>
+              <label className="form-label" htmlFor="vehicle-activation">
+                Mã kích hoạt đi kèm thiết bị:
+              </label>
               <input
+                id="vehicle-activation"
                 type="text"
                 className="form-input"
-                placeholder="Ví dụ: GUARDIAN-QR-2026"
+                placeholder="Nhập mã kích hoạt"
                 value={claimToken}
                 onChange={(e) => setClaimToken(e.target.value)}
                 required
@@ -90,8 +103,11 @@ export default function OnboardModal({ isOpen, onClose, onSuccess }) {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Tên thiết bị / Xe:</label>
+              <label className="form-label" htmlFor="new-vehicle-name">
+                Tên xe:
+              </label>
               <input
+                id="new-vehicle-name"
                 type="text"
                 className="form-input"
                 placeholder="Ví dụ: VinFast Theon S 2024"
@@ -124,18 +140,34 @@ export default function OnboardModal({ isOpen, onClose, onSuccess }) {
             </div>
 
             {error && (
-              <div style={{ color: '#ef4444', fontSize: '0.825rem', marginTop: '0.5rem', fontWeight: '600' }}>
+              <div
+                style={{
+                  color: "#ef4444",
+                  fontSize: "0.825rem",
+                  marginTop: "0.5rem",
+                  fontWeight: "600",
+                }}
+              >
                 {error}
               </div>
             )}
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onClose}
+              disabled={loading}
+            >
               Đóng
             </button>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Đang kích hoạt...' : 'Kích hoạt Thiết Bị'}
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading}
+            >
+              {loading ? "Đang kích hoạt..." : "Kích hoạt Thiết Bị"}
             </button>
           </div>
         </form>

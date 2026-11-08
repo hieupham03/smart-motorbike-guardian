@@ -2,7 +2,9 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "guardian_config.h"
+#include "wheel_activity.h"
 #include <ArduinoJson.h>
+#include <Preferences.h>
 #include <math.h>
 
 // --- Cấu hình Wi-Fi & MQTT Broker ---
@@ -10,6 +12,7 @@
 
 #define MQTT_BROKER     "broker.emqx.io"          // MQTT Broker công cộng hoặc IP local
 #define MQTT_PORT       1883
+#define FIRMWARE_VERSION "v1.0.0"
 #define DEVICE_ID       "550e8400-e29b-41d4-a716-446655440001" // UUID xe mau Honda SH 150i ABS
 
 // Topic MQTT chuẩn hóa
@@ -19,6 +22,7 @@
 #define TOPIC_CMD_SUB   "guardian/" DEVICE_ID "/cmd/#"
 #define TOPIC_CMD_ACK   "guardian/" DEVICE_ID "/cmd/ack"
 #define TOPIC_HEARTBEAT "guardian/" DEVICE_ID "/heartbeat"
+#define TOPIC_WHEEL_SESSION "guardian/" DEVICE_ID "/wheel_session"
 
 // --- Cấu hình phần cứng & Chân giao tiếp (Node A Gateway) ---
 #define RXD2 16
@@ -51,17 +55,24 @@ const char* state_to_string(VehicleState s) {
     }
 }
 
-enum Action : uint8_t {ACTION_ARM,ACTION_DISARM,ACTION_LOCK,ACTION_UNLOCK,ACTION_SIREN_ON,ACTION_SIREN_OFF,ACTION_REBOOT,ACTION_ALARM};
-struct ControlCommand {Action action; char id[40]; bool remote;};
+enum Action : uint8_t {ACTION_ARM,ACTION_DISARM,ACTION_LOCK,ACTION_UNLOCK,ACTION_SIREN_ON,ACTION_SIREN_OFF,ACTION_REBOOT,ACTION_ALARM,ACTION_RESET_WHEEL_SESSION,ACTION_CONFIG_THRESHOLDS};
+struct ControlCommand {Action action; char id[40]; bool remote; float speedLimit;};
 struct CommandResult {char id[40]; bool executed; char reason[40]; bool reboot;};
 static QueueHandle_t resultQueue;
 static uint32_t telemetryReceived=0;
 static bool telemetrySeen=false;
 static uint32_t bootNonce;
+static Preferences speedPreferences;
+static bool speedStorageReady=false;
+static float initialSpeedLimit=OVERSPEED_LIMIT_KMH;
 
 
 // Dữ liệu chia sẻ được bảo vệ bởi Mutex
 static TelemetryData sharedTelemetry = {0};
+static WheelSampleData sharedWheelSample={};
+static WheelSessionSnapshot sharedWheelSession={};
+static uint32_t wheelReceived=0;
+static bool wheelSeen=false;
 static SemaphoreHandle_t telemetryMutex = NULL;
 
 static QueueHandle_t controlQueue = NULL;
@@ -138,6 +149,22 @@ bool get_snapshot(TelemetryData &t,uint32_t &received) {
     t=sharedTelemetry;received=telemetryReceived;bool seen=telemetrySeen;
     xSemaphoreGive(telemetryMutex);return seen;
 }
+WheelActivityInput wheel_input(uint32_t now) {
+    WheelActivityInput input={};input.now=now;input.armed=currentState==STATE_ARMED;
+    if(xSemaphoreTake(telemetryMutex,pdMS_TO_TICKS(10))!=pdTRUE) return input;
+    input.source_boot=sharedWheelSample.boot_id;input.pulse_count=sharedWheelSample.pulse_count;
+    input.counter_ms=sharedWheelSample.timestamp;input.speed_ms=sharedTelemetry.timestamp;
+    input.speed=sharedTelemetry.speed;input.speed_valid=sharedTelemetry.speed_valid;
+    bool live=sensorConnected && uint32_t(now-lastSensorHeartbeat)<=3000;
+    input.counter_fresh=live && wheelSeen && uint32_t(now-wheelReceived)<=SENSOR_STALE_MS;
+    input.telemetry_fresh=live && telemetrySeen && uint32_t(now-telemetryReceived)<=SENSOR_STALE_MS;
+    xSemaphoreGive(telemetryMutex);return input;
+}
+WheelSessionSnapshot wheel_snapshot() {
+    WheelSessionSnapshot snapshot={};
+    if(xSemaphoreTake(telemetryMutex,pdMS_TO_TICKS(10))==pdTRUE) {snapshot=sharedWheelSession;xSemaphoreGive(telemetryMutex);}
+    return snapshot;
+}
 const char *lock_block_reason() {
     TelemetryData t;uint32_t received;
     if(!get_snapshot(t,received)) return "NO_SENSOR_DATA";
@@ -158,9 +185,15 @@ void mqtt_callback(char* topic,byte* payload,unsigned length) {
     struct Map {const char *type,*suffix;Action action;};
     static const Map maps[]={{"ARM","/arm",ACTION_ARM},{"DISARM","/disarm",ACTION_DISARM},
         {"LOCK_ENGINE","/lock_engine",ACTION_LOCK},{"UNLOCK_ENGINE","/unlock_engine",ACTION_UNLOCK},
-        {"SIREN_ON","/siren_on",ACTION_SIREN_ON},{"SIREN_OFF","/siren_off",ACTION_SIREN_OFF},{"REBOOT","/reboot",ACTION_REBOOT}};
+        {"SIREN_ON","/siren_on",ACTION_SIREN_ON},{"SIREN_OFF","/siren_off",ACTION_SIREN_OFF},{"REBOOT","/reboot",ACTION_REBOOT},
+        {"RESET_WHEEL_SESSION","/reset_wheel_session",ACTION_RESET_WHEEL_SESSION},
+        {"CONFIG_THRESHOLDS","/config_thresholds",ACTION_CONFIG_THRESHOLDS}};
     for(const auto &m:maps) if(strcmp(type,m.type)==0 && strcmp(suffix,m.suffix)==0) {
         ControlCommand c={};c.action=m.action;c.remote=true;strlcpy(c.id,id,sizeof(c.id));
+        if(c.action==ACTION_CONFIG_THRESHOLDS) {
+            // Only a JSON number is accepted; strings/null/booleans must not coerce to a threshold.
+            c.speedLimit=doc["speed_limit_kmh"].is<float>()?doc["speed_limit_kmh"].as<float>():NAN;
+        }
         if(xQueueSend(controlQueue,&c,0)==pdTRUE) return;
         char json[160];snprintf(json,sizeof(json),"{\"cmd_id\":\"%s\",\"result\":\"REJECTED\",\"reason_if_failed\":\"QUEUE_FULL\"}",id);
         mqttClient.publish(TOPIC_CMD_ACK,json);return;
@@ -192,6 +225,15 @@ void UARTRxTask(void *pvParameters) {
                         break;
                     }
 
+                    case MSG_WHEEL_SAMPLE: {
+                        if(rxPacket.len==sizeof(WheelSampleData)) {
+                            WheelSampleData sample;memcpy(&sample,rxPacket.data,sizeof(sample));
+                            if(sample.version==1 && xSemaphoreTake(telemetryMutex,pdMS_TO_TICKS(10))==pdTRUE) {
+                                sharedWheelSample=sample;wheelReceived=millis();wheelSeen=true;xSemaphoreGive(telemetryMutex);
+                            }
+                        }
+                        break;
+                    }
                     case MSG_ACCEL_EVENT: {
                         if (rxPacket.len == sizeof(AccelEventData)) {
                             AccelEventData evt;
@@ -264,22 +306,47 @@ void UARTRxTask(void *pvParameters) {
 void ControlTask(void*) {
     ControlCommand c;CommandResult cache[8]={};uint8_t head=0;
     uint32_t alarmStart=0;bool manualSiren=false;
+    WheelActivityMonitor wheel;
+    wheel.setSpeedLimit(initialSpeedLimit);
     for(;;) {
+        WheelActivityInput input=wheel_input(millis());
+        uint8_t events=wheel.update(input);
+        if(events&WHEEL_EVENT_GUARD) {
+            AccelEventData evt={3,float(WHEEL_GUARD_MIN_PULSES),input.now};
+            xQueueSend(alertMqttQueue,&evt,0);
+            if(currentState==STATE_ARMED) currentState=STATE_ALARM;
+            Serial.println("[WHEEL GUARD] movement while ARMED -> ALARM");
+        }
+        if(events&WHEEL_EVENT_OVERSPEED) {
+            AccelEventData evt={4,input.speed,input.now};xQueueSend(alertMqttQueue,&evt,0);
+            Serial.printf("[OVERSPEED] speed=%.2f limit=%.2f km/h; WARNING ONLY\n",input.speed,wheel.snapshot(input.now).speed_limit);
+        }
         if(uxQueueSpacesAvailable(resultQueue)>0 && xQueueReceive(controlQueue,&c,pdMS_TO_TICKS(20))==pdTRUE) {
             bool duplicate=false;
             if(c.remote) for(const auto &r:cache) if(r.id[0]&&strcmp(r.id,c.id)==0) {xQueueSend(resultQueue,&r,0);duplicate=true;break;}
             if(!duplicate) {
                 CommandResult r={};strlcpy(r.id,c.id,sizeof(r.id));r.executed=true;
-                const char *reason=(c.action==ACTION_LOCK||c.action==ACTION_REBOOT)?lock_block_reason():nullptr;
+                const char *reason=(c.action==ACTION_LOCK||c.action==ACTION_REBOOT||c.action==ACTION_ARM)?lock_block_reason():nullptr;
+                if(!reason && (c.action==ACTION_ARM||c.action==ACTION_RESET_WHEEL_SESSION) && !wheel.snapshot(millis()).fresh) reason="WHEEL_DATA_STALE";
+                if(c.action==ACTION_CONFIG_THRESHOLDS) {
+                    if(!WheelActivityMonitor::validSpeedLimit(c.speedLimit)) reason="INVALID_SPEED_LIMIT";
+                    else if(!speedStorageReady || (c.speedLimit!=wheel.snapshot(millis()).speed_limit &&
+                            speedPreferences.putFloat("speed_kmh",c.speedLimit)!=sizeof(float))) reason="CONFIG_STORAGE_FAILED";
+                }
                 if(reason) {r.executed=false;strlcpy(r.reason,reason,sizeof(r.reason));}
                 else switch(c.action) {
-                    case ACTION_ARM:currentState=STATE_ARMED;manualSiren=false;set_motor(true);break;
+                    case ACTION_ARM:currentState=STATE_ARMED;manualSiren=false;set_motor(false);break;
                     case ACTION_DISARM:case ACTION_UNLOCK:currentState=STATE_PARKED;manualSiren=false;set_motor(true);break;
                     case ACTION_LOCK:currentState=STATE_THEFT_LOCK;set_motor(false);break;
                     case ACTION_SIREN_ON:manualSiren=true;break;
                     case ACTION_SIREN_OFF:manualSiren=false;if(currentState==STATE_ALARM)currentState=STATE_ARMED;break;
                     case ACTION_ALARM:if(currentState==STATE_ARMED)currentState=STATE_ALARM;break;
                     case ACTION_REBOOT:r.reboot=true;break;
+                    case ACTION_RESET_WHEEL_SESSION:wheel.resetSession(millis());break;
+                    case ACTION_CONFIG_THRESHOLDS:
+                        wheel.setSpeedLimit(c.speedLimit);
+                        Serial.printf("[SPEED LIMIT] applied=%.2f km/h saved=NVS\n",c.speedLimit);
+                        break;
                 }
                 digitalWrite(PIN_BUZZER,(manualSiren||currentState==STATE_ALARM||currentState==STATE_THEFT_LOCK)?HIGH:LOW);
                 Serial.printf("[CONTROL] cmd=%s action=%u result=%s reason=%s state=%s\n",c.id,unsigned(c.action),r.executed?"EXECUTED":"REJECTED",r.reason,state_to_string(currentState));
@@ -290,6 +357,7 @@ void ControlTask(void*) {
             if(!alarmStart)alarmStart=millis();
             if(millis()-alarmStart>=15000&&!lock_block_reason()) {set_motor(false);currentState=STATE_THEFT_LOCK;Serial.println("[CONTROL] automatic lock");}
         } else alarmStart=0;
+        if(xSemaphoreTake(telemetryMutex,pdMS_TO_TICKS(10))==pdTRUE) {sharedWheelSession=wheel.snapshot(millis());xSemaphoreGive(telemetryMutex);}
         digitalWrite(PIN_BUZZER,(manualSiren||(currentState==STATE_ALARM&&(millis()/200)%2)||(currentState==STATE_THEFT_LOCK&&(millis()/500)%2))?HIGH:LOW);
         digitalWrite(PIN_LED,(currentState==STATE_THEFT_LOCK||(currentState==STATE_ARMED&&(millis()/1000)%2)||(currentState==STATE_ALARM&&(millis()/200)%2))?HIGH:LOW);
         vTaskDelay(pdMS_TO_TICKS(20));
@@ -299,12 +367,13 @@ void ControlTask(void*) {
 void MQTTTask(void *pvParameters) {
     mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
     mqttClient.setCallback(mqtt_callback);
-    if(!mqttClient.setBufferSize(768)) Serial.println("[MQTT] buffer allocation failed");
+    if(!mqttClient.setBufferSize(1024)) Serial.println("[MQTT] buffer allocation failed");
     mqttClient.setSocketTimeout(1);
     CommandResult pendingAck={};bool hasAck=false;
 
     uint32_t lastTelemetryPub = 0;
     uint32_t lastHeartbeatPub = 0;
+    uint32_t alertSequence=0,wheelSequence=0;
 
     for (;;) {
         // 1. Quản lý kết nối Wi-Fi
@@ -332,8 +401,8 @@ void MQTTTask(void *pvParameters) {
 
                 // Báo Online
                 char onlineMsg[128];
-                snprintf(onlineMsg, sizeof(onlineMsg), "{\"status\":\"online\",\"ip\":\"%s\",\"fw\":\"v2-gps\"}",
-                         WiFi.localIP().toString().c_str());
+                snprintf(onlineMsg, sizeof(onlineMsg), "{\"status\":\"online\",\"ip\":\"%s\",\"fw\":\"%s\"}",
+                         WiFi.localIP().toString().c_str(), FIRMWARE_VERSION);
                 mqttClient.publish(TOPIC_STATUS, onlineMsg, true);
 
                 // Lắng nghe topic nhận lệnh (cả UUID lẫn Device ID)
@@ -350,13 +419,14 @@ void MQTTTask(void *pvParameters) {
         // 3. Tiếp nhận cảnh báo từ Sensor Node (KỂ CẢ KHI ĐANG MẤT MẠNG ĐỂ LƯU BUFFER)
         AccelEventData evt;
         if (alertMqttQueue != NULL && xQueueReceive(alertMqttQueue, &evt, 0) == pdTRUE) {
-            const char* reason = (evt.event_type >= 2) ? "FALL_DETECTED" : "MOTION_WHILE_ARMED";
-            const char* severity = (evt.event_type >= 2) ? "CRITICAL" : "HIGH";
+            const char* reason=evt.event_type==1?"MOTION_WHILE_ARMED":evt.event_type==2?"FALL_DETECTED":evt.event_type==3?"WHEEL_MOVEMENT_WHILE_ARMED":"SPEED_LIMIT_EXCEEDED";
+            const char* severity=evt.event_type==2?"CRITICAL":evt.event_type==4?"MEDIUM":"HIGH";
+            const char* unit=evt.event_type==1?"m/s2":evt.event_type==2?"deg":evt.event_type==3?"pulses":"km/h";
 
             char alertJson[320];
             snprintf(alertJson, sizeof(alertJson),
-                     "{\"device_id\":\"%s\",\"ts\":%lu,\"alert_id\":\"a%08lx-%lu\",\"reason\":\"%s\",\"severity\":\"%s\",\"details\":\"Sensor event: %.2f %s\"}",
-                     DEVICE_ID, (unsigned long)(millis() / 1000), (unsigned long)bootNonce, (unsigned long)evt.timestamp, reason, severity, evt.value, evt.event_type==2?"deg":"m/s2");
+                     "{\"device_id\":\"%s\",\"ts\":%lu,\"alert_id\":\"a%08lx-%lu\",\"reason\":\"%s\",\"severity\":\"%s\",\"action_taken\":\"%s\",\"details\":\"Sensor event: %.2f %s\"}",
+                     DEVICE_ID, (unsigned long)(millis() / 1000), (unsigned long)bootNonce, (unsigned long)++alertSequence, reason, severity, evt.event_type==4?"WARNING_ONLY":"LOGGED", evt.value, unit);
 
             // Tự động publish nếu có mạng, hoặc lưu vào Offline Buffer nếu đang mất mạng
             publish_or_buffer(TOPIC_ALERT, alertJson, 1);
@@ -394,6 +464,21 @@ void MQTTTask(void *pvParameters) {
                 // No battery ADC yet: do not publish fabricated 12.6V.
                 char json[640];size_t len=serializeJson(doc,json,sizeof(json));
                 if(doc.overflowed()||len>=sizeof(json)-1||!mqttClient.publish(TOPIC_TELEMETRY,json)) Serial.println("[MQTT] telemetry publish failed");
+                WheelSessionSnapshot session=wheel_snapshot();
+                if(session.available) {
+                    StaticJsonDocument<768> stats;char sessionId[32];
+                    snprintf(sessionId,sizeof(sessionId),"%08lx-%lu",(unsigned long)bootNonce,(unsigned long)session.generation);
+                    stats["device_id"]=DEVICE_ID;stats["data_source"]="HARDWARE";stats["session_id"]=sessionId;
+                    stats["sequence"]=++wheelSequence;stats["source_boot_id"]=session.source_boot;
+                    stats["pulse_count"]=session.pulses;stats["revolutions"]=double(session.pulses)/WHEEL_PULSES_PER_REV;
+                    stats["distance_m"]=double(session.pulses)*WHEEL_CIRCUMFERENCE_M/WHEEL_PULSES_PER_REV;
+                    stats["max_speed_kmh"]=session.max_speed;stats["moving_ms"]=session.moving_ms;stats["elapsed_ms"]=session.elapsed_ms;
+                    stats["fresh"]=session.fresh;stats["overspeed_active"]=session.overspeed;stats["speed_limit_kmh"]=session.speed_limit;
+                    stats["speed_limit_configurable"]=true; // Capability is distinct from a storage failure reported in ACK.
+                    stats["circumference_m"]=WHEEL_CIRCUMFERENCE_M;stats["pulses_per_rev"]=WHEEL_PULSES_PER_REV;
+                    char wheelJson[768];size_t size=serializeJson(stats,wheelJson,sizeof(wheelJson));
+                    if(stats.overflowed()||size>=sizeof(wheelJson)-1||!mqttClient.publish(TOPIC_WHEEL_SESSION,wheelJson)) Serial.println("[MQTT] wheel session publish failed");
+                }
             }
 
             // Định kỳ 15s gửi Heartbeat
@@ -428,6 +513,11 @@ void setup() {
     CommSerial.begin(UART_BAUD, SERIAL_8N1, RXD2, TXD2);
 
     Serial.println("\n--- ESP32 Gateway (Node A) Initializing ---");
+    Serial.printf("[FIRMWARE] Node A %s\n", FIRMWARE_VERSION);
+    speedStorageReady=speedPreferences.begin("guardian",false);
+    float savedLimit=speedStorageReady?speedPreferences.getFloat("speed_kmh",OVERSPEED_LIMIT_KMH):OVERSPEED_LIMIT_KMH;
+    if(WheelActivityMonitor::validSpeedLimit(savedLimit)) initialSpeedLimit=savedLimit;
+    Serial.printf("[SPEED LIMIT] boot=%.2f km/h storage=%s\n",initialSpeedLimit,speedStorageReady?"READY":"UNAVAILABLE");
 
     telemetryMutex  = xSemaphoreCreateMutex();
     controlQueue    = xQueueCreate(5, sizeof(ControlCommand));
@@ -456,7 +546,8 @@ void loop() {
         switch(ch) {case 'a':case 'A':case '1':c.action=ACTION_ARM;break;
             case 'd':case 'D':case '0':c.action=ACTION_DISARM;break;
             case 'k':case 'K':c.action=ACTION_LOCK;break;case 'u':case 'U':c.action=ACTION_UNLOCK;break;
-            case 'b':case '2':c.action=ACTION_SIREN_ON;break;case 's':c.action=ACTION_SIREN_OFF;break;default:known=false;}
+            case 'b':case '2':c.action=ACTION_SIREN_ON;break;case 's':c.action=ACTION_SIREN_OFF;break;
+            case 'r':case 'R':c.action=ACTION_RESET_WHEEL_SESSION;break;default:known=false;}
         if(known&&xQueueSend(controlQueue,&c,0)!=pdTRUE)Serial.println("[CONTROL] queue full");
     }
     static uint32_t log=0;
@@ -465,6 +556,9 @@ void loop() {
         Serial.printf("[Node A UART v2] size=%u state=%s speed=%.2f fresh=%u gps_valid=%u age=%lu heap=%u\n",
             unsigned(sizeof(TelemetryData)),state_to_string(currentState),t.speed,
             seen&&millis()-received<=SENSOR_STALE_MS,t.gps_valid,(unsigned long)t.gps_age_ms,esp_get_free_heap_size());
+        WheelSessionSnapshot session=wheel_snapshot();
+        Serial.printf("[WHEEL SESSION] id=%lu pulses=%llu distance=%.3f m max=%.2f km/h fresh=%u overspeed=%u\n",
+            (unsigned long)session.generation,(unsigned long long)session.pulses,double(session.pulses)*WHEEL_CIRCUMFERENCE_M/WHEEL_PULSES_PER_REV,session.max_speed,session.fresh,session.overspeed);
     }
     vTaskDelay(pdMS_TO_TICKS(20));
 }

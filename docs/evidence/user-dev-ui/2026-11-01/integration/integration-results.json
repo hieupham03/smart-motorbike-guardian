@@ -1,0 +1,25 @@
+{
+  "result": "PASS",
+  "source": "EXPORTED_MOBILE_REAL_BACKEND_LOCAL_MQTT_EMULATOR",
+  "checks": [
+    "Backend starts with Flyway V1/V2/V3 and real authentication",
+    "Exported mobile login + real REST/STOMP dashboard receives emulated Hall speed",
+    "Mobile session survives browser reload",
+    "Mobile LOCK -> real backend -> local MQTT emulator -> REJECTED ACK -> DB/STOMP history",
+    "New firmware overspeed alert is stored and displayed by mobile",
+    "Emulated GPS NO_FIX -> FIX -> STALE keeps last-known position",
+    "Live telemetry preserves dirty metadata form",
+    "Hardware metadata save succeeds without threshold fields",
+    "Firmware wheel_session reaches mobile with real limit, distance and overspeed indicator",
+    "Owner reset passes REST/MQTT/ACK and new wheel session clears totals",
+    "Sensor/wheel expiry retains totals and disables reset",
+    "Actual alert afterCommit calls local HTTP push transport without transaction error",
+    "Backend denies Viewer wheel reset with 403",
+    "Foreground REST fallback updates mobile speed when WebSocket is blocked",
+    "No browser JavaScript errors including notification APIs"
+  ],
+  "localPushRequests": 1,
+  "pageErrors": [],
+  "physicalBoard": false,
+  "nativePhone": false
+}

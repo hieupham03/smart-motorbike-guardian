@@ -1,23 +1,22 @@
-﻿# Firmware verification
+# Kiểm tra firmware
 
-Checked 2026-10-08. The UART test uses a tiny Arduino/HardwareSerial host stub; it tests real uart_protocol.h, not an independent reimplementation. It does not test GPIO, RTOS scheduling, MQTT delivery or GPS RF reception.
-
-Additional regression (2026-10-18): first Hall pulse and first pulse after stop have unknown speed; both speed and IMU validity expire with the original sample. Re-test the breadboard after uploading.
-
-```powershell
-g++ -std=c++11 -Ifirmware/node_b_sensor tests/firmware/wheel_speed_test.cpp -o build/wheel_speed_test.exe
-& ./build/wheel_speed_test.exe
-```
-
-From repository root in PowerShell:
+Chạy từ gốc repository với C++ compiler:
 
 ```powershell
 New-Item -ItemType Directory -Path build -Force | Out-Null
 g++ -std=c++11 -Itests/firmware/stubs -Ifirmware/node_a_gateway tests/firmware/uart_protocol_test.cpp -o build/uart_protocol_test.exe
-& ./build/uart_protocol_test.exe
+./build/uart_protocol_test.exe
+g++ -std=c++11 -Ifirmware/node_b_sensor tests/firmware/wheel_speed_test.cpp -o build/wheel_speed_test.exe
+./build/wheel_speed_test.exe
+g++ -std=c++11 -Ifirmware/node_a_gateway tests/firmware/wheel_activity_test.cpp -o build/wheel_activity_test.exe
+./build/wheel_activity_test.exe
 ```
 
-Install ESP32 core 2.0.17, TinyGPSPlus 1.0.3, PubSubClient and ArduinoJson (verified with 7.4.3). Ensure Node A has local network_config.h copied from network_config.example.h. Add --libraries with your Arduino sketchbook library directory if CLI does not find installed libraries.
+Test dùng module UART/Hall/wheel activity thật. UART được thay bằng host stub để kiểm framing/checksum/timeout/độ dài; Hall kiểm xung đầu, dừng/tiếp tục và freshness; wheel activity kiểm phiên, reset, reboot/wrap, bảo vệ bánh, ngưỡng tốc độ động và hysteresis/dwell. Không mô phỏng toàn bộ FreeRTOS/GPIO hoặc xác nhận motor/còi/GPS RF.
+
+## Biên dịch Arduino
+
+Đã dùng ESP32 core 2.0.17, TinyGPSPlus 1.0.3, PubSubClient và ArduinoJson 7.4.3. Tạo `firmware/node_a_gateway/network_config.h` từ file mẫu cạnh đó; chỉ điền Wi-Fi riêng tại máy người chạy, không commit.
 
 ```powershell
 arduino-cli compile --fqbn esp32:esp32:esp32 --build-path build/node_a firmware/node_a_gateway
@@ -25,4 +24,4 @@ arduino-cli compile --fqbn 'esp32:esp32:esp32s3:FlashSize=16M,PSRAM=opi,CDCOnBoo
 arduino-cli compile --fqbn 'esp32:esp32:esp32s3:FlashSize=16M,PSRAM=opi,CDCOnBoot=cdc' --build-path build/gps_bringup firmware/gps_bringup
 ```
 
-All three builds and UART tests passed. See docs/HUONG-DAN-HARDWARE-FIRMWARE-V2-GPS.md for exact binary/static RAM sizes and manual hardware tests. Firmware mirror hashes match. No hardware upload performed.
+Chỉ dùng hai thư mục chuẩn trong `firmware/`, không có mirror ở gốc. Bánh đường kính 6,5 cm, một xung/vòng cho tốc độ tham chiếu khoảng 0,735 km/h ở một vòng/giây; phép kiểm host không đo sai số bánh thật. Xem [hướng dẫn đấu nối/nạp](../../docs/HUONG-DAN-HARDWARE-FIRMWARE-V2-GPS.md).

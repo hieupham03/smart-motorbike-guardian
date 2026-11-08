@@ -1,0 +1,10 @@
+*.lck
+*.bak_*
+builder/classes/
+builder/workspace/
+builder/smoke.vpp*
+builder/types.vpp*
+builder/erd.png
+builder/erd.svg
+builder/seq.png
+builder/seq.svg

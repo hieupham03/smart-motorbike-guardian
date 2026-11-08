@@ -1,17 +1,26 @@
-# Software integration checks
+# Kiểm thử tích hợp phần mềm
 
-`backend/src/test/java/com/guardian/`: `mvn test` chạy H2/Flyway, MQTT TCP peer local, STOMP thật, metadata, ACK/timeout và quyền. Không cần board, broker công cộng hoặc PostgreSQL thật.
+Cài dependencies bằng `npm ci` trong `frontend/` và `frontend/mobile/`. Playwright là dev dependency đã có trong lockfile web. Cài browser bằng `npx playwright install chromium` trong `frontend/` nếu không dùng Edge trên Windows.
 
-`frontend/src/services/`: `npm test` chạy reducer, freshness, session refresh/race conditions bằng Node test runner.
+Tạo các build trước khi chạy:
 
-UI smoke dành cho môi trường Windows có Microsoft Edge:
+```powershell
+cd frontend
+npm run build
+cd mobile
+npx expo export --platform web --output-dir dist
+cd ../..
+```
 
-1. Trong `backend/`: `mvn package -DskipTests`.
-2. Trong `frontend/`: `npm ci`, rồi `npm install --no-save --package-lock=false playwright`. Dependency UI chỉ dùng khi chạy smoke, không cần cho app/default unit tests.
-3. Từ root repo: `node tests/integration/ui-runtime.cjs`. Helper tạo secret tạm, H2 riêng, MQTT disabled; dùng cổng 18080/15173, không điều khiển board.
-4. Terminal khác, từ root: `node tests/integration/ui-smoke.cjs`.
-5. Ctrl+C terminal runtime để dừng backend/Vite và xóa file credential/PID tạm. Không chạy helper khi những cổng này đã được dùng.
+| Script, chạy từ gốc repo | Phạm vi |
+|---|---|
+| `node tests/integration/speed-limit-ui.cjs` | Web/mobile: nhập ngưỡng, chờ ACK, ngưỡng thiết bị báo về, lỗi và quyền |
+| `node tests/integration/gps-map-ui.cjs` | Bản đồ web/mobile export với vị trí và trạng thái fixture |
+| `node tests/integration/user-dev-ui-smoke.cjs` | Giao diện người dùng/khu vực dev, quyền và màn hình nhỏ |
+| `node tests/integration/mobile-native-config-check.cjs` | Kiểm cấu hình development/production; không dựng APK |
+| `node tests/integration/mobile-integrated-acceptance.cjs` | Spring Boot/H2 thật + MQTT/push emulator cục bộ; cần `mvn package` trong backend |
+| `node tests/integration/gps-map-provider-probe.cjs` | Kiểm truy cập nhà cung cấp bản đồ; có gọi mạng ngoài |
 
-Smoke login Owner/Viewer, xác nhận WebSocket, telemetry SIMULATED, ACK/command history, MQTT_UNAVAILABLE, NO_FIX/null ADC, quyền Viewer và reload. Ảnh/JSON phần mềm được ghi vào `docs/evidence/realtime/`; cần phân biệt với evidence hardware.
+UI fixtures không đăng nhập tài khoản thật và không gửi lệnh tới mạch. Phép tích hợp backend dùng cổng/DB riêng và emulator, không dùng broker công cộng để điều khiển board. Kết quả được lưu trong `docs/evidence/` và phải ghi đúng nhãn fixture/emulator. Native phone, GPS RF, relay/motor và độ trễ vật lý cần kiểm riêng.
 
-Có thể dùng cùng smoke với stack Docker thử riêng bằng GUARDIAN_WEB_URL, GUARDIAN_API_URL và GUARDIAN_CREDENTIALS_FILE (JSON chứa demoPassword). Đặt CORS_ALLOWED_ORIGINS đúng origin web thử, giữ MQTT_ENABLED=false để không tác động board. Mặc định vẫn dùng runtime local ở các bước trên. Lưu evidence mới vào thư mục có ngày, không ghi đè nhãn bằng chứng cũ.
+Đặt `PLAYWRIGHT_EXECUTABLE_PATH` nếu dùng browser ở đường dẫn riêng. Có thể đặt `GUARDIAN_JAVA` để chọn Java khi chạy tích hợp backend.

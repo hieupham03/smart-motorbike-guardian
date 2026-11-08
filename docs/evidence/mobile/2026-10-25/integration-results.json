@@ -1,0 +1,76 @@
+{
+  "result": "COMPLETED_WITH_FINDINGS",
+  "source": "EXPORTED_MOBILE_REAL_BACKEND_LOCAL_MQTT_EMULATOR",
+  "checks": [
+    "Backend starts with Flyway V1/V2/V3 and real authentication",
+    "Exported mobile login + real REST/STOMP dashboard receives emulated Hall speed",
+    "Mobile session survives browser reload",
+    "Mobile LOCK -> real backend -> local MQTT emulator -> REJECTED ACK -> DB/STOMP history",
+    "New firmware overspeed alert is stored and displayed by mobile",
+    "Emulated GPS NO_FIX -> FIX -> STALE keeps last-known position",
+    "Backend denies Viewer wheel reset with 403"
+  ],
+  "findings": [
+    {
+      "id": "MOBILE-FORM-RESET",
+      "confirmed": true,
+      "observation": "Unsaved name is replaced after live DEVICE update"
+    },
+    {
+      "id": "HARDWARE-CONFIG-400",
+      "confirmed": true,
+      "status": 400,
+      "observation": "Metadata save includes unsupported hardware thresholds"
+    },
+    {
+      "id": "MISSING-WHEEL-UI",
+      "confirmed": true,
+      "observation": "Backend has wheel session; mobile lacks wheel API/event/reset UI"
+    },
+    {
+      "id": "PUSH-AFTER-COMMIT",
+      "confirmed": true,
+      "localMockRequests": 0,
+      "observation": "After-commit push path throws transaction error before reaching local transport"
+    },
+    {
+      "id": "WEB-NATIVE-NOTIFICATION-API",
+      "confirmed": true,
+      "count": 27,
+      "observation": [
+        "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?"
+      ]
+    }
+  ],
+  "pageErrors": [
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?",
+    "The method or property ExpoNotifications.getLastNotificationResponse is not available on web, are you sure you've linked all the native dependencies properly?"
+  ],
+  "physicalBoard": false,
+  "nativePhone": false
+}

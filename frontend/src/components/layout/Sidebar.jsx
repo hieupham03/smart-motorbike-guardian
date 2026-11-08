@@ -1,95 +1,71 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import React from "react";
+import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   Bike,
   MapPin,
   LineChart,
   AlertTriangle,
-  Terminal,
+  History,
   Users,
-  ShieldAlert,
-  UserCheck,
-  Settings
-} from 'lucide-react';
+  Shield,
+  Settings,
+  Wrench,
+} from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { useDevice } from "../../context/DeviceContext";
+import { canUseDeveloperTools } from "../../services/presentation";
 
 export default function Sidebar() {
   const { role } = useAuth();
-
-  const navItems = [
-    { to: '/', label: 'Tổng quan Realtime', icon: LayoutDashboard },
-    { to: '/devices', label: 'Quản lý Thiết bị', icon: Bike },
-    { to: '/map', label: 'Bản đồ & Định vị', icon: MapPin },
-    { to: '/analytics', label: 'Lịch sử & Xuất CSV', icon: LineChart },
-    { to: '/alerts', label: 'Trung tâm Cảnh báo', icon: AlertTriangle },
-    { to: '/commands', label: 'Lịch sử Lệnh', icon: Terminal },
-    { to: '/users', label: 'Người dùng & Viewer', icon: Users, hideForViewer: true },
-    ...(role === 'ADMIN' ? [{ to: '/admin', label: 'Cổng Quản trị Admin', icon: ShieldAlert }] : []),
-    { to: '/profile', label: 'Tài khoản & Bảo mật', icon: Settings },
+  const { selectedDevice } = useDevice();
+  const items = [
+    ["/", "Tổng quan", LayoutDashboard],
+    ["/devices", "Xe của tôi", Bike],
+    ["/map", "Vị trí xe", MapPin],
+    ["/alerts", "Cảnh báo", AlertTriangle],
+    ["/analytics", "Lịch sử hoạt động", LineChart],
+    ["/commands", "Lịch sử điều khiển", History],
+    ...(role !== "VIEWER" ? [["/users", "Chia sẻ theo dõi", Users]] : []),
+    ["/profile", "Tài khoản", Settings],
   ];
-
   return (
-    <aside style={{
-      width: '260px',
-      background: 'rgba(255, 255, 255, 0.78)',
-      backdropFilter: 'blur(16px)',
-      borderRight: '1px solid var(--border-card)',
-      display: 'flex',
-      flexDirection: 'column',
-      padding: '1.25rem 0.85rem'
-    }}>
-      <div style={{ padding: '0 0.75rem 1.25rem', fontSize: '0.75rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-        MENU ĐIỀU KHIỂN
+    <aside className="sidebar" aria-label="Điều hướng chính">
+      <div className="sidebar-brand">
+        <Shield size={26} aria-hidden="true" />
+        <div>
+          <strong>Guardian</strong>
+          <span>Đồng hành cùng xe của bạn</span>
+        </div>
       </div>
-
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', flex: 1 }}>
-        {navItems.map((item) => {
-          if (item.hideForViewer && role === 'VIEWER') return null;
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              style={({ isActive }) => ({
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                padding: '0.7rem 1rem',
-                borderRadius: '12px',
-                fontSize: '0.885rem',
-                fontWeight: isActive ? '700' : '600',
-                textDecoration: 'none',
-                color: isActive ? '#0284c7' : '#475569',
-                background: isActive ? '#e0f2fe' : 'transparent',
-                border: isActive ? '1px solid #bae6fd' : '1px solid transparent',
-                transition: 'all 0.15s ease'
-              })}
-            >
-              <Icon size={19} />
-              <span>{item.label}</span>
-            </NavLink>
-          );
-        })}
+      <p className="nav-caption">THEO DÕI & BẢO VỆ</p>
+      <nav className="sidebar-nav">
+        {items.map(([to, label, Icon]) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={to === "/"}
+            className={({ isActive }) => `nav-item${isActive ? " active" : ""}`}
+          >
+            <Icon size={20} aria-hidden="true" />
+            <span>{label}</span>
+          </NavLink>
+        ))}
       </nav>
-
-      {/* Embedded Hardware & UART Protocol Info Box */}
-      <div style={{
-        marginTop: 'auto',
-        background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-        border: '1px solid #bae6fd',
-        borderRadius: '14px',
-        padding: '0.85rem'
-      }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: '800', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#0284c7', display: 'inline-block' }} />
-          KIẾN TRÚC ĐA NODE
-        </div>
-        <div style={{ fontSize: '0.7rem', color: '#0c4a6e', marginTop: '4px', lineHeight: '1.4' }}>
-          • Sensor: Hall, IMU, ADC<br/>
-          • UART: 115200 0xAA..0x55<br/>
-          • Gateway: ESP32 + SafetyTask
-        </div>
+      <div className="sidebar-tools">
+        {role === "ADMIN" && (
+          <NavLink className="nav-item" to="/admin">
+            <Shield size={19} aria-hidden="true" />
+            Quản trị hệ thống
+          </NavLink>
+        )}
+        {canUseDeveloperTools(role, selectedDevice?.currentUserRole) && (
+          <NavLink className="nav-item dev-nav-link" to="/developer">
+            <Wrench size={19} aria-hidden="true" />
+            Chẩn đoán & thử nghiệm
+          </NavLink>
+        )}
+        <p>Thông tin mới giúp bạn theo dõi xe rõ hơn.</p>
       </div>
     </aside>
   );

@@ -1,0 +1,21 @@
+title = "Guardian release secret scan"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "firmware-wifi-password"
+description = "Wi-Fi password literal, including short values missed by entropy rules"
+regex = '''(?m)^\s*#define\s+WIFI_PASSWORD\s+"([^"\r\n]+)"'''
+secretGroup = 1
+keywords = ["WIFI_PASSWORD"]
+
+[[rules.allowlists]]
+description = "Explicit non-secret firmware example placeholders"
+regexTarget = "secret"
+regexes = ['''^(?:YOUR_|WIFI_|CHANGE_|ENTER_|REPLACE_)[A-Z_]+$''']
+
+[[allowlists]]
+description = "Public integration-test signing fixture; never used by runtime configuration"
+regexTarget = "line"
+regexes = ['''app\.jwt\.secret=integration-test-signing-key-at-least-32-bytes''']

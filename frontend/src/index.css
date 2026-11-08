@@ -17,10 +17,10 @@
   --primary-900: #0c4a6e;
 
   /* Neutral Surface Palette */
-  --bg-page: #f4f8fc;
-  --bg-card: rgba(255, 255, 255, 0.92);
+  --bg-page: #f5f7fb;
+  --bg-card: #ffffff;
   --bg-card-glass: rgba(255, 255, 255, 0.75);
-  --border-card: rgba(186, 230, 253, 0.55);
+  --border-card: #dce5ef;
   --border-subtle: #e2e8f0;
   
   --text-main: #0f172a;

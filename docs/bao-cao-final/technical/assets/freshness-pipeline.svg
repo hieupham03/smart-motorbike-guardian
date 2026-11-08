@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="792pt" height="446.4pt" viewBox="0 0 792 446.4" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-11-07T21:53:42.811743</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 446.4 
+L 792 446.4 
+L 792 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 25.4988 211.914 
+L 179.8452 211.914 
+Q 185.4324 211.914 185.4324 206.442 
+L 185.4324 123.678 
+Q 185.4324 118.206 179.8452 118.206 
+L 25.4988 118.206 
+Q 19.9116 118.206 19.9116 123.678 
+L 19.9116 206.442 
+Q 19.9116 211.914 25.4988 211.914 
+z
+" clip-path="url(#pa37e6ae5a6)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 221.0508 211.914 
+L 375.3972 211.914 
+Q 380.9844 211.914 380.9844 206.442 
+L 380.9844 123.678 
+Q 380.9844 118.206 375.3972 118.206 
+L 221.0508 118.206 
+Q 215.4636 118.206 215.4636 123.678 
+L 215.4636 206.442 
+Q 215.4636 211.914 221.0508 211.914 
+z
+" clip-path="url(#pa37e6ae5a6)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 416.6028 211.914 
+L 570.9492 211.914 
+Q 576.5364 211.914 576.5364 206.442 
+L 576.5364 123.678 
+Q 576.5364 118.206 570.9492 118.206 
+L 416.6028 118.206 
+Q 411.0156 118.206 411.0156 123.678 
+L 411.0156 206.442 
+Q 411.0156 211.914 416.6028 211.914 
+z
+" clip-path="url(#pa37e6ae5a6)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 612.1548 211.914 
+L 766.5012 211.914 
+Q 772.0884 211.914 772.0884 206.442 
+L 772.0884 123.678 
+Q 772.0884 118.206 766.5012 118.206 
+L 612.1548 118.206 
+Q 606.5676 118.206 606.5676 123.678 
+L 606.5676 206.442 
+Q 606.5676 211.914 612.1548 211.914 
+z
+" clip-path="url(#pa37e6ae5a6)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 49.9428 382.914 
+L 357.9372 382.914 
+Q 363.5244 382.914 363.5244 377.442 
+L 363.5244 304.938 
+Q 363.5244 299.466 357.9372 299.466 
+L 49.9428 299.466 
+Q 44.3556 299.466 44.3556 304.938 
+L 44.3556 377.442 
+Q 44.3556 382.914 49.9428 382.914 
+z
+" clip-path="url(#pa37e6ae5a6)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 434.0628 382.914 
+L 742.0572 382.914 
+Q 747.6444 382.914 747.6444 377.442 
+L 747.6444 304.938 
+Q 747.6444 299.466 742.0572 299.466 
+L 434.0628 299.466 
+Q 428.4756 299.466 428.4756 304.938 
+L 428.4756 377.442 
+Q 428.4756 382.914 434.0628 382.914 
+z
+" clip-path="url(#pa37e6ae5a6)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(78.040164 132.109805)">NODE B</text>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(102.672 146.31)"/>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(44.543094 169.228945)">Mẫu có timestamp</text>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(42.338016 187.799258)">Cờ cảm biến hợp lệ</text>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(44.066531 206.259219)">GPS age và last fix</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(273.604859 132.109805)">NODE A</text>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(298.224 146.31)"/>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(245.629273 169.332461)">UART mới ≤1,5 s</text>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(250.292359 188.470156)">Heartbeat ≤3 s</text>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(236.331422 207.859805)">Interlock điều khiển</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(463.421508 132.109805)">BACKEND</text>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(493.776 146.31)"/>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(445.113891 169.304141)">Thời điểm nhận</text>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(450.205688 187.802188)">Nguồn dữ liệu</text>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(432.983031 206.322695)">Snapshot và lịch sử</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(644.956906 131.618594)">WEB / MOBILE</text>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(689.328 146.31)"/>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(637.211789 168.914492)">Dữ liệu mới ≤5 s</text>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(620.357297 187.898867)">Tuổi GPS tiếp tục tăng</text>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(617.694211 206.552188)">Vị trí gần nhất có nhãn</text>
+   </g>
+   <g id="patch_8">
+    <path d="M 184.987204 165.06 
+Q 200.448967 165.06 214.569089 165.06 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 209.069089 162.31 
+L 214.569089 165.06 
+L 209.069089 167.81 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 380.539204 165.06 
+Q 396.000967 165.06 410.121089 165.06 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 404.621089 162.31 
+L 410.121089 165.06 
+L 404.621089 167.81 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 576.091204 165.06 
+Q 591.552967 165.06 605.673089 165.06 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 600.173089 162.31 
+L 605.673089 165.06 
+L 600.173089 167.81 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 15px; font-family: 'DejaVu Sans'" transform="translate(137.784141 334.727109)">Liên kết còn sống</text>
+    <text style="font-size: 15px; font-family: 'DejaVu Sans'" transform="translate(70.322812 357.442734)">Không tự xác nhận mẫu đo còn mới</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 15px; font-family: 'DejaVu Sans'" transform="translate(517.406484 334.565391)">Có tọa độ được lưu</text>
+    <text style="font-size: 15px; font-family: 'DejaVu Sans'" transform="translate(451.051406 356.879063)">Không tự xác nhận GPS đang định vị</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pa37e6ae5a6">
+   <rect x="11.88" y="11.16" width="768.24" height="424.08"/>
+  </clipPath>
+ </defs>
+</svg>

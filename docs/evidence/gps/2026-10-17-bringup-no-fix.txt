@@ -1,0 +1,26 @@
+========== GPS NO_FIX | uptime 62 s ==========
+UART RX6 / 9600: DANG NHAN | bytes=8040 | checksum OK=217 ERROR=0
+GSV: reported=12 | co tin hieu=3 | C/N0 manh nhat=38 dB-Hz
+RF: da thay tin hieu ve tinh; chua dong nghia co vi tri.
+GGA: ve tinh DUNG DINH VI=0
+VI TRI: chua co fix hien tai hop le; khong dung 0,0 lam vi tri.
+THU: mat gom antenna huong troi, noi thoang, giu nguon lien tuc.
+Raw NMEA: ON | go r de bat/tat
+
+========== GPS NO_FIX | uptime 662 s ==========
+UART RX6 / 9600: DANG NHAN | bytes=102391 | checksum OK=2377 ERROR=0
+GSV: reported=12 | co tin hieu=0 | C/N0 manh nhat=0 dB-Hz
+RF: chua thay C/N0 > 0; reported KHONG phai so ve tinh da bat.
+GGA: ve tinh DUNG DINH VI=0
+VI TRI: chua co fix hien tai hop le; khong dung 0,0 lam vi tri.
+THU: mat gom antenna huong troi, noi thoang, giu nguon lien tuc.
+Raw NMEA: OFF | go r de bat/tat
+
+========== GPS NO_FIX | uptime 664 s ==========
+UART RX6 / 9600: DANG NHAN | bytes=102627 | checksum OK=2383 ERROR=0
+GSV: reported=12 | co tin hieu=0 | C/N0 manh nhat=0 dB-Hz
+RF: chua thay C/N0 > 0; reported KHONG phai so ve tinh da bat.
+GGA: ve tinh DUNG DINH VI=0
+VI TRI: chua co fix hien tai hop le; khong dung 0,0 lam vi tri.
+THU: mat gom antenna huong troi, noi thoang, giu nguon lien tuc.
+Raw NMEA: OFF | go r de bat/tat

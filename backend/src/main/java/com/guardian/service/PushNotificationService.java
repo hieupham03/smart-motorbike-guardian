@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 import java.time.Instant;
 import java.util.*;
 
@@ -25,12 +26,12 @@ public class PushNotificationService {
   target.setUser(user); target.setExpoToken(token); target.setPlatform(platform.toLowerCase()); target.setInstallationId(installationId); target.setActive(true); tokens.save(target);
  }
  @Transactional public void unregister(User user,String installationId){tokens.findByUserAndInstallationId(user,installationId).ifPresent(token->{token.setActive(false);tokens.save(token);});}
- @Transactional public void notifyDevice(Device device,String eventKey,String title,String body,Map<String,Object> data){
+ @Transactional(propagation=Propagation.REQUIRES_NEW) public void notifyDevice(Device device,String eventKey,String title,String body,Map<String,Object> data){
   LinkedHashMap<String,User> recipients=new LinkedHashMap<>(); ownerships.findByDevice(device).forEach(o->{if("ACTIVE".equals(o.getUser().getStatus()))recipients.put(o.getUser().getUserId(),o.getUser());});
   users.findAll().stream().filter(u->u.getRole()==Role.ADMIN&&"ACTIVE".equals(u.getStatus())).forEach(u->recipients.put(u.getUserId(),u));
   send(recipients.values(),eventKey,title,body,data);
  }
- @Transactional public void notifyUser(User user,String eventKey,String title,String body,Map<String,Object> data){send(List.of(user),eventKey,title,body,data);}
+ @Transactional(propagation=Propagation.REQUIRES_NEW) public void notifyUser(User user,String eventKey,String title,String body,Map<String,Object> data){send(List.of(user),eventKey,title,body,data);}
  private void send(Collection<User> recipients,String eventKey,String title,String body,Map<String,Object> data){
   if(!enabled)return;
   for(PushToken token:tokens.findByUserInAndActiveTrue(recipients)){

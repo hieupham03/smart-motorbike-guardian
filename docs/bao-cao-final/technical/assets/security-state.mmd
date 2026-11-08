@@ -1,0 +1,6 @@
+stateDiagram-v2
+ PARKED --> ARMED: ARM và guard
+ ARMED --> ALARM: rung hoặc bánh quay
+ ALARM --> THEFT_LOCK:15s và guard
+ THEFT_LOCK --> PARKED: UNLOCK DISARM
+ ARMED --> PARKED: DISARM UNLOCK

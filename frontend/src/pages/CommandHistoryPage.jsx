@@ -1,28 +1,46 @@
-import React from 'react';
-import { useDevice } from '../context/DeviceContext';
-import { Terminal, Clock, CheckCircle2, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import React from "react";
+import {
+  commandLabel,
+  commandStatusLabel,
+  reasonLabel,
+} from "../services/presentation";
+import { useDevice } from "../context/DeviceContext";
+import {
+  Terminal,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  RefreshCw,
+} from "lucide-react";
 
 export default function CommandHistoryPage() {
   const { selectedDevice, commands } = useDevice();
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
       <div>
         <h1 className="page-title">
-          <Terminal size={26} color="#0284c7" /> Lịch Sử Lệnh &amp; Xác Nhận Phần Cứng (ACK)
+          <Terminal size={26} color="#0284c7" /> Lịch sử điều khiển
         </h1>
         <p className="page-subtitle">
-          Theo dõi toàn bộ lệnh điều khiển hai chiều gửi xuống vi điều khiển Gateway ESP32
+          Xem yêu cầu đã gửi và phản hồi từ thiết bị trên xe.
         </p>
       </div>
 
-      <div className="glass-card" style={{ padding: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h3 style={{ fontSize: '1rem', fontWeight: '800', color: '#0c4a6e' }}>
+      <div className="glass-card" style={{ padding: "1.5rem" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "1rem",
+          }}
+        >
+          <h3 style={{ fontSize: "1rem", fontWeight: "800", color: "#0c4a6e" }}>
             DANH SÁCH LỆNH CỦA THIẾT BỊ: {selectedDevice?.name}
           </h3>
-          <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+          <span style={{ fontSize: "0.8rem", color: "#64748b" }}>
             {commands.length} bản ghi
           </span>
         </div>
@@ -31,50 +49,79 @@ export default function CommandHistoryPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Mã Lệnh (cmd_id)</th>
                 <th>Loại Lệnh</th>
                 <th>Người Gửi</th>
                 <th>Trạng Thái</th>
                 <th>Lý Do Từ Chối (Nếu có)</th>
                 <th>Thời Gian Gửi</th>
-                <th>Thời Gian Nhận ACK</th>
+                <th>Thời gian phản hồi</th>
               </tr>
             </thead>
             <tbody>
               {commands.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+                  <td
+                    colSpan={6}
+                    style={{
+                      textAlign: "center",
+                      padding: "2rem",
+                      color: "#64748b",
+                    }}
+                  >
                     Chưa có lệnh nào được gửi tới thiết bị này.
                   </td>
                 </tr>
               ) : (
                 commands.map((cmd) => {
-                  const isSuccess = cmd.status === 'EXECUTED';
-                  const isRejected = ['REJECTED', 'TIMEOUT'].includes(cmd.status);
-                  const isPending = cmd.status === 'PENDING';
+                  const isSuccess = cmd.status === "EXECUTED";
+                  const isRejected = ["REJECTED", "TIMEOUT"].includes(
+                    cmd.status,
+                  );
+                  const isPending = cmd.status === "PENDING";
 
                   return (
                     <tr key={cmd.cmdId}>
-                      <td style={{ fontFamily: 'monospace', fontWeight: '700', color: '#0369a1' }}>
-                        {cmd.cmdId}
-                      </td>
                       <td>
-                        <span style={{ fontWeight: '800', color: '#0f172a' }}>{cmd.type}</span>
-                      </td>
-                      <td>{cmd.issuedByName || cmd.issuedByEmail || 'System'}</td>
-                      <td>
-                        <span className={`badge ${isSuccess ? 'badge-armed' : isRejected ? 'badge-alarm' : 'badge-medium'}`}>
-                          {cmd.status}
+                        <span style={{ fontWeight: "800", color: "#0f172a" }}>
+                          {commandLabel(cmd.type)}
                         </span>
                       </td>
-                      <td style={{ color: isRejected ? '#dc2626' : '#64748b', fontWeight: isRejected ? '700' : 'normal' }}>
-                        {cmd.reasonIfFailed || '—'}{cmd.lateAckAt && <div>ACK muộn: {cmd.lateAckResult} · {cmd.lateAckReason || '—'}</div>}
+                      <td>
+                        {cmd.issuedByName || cmd.issuedByEmail || "Hệ thống"}
                       </td>
-                      <td style={{ fontSize: '0.8rem' }}>
-                        {cmd.issuedAt ? new Date(cmd.issuedAt).toLocaleString() : 'N/A'}
+                      <td>
+                        <span
+                          className={`badge ${isSuccess ? "badge-armed" : isRejected ? "badge-alarm" : "badge-medium"}`}
+                        >
+                          {commandStatusLabel(cmd.status)}
+                        </span>
                       </td>
-                      <td style={{ fontSize: '0.8rem' }}>
-                        {cmd.ackAt ? new Date(cmd.ackAt).toLocaleString() : isPending ? 'Đang chờ...' : 'Không có ACK'}
+                      <td
+                        style={{
+                          color: isRejected ? "#dc2626" : "#64748b",
+                          fontWeight: isRejected ? "700" : "normal",
+                        }}
+                      >
+                        {reasonLabel(cmd.reasonIfFailed) || "—"}
+                        {cmd.lateAckAt && (
+                          <div>
+                            Thiết bị phản hồi sau thời gian chờ:{" "}
+                            {commandStatusLabel(cmd.lateAckResult)} ·{" "}
+                            {reasonLabel(cmd.lateAckReason)}
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ fontSize: "0.8rem" }}>
+                        {cmd.issuedAt
+                          ? new Date(cmd.issuedAt).toLocaleString()
+                          : "N/A"}
+                      </td>
+                      <td style={{ fontSize: "0.8rem" }}>
+                        {cmd.ackAt
+                          ? new Date(cmd.ackAt).toLocaleString()
+                          : isPending
+                            ? "Đang chờ..."
+                            : "Chưa có phản hồi"}
                       </td>
                     </tr>
                   );
@@ -84,7 +131,6 @@ export default function CommandHistoryPage() {
           </table>
         </div>
       </div>
-
     </div>
   );
 }

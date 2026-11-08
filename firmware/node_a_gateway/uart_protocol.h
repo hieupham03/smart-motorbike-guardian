@@ -17,7 +17,8 @@ enum MsgType : uint8_t {
     MSG_ACCEL_EVENT = 0x02,  // Sự kiện rung lắc / ngã xe
     MSG_CMD_RELAY   = 0x03,  // Lệnh điều khiển rơ-le
     MSG_HEARTBEAT   = 0x04,  // Nhịp tim kiểm tra kết nối
-    MSG_NACK        = 0x05   // Báo lỗi khung nhận
+    MSG_NACK        = 0x05,  // Báo lỗi khung nhận
+    MSG_WHEEL_SAMPLE= 0x06   // Versioned extension; telemetry remains 39 bytes
 };
 
 // --- Mã lỗi NACK ---
@@ -41,9 +42,16 @@ struct TelemetryData {
 };
 
 struct AccelEventData {
-    uint8_t event_type;      // 1: Rung lắc, 2: Nghiêng, 3: Va chạm
-    float value;             // Cường độ gia tốc (m/s2)
+    uint8_t event_type;      // 1: MPU motion, 2: fall; gateway-local 3: wheel guard, 4: overspeed
+    float value;             // Unit depends on type: m/s2, deg, pulses, km/h
     uint32_t timestamp;      // Thời gian phát hiện (ms)
+};
+
+struct WheelSampleData {
+    uint8_t version;         // 1
+    uint32_t boot_id;        // Random Node B boot identity
+    uint32_t pulse_count;    // Absolute debounced ISR counter (wraps as uint32_t)
+    uint32_t timestamp;      // Node B millis, same clock as telemetry
 };
 
 struct CmdRelayData {
@@ -64,6 +72,7 @@ struct NackData {
 
 #pragma pack(pop)
 static_assert(sizeof(TelemetryData) == 39, "UART v2 payload must be 39 bytes");
+static_assert(sizeof(WheelSampleData) == 13, "Wheel extension v1 must be 13 bytes");
 
 // Cấu trúc gói tin sau khi giải mã
 struct UartPacket {
@@ -144,7 +153,7 @@ inline bool parse_byte(uint8_t byte_in, UartPacket &out_pkt) {
             break;
 
         case STATE_WAIT_TYPE:
-            if (byte_in >= MSG_TELEMETRY && byte_in <= MSG_NACK) {
+            if (byte_in >= MSG_TELEMETRY && byte_in <= MSG_WHEEL_SAMPLE) {
                 rx_type = byte_in;
                 state = STATE_WAIT_LEN;
             } else {

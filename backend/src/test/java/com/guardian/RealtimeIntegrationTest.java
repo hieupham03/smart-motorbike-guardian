@@ -39,6 +39,7 @@ class RealtimeIntegrationTest {
     @Autowired DevicePresenceService presence;
     @Autowired DeviceService deviceService;
     @Autowired AlertService alertService;
+    @Autowired WheelSessionService wheelSessions;
     @Autowired AuthService auth;
     @Autowired DeviceRepository devices;
     @Autowired UserRepository users;
@@ -321,5 +322,100 @@ class RealtimeIntegrationTest {
             telemetry.recordTelemetry(other.getDeviceUuid(), dto);
             assertThat(received.poll(300, TimeUnit.MILLISECONDS)).isNull();
         } finally { session.disconnect(); stomp.stop(); }
+    }
+
+    @Test void remoteSpeedLimitRequiresOwnershipAndDoesNotPretendToApplyWithoutTheDevice() {
+        var request = new CommandRequest(CommandType.CONFIG_THRESHOLDS,"{\"speed_limit_kmh\":5.5}",null);
+        String path="/api/devices/"+device.getDeviceId()+"/command";
+        assertThat(rest.exchange(path,HttpMethod.POST,new HttpEntity<>(request,bearer(viewer)),String.class).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(rest.exchange(path,HttpMethod.POST,new HttpEntity<>(new CommandRequest(CommandType.CONFIG_THRESHOLDS,"{\"speed_limit_kmh\":0}",null),bearer(owner)),String.class).getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        var response=commandService.sendCommand(device.getDeviceId(),request,owner,"TEST");
+        var saved=commands.findById(response.getCmdId()).orElseThrow();
+        assertThat(saved.getPayload()).isEqualTo("{\"speed_limit_kmh\":5.5}");
+        assertThat(saved.getStatus()).isEqualTo(CommandStatus.REJECTED); // Broker is disabled in this test.
+        assertThat(saved.getReasonIfFailed()).isEqualTo("MQTT_UNAVAILABLE");
+        assertThat(devices.findById(device.getDeviceId()).orElseThrow().getSpeedThresholdKmh()).isEqualTo(80.0);
+        message("telemetry",payload(false));
+        message("wheel_session",wheelPayload(1,"12345678-1",0).replace("\"speed_limit_kmh\":2", "\"speed_limit_kmh\":5.5,\"speed_limit_configurable\":true"));
+        assertThat(wheelSessions.get(device.getDeviceId(),owner).speedLimitKmh()).isEqualTo(5.5);
+        assertThat(wheelSessions.get(device.getDeviceId(),owner).speedLimitConfigurable()).isTrue();
+    }
+
+    String wheelPayload(long seq, String sessionId, long pulses) {
+        return String.format(java.util.Locale.ROOT,
+            "{\"data_source\":\"HARDWARE\",\"session_id\":\"%s\",\"sequence\":%d,\"source_boot_id\":42,"+
+            "\"pulse_count\":%d,\"revolutions\":%d,\"distance_m\":%.8f,\"max_speed_kmh\":3,\"moving_ms\":2000,\"elapsed_ms\":5000,"+
+            "\"fresh\":true,\"overspeed_active\":false,\"speed_limit_kmh\":2,\"circumference_m\":0.20420352,\"pulses_per_rev\":1}",
+            sessionId,seq,pulses,pulses,pulses*0.20420352);
+    }
+
+    @Test void wheelSessionsAreRamSnapshotsWithSourceOrderingAndReadPermissions() {
+        message("telemetry",payload(false));
+        message("wheel_session",wheelPayload(10,"12345678-1",10));
+        assertThat(wheelSessions.get(device.getDeviceId(),owner).distanceM()).isCloseTo(2.0420352,within(0.00001));
+        var response=rest.exchange("/api/devices/"+device.getDeviceId()+"/wheel-session",HttpMethod.GET,
+                new HttpEntity<>(bearer(viewer)),JsonNode.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().path("data").path("pulseCount").asLong()).isEqualTo(10);
+        assertThat(response.getBody().path("data").path("fresh").asBoolean()).isTrue();
+        assertThat(rest.exchange("/api/devices/"+device.getDeviceId()+"/wheel-session",HttpMethod.GET,
+                new HttpEntity<>(bearer(stranger)),String.class).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        message("wheel_session",wheelPayload(9,"12345678-1",9));
+        message("wheel_session",wheelPayload(11,"12345678-1",1)); // Regressive statistics in the same session.
+        assertThat(wheelSessions.get(device.getDeviceId(),owner).pulseCount()).isEqualTo(10);
+        message("wheel_session",wheelPayload(12,"12345678-2",0));
+        assertThat(wheelSessions.get(device.getDeviceId(),owner).pulseCount()).isZero();
+        message("wheel_session",wheelPayload(13,"12345678-2",-1));
+        message("wheel_session",wheelPayload(13,"12345678-2",1).replace("\"distance_m\":0.20420352","\"distance_m\":100"));
+        message("wheel_session",wheelPayload(13,"12345678-2",1).replace("HARDWARE","SIMULATED"));
+        assertThat(wheelSessions.get(device.getDeviceId(),owner).sequence()).isEqualTo(12);
+        message("status","{\"status\":\"offline\"}");
+        assertThat(wheelSessions.get(device.getDeviceId(),owner).fresh()).isFalse();
+        device=devices.findById(device.getDeviceId()).orElseThrow();
+        device.setDataSource("SIMULATED");devices.save(device);
+        message("wheel_session",wheelPayload(14,"12345678-2",2));
+        assertThat(wheelSessions.get(device.getDeviceId(),owner)).isNull();
+    }
+
+    @Test void realWheelAlertsAreStoredAndOverspeedNeverChangesTheSecurityState() {
+        message("telemetry",payload(false).replace("ALARM","PARKED"));
+        message("alert","{\"alert_id\":\"wheel-guard-1\",\"reason\":\"WHEEL_MOVEMENT_WHILE_ARMED\",\"severity\":\"HIGH\",\"details\":\"3 pulses\"}");
+        message("alert","{\"alert_id\":\"speed-warning-1\",\"reason\":\"SPEED_LIMIT_EXCEEDED\",\"severity\":\"MEDIUM\",\"action_taken\":\"WARNING_ONLY\",\"details\":\"3 km/h > 2 km/h\"}");
+        var rows=alertService.getAlerts(device.getDeviceId(),null,viewer);
+        assertThat(rows).hasSize(2);
+        assertThat(rows).extracting(AlertDto::getReason).containsExactlyInAnyOrder("WHEEL_MOVEMENT_WHILE_ARMED","SPEED_LIMIT_EXCEEDED");
+        assertThat(devices.findById(device.getDeviceId()).orElseThrow().getSecurityState()).isEqualTo(SecurityState.PARKED);
+        message("alert","{\"alert_id\":\"speed-warning-1\",\"reason\":\"SPEED_LIMIT_EXCEEDED\"}");
+        assertThat(alertService.getAlerts(device.getDeviceId(),null,viewer)).hasSize(2);
+        CommandRequest reset=new CommandRequest();reset.setType(CommandType.RESET_WHEEL_SESSION);
+        assertThatThrownBy(() -> commandService.sendCommand(device.getDeviceId(),reset,viewer,"TEST"))
+                .isInstanceOf(com.guardian.exception.ForbiddenException.class);
+        var result=commandService.sendCommand(device.getDeviceId(),reset,owner,"TEST");
+        assertThat(result.getType()).isEqualTo(CommandType.RESET_WHEEL_SESSION);
+        assertThat(commands.findById(result.getCmdId()).orElseThrow().getStatus()).isEqualTo(CommandStatus.REJECTED);
+        device=devices.findById(device.getDeviceId()).orElseThrow();device.setDataSource("SIMULATED");devices.save(device);
+        assertThatThrownBy(() -> commandService.sendCommand(device.getDeviceId(),reset,owner,"TEST"))
+                .isInstanceOf(com.guardian.exception.BadRequestException.class);
+    }
+
+    @Test void wheelSessionUpdatesReachAuthorizedViewerOverWebSocket() throws Exception {
+        var stomp=new WebSocketStompClient(new StandardWebSocketClient());
+        stomp.setMessageConverter(new MappingJackson2MessageConverter());
+        StompHeaders headers=new StompHeaders();headers.set("Authorization","Bearer "+tokens.generateAccessToken(viewer));
+        var session=stomp.connectAsync("ws://localhost:"+port+"/ws",new org.springframework.web.socket.WebSocketHttpHeaders(),headers,
+                new StompSessionHandlerAdapter() {}).get(5,TimeUnit.SECONDS);
+        BlockingQueue<JsonNode> received=new LinkedBlockingQueue<>();
+        session.subscribe("/user/queue/events",new StompFrameHandler() {
+            @Override public Type getPayloadType(StompHeaders h) { return JsonNode.class; }
+            @Override public void handleFrame(StompHeaders h,Object p) { received.add((JsonNode)p); }
+        });
+        try {
+            Thread.sleep(150);
+            message("wheel_session",wheelPayload(1,"12345678-1",5));
+            var event=received.poll(3,TimeUnit.SECONDS);
+            assertThat(event).isNotNull();assertThat(event.path("type").asText()).isEqualTo("WHEEL_SESSION");
+            assertThat(event.path("data").path("pulseCount").asLong()).isEqualTo(5);
+            assertThat(event.path("deviceId").asText()).isEqualTo(device.getDeviceId());
+        } finally { session.disconnect();stomp.stop(); }
     }
 }

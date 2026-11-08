@@ -1,0 +1,7 @@
+{
+  "purpose": "One public demo-coordinate provider check",
+  "physicalBoard": false,
+  "nativePhone": false,
+  "status": "NOT_VERIFIED",
+  "reason": "Error: page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.openstreetmap.org/export/embed.html?bbox=105.8494%2C21.0235%2C105.8594%2C21.0335&layer=mapnik&marker=21.0285%2C105.8544\nCall log:\n\u001b[2m  - navigating to \"https://www.openstreetmap.org/export/embed.html?bbox=105.8494%2C21.0235%2C105.8594%2C21"
+}

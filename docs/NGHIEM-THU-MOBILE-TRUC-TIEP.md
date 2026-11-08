@@ -2,6 +2,8 @@
 
 Điền Actual, trạng thái `PASS`/`FAIL`/`CHƯA CHẠY`, người thử, thời gian và link ảnh/log. Không đổi mục chưa chạy thành PASS.
 
+Cập nhật 26/10/2026: người dùng xác nhận đăng nhập mobile thành công sau sửa Expo Go; đây mới là một phần M01, chưa chứng minh kill/mở app, logout hoặc các mục hardware. Xem [tính năng và thao tác test cụ thể](TONG-HOP-TINH-NANG-VA-KICH-BAN-TEST.md) để thử lần lượt và điền Actual.
+
 ## Chuẩn bị
 
 - Ghi commit app/backend, model máy, OS, kiểu build, IP backend, DB/broker và device ID.
@@ -21,7 +23,7 @@
 | M09 | LOCK interlock | Nhập lại mật khẩu; xe quay/stale bị firmware từ chối, relay không tác động sai | CHƯA CHẠY |
 | M10 | Alert | Alert MQTT tạo một bản ghi; Viewer ack; Owner resolve kèm actionTaken | CHƯA CHẠY |
 | M11 | QR onboarding | Cho quyền camera, scan QR hợp lệ; token dùng lại bị từ chối; manual fallback hoạt động | CHƯA CHẠY |
-| M12 | Config/Viewer | Owner sửa metadata/ngưỡng, thêm/gỡ Viewer; ghi nhận đây là config backend | CHƯA CHẠY |
+| M12 | Config/Viewer | Owner sửa metadata khi telemetry chạy không bị mất nội dung; HARDWARE không gửi ngưỡng, SIMULATED sửa ngưỡng riêng; thêm/gỡ/cấp lại Viewer | CHƯA CHẠY |
 | M13 | History/CSV | Chọn 1h/24h/7d, biểu đồ đúng null; CSV tải/chia sẻ, tối đa 5.000 mẫu | CHƯA CHẠY |
 | M14 | Admin | Admin thấy user/device/audit, khóa/mở user; non-admin bị 403/UI chặn | CHƯA CHẠY |
 | M15 | Push foreground | Alert/offline/command terminal hiện notification một lần | CHƯA CHẠY |
@@ -30,6 +32,10 @@
 | M18 | Thu hồi quyền | Gỡ Viewer rồi tap push cũ; app không mở dữ liệu device đã mất quyền | CHƯA CHẠY |
 | M19 | Đổi tài khoản | Logout A/login B; token không tiếp tục nhận dữ liệu của A | CHƯA CHẠY |
 | M20 | Offline gateway | Ngắt Node A/LWT hoặc chờ timeout; UI + push offline, phục hồi khi telemetry mới | CHƯA CHẠY |
+| M21 | Phiên quay bánh | Hall thật tăng xung/vòng/khoảng cách quy đổi, hiển thị ngưỡng firmware; mất dữ liệu >5 s giữ tổng nhưng đánh dấu cũ | CHƯA CHẠY |
+| M22 | Reset phiên | Owner/Admin bấm phiên mới → PENDING → ACK EXECUTED và phiên mới về 0; Viewer không gửi được, sensor stale khóa nút | CHƯA CHẠY |
+| M23 | Cảnh báo tốc độ | Vượt 2 km/h đủ thời gian theo firmware → alert/app/push; giảm qua hysteresis thì hết cảnh báo; không tự ngắt motor | CHƯA CHẠY |
+| M24 | REST fallback | Chặn WebSocket nhưng giữ REST, app foreground vẫn cập nhật qua polling 5 s; phục hồi socket không rollback số liệu mới | CHƯA CHẠY |
 
 ## Bằng chứng hardware bắt buộc
 

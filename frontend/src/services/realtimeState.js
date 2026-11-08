@@ -1,4 +1,4 @@
-export const initialRealtimeState = { devices: [], alerts: [], telemetry: {}, histories: {}, commands: {}, versions: {}, revoked: {}, version: 0, alertsVersion: 0 };
+export const initialRealtimeState = { devices: [], alerts: [], telemetry: {}, histories: {}, commands: {}, wheelSessions: {}, versions: {}, revoked: {}, version: 0, alertsVersion: 0 };
 export function liveDeviceView(device, now = Date.now()) {
   if (!device) return null;
   const age = device.lastTelemetryAt ? now - Date.parse(device.lastTelemetryAt) : Infinity;
@@ -26,6 +26,15 @@ export function mergeCommands(old = [], incoming = []) {
     rows.set(row.cmdId, row);
   });
   return [...rows.values()].sort((a, b) => time(b) - time(a)).slice(0, 100);
+}
+export function mergeWheelSession(old, incoming) {
+  if (!old) return incoming;
+  if (time(incoming) < time(old)) return old;
+  if (old.sessionId?.slice(0, 8) === incoming.sessionId?.slice(0, 8)) {
+    const delta = (incoming.sequence - old.sequence) >>> 0;
+    if (delta === 0 || delta >= 0x80000000) return old;
+  }
+  return incoming;
 }
 export function realtimeReducer(state, action) {
   if (action.type === 'RESET') return initialRealtimeState;
@@ -57,14 +66,16 @@ export function realtimeReducer(state, action) {
   if (!id || !data) return state;
   if (type === 'ACCESS_REMOVED') {
     const version = state.version + 1;
-    const next = { ...state, version, versions: { ...state.versions, [id]: version }, revoked: { ...state.revoked, [id]: true }, devices: state.devices.filter(d => d.deviceId !== id), alerts: state.alerts.filter(a => a.deviceId !== id), telemetry: { ...state.telemetry }, histories: { ...state.histories }, commands: { ...state.commands } };
+    const next = { ...state, version, versions: { ...state.versions, [id]: version }, revoked: { ...state.revoked, [id]: true }, devices: state.devices.filter(d => d.deviceId !== id), alerts: state.alerts.filter(a => a.deviceId !== id), telemetry: { ...state.telemetry }, histories: { ...state.histories }, commands: { ...state.commands }, wheelSessions: { ...state.wheelSessions } };
     delete next.telemetry[id]; delete next.histories[id]; delete next.commands[id];
+    delete next.wheelSessions[id];
     return next;
   }
   const version = state.version + 1;
   const next = { ...state, version, versions: { ...state.versions, [id]: version } };
   if (type === 'DEVICE') return { ...next, revoked: { ...state.revoked, [id]: false }, devices: state.devices.some(d => d.deviceId === id) ? state.devices.map(d => d.deviceId === id ? { ...d, ...data } : d) : [...state.devices, data] };
   if (state.revoked[id]) return state;
+  if (type === 'WHEEL_SESSION') return { ...next, wheelSessions: { ...state.wheelSessions, [id]: mergeWheelSession(state.wheelSessions[id], data) } };
   if (type === 'TELEMETRY' || type === 'HISTORY') {
     const rows = mergeReadings(state.histories[id], type === 'HISTORY' ? data : [data]);
     return { ...next, histories: { ...state.histories, [id]: rows }, telemetry: { ...state.telemetry, [id]: rows.at(-1) || null } };

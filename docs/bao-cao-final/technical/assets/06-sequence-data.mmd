@@ -1,0 +1,12 @@
+sequenceDiagram
+ participant B as Node B
+ participant A as Node A
+ participant M as MQTT
+ participant S as Backend DB
+ participant U as App
+ B->>A: telemetry và wheel
+ A->>M: publish UUID
+ M->>S: kiểm tra và lưu
+ S->>S: commit transaction
+ S-->>U: STOMP event
+ U->>S: REST snapshot khi reconnect

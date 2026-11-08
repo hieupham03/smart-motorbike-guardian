@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="792pt" height="403.2pt" viewBox="0 0 792 403.2" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-11-05T20:26:32.478769</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 403.2 
+L 792 403.2 
+L 792 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 28.9908 142.434 
+L 211.2732 142.434 
+Q 216.8604 142.434 216.8604 136.962 
+L 216.8604 61.038 
+Q 216.8604 55.566 211.2732 55.566 
+L 28.9908 55.566 
+Q 23.4036 55.566 23.4036 61.038 
+L 23.4036 136.962 
+Q 23.4036 142.434 28.9908 142.434 
+z
+" clip-path="url(#pf90b06c3b7)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 308.3508 142.434 
+L 490.6332 142.434 
+Q 496.2204 142.434 496.2204 136.962 
+L 496.2204 61.038 
+Q 496.2204 55.566 490.6332 55.566 
+L 308.3508 55.566 
+Q 302.7636 55.566 302.7636 61.038 
+L 302.7636 136.962 
+Q 302.7636 142.434 308.3508 142.434 
+z
+" clip-path="url(#pf90b06c3b7)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 587.7108 142.434 
+L 763.0092 142.434 
+Q 768.5964 142.434 768.5964 136.962 
+L 768.5964 61.038 
+Q 768.5964 55.566 763.0092 55.566 
+L 587.7108 55.566 
+Q 582.1236 55.566 582.1236 61.038 
+L 582.1236 136.962 
+Q 582.1236 142.434 587.7108 142.434 
+z
+" clip-path="url(#pf90b06c3b7)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 35.9748 340.794 
+L 239.2092 340.794 
+Q 244.7964 340.794 244.7964 335.322 
+L 244.7964 262.818 
+Q 244.7964 257.346 239.2092 257.346 
+L 35.9748 257.346 
+Q 30.3876 257.346 30.3876 262.818 
+L 30.3876 335.322 
+Q 30.3876 340.794 35.9748 340.794 
+z
+" clip-path="url(#pf90b06c3b7)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 294.3828 340.794 
+L 497.6172 340.794 
+Q 503.2044 340.794 503.2044 335.322 
+L 503.2044 262.818 
+Q 503.2044 257.346 497.6172 257.346 
+L 294.3828 257.346 
+Q 288.7956 257.346 288.7956 262.818 
+L 288.7956 335.322 
+Q 288.7956 340.794 294.3828 340.794 
+z
+" clip-path="url(#pf90b06c3b7)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 552.7908 340.794 
+L 756.0252 340.794 
+Q 761.6124 340.794 761.6124 335.322 
+L 761.6124 262.818 
+Q 761.6124 257.346 756.0252 257.346 
+L 552.7908 257.346 
+Q 547.2036 257.346 547.2036 262.818 
+L 547.2036 335.322 
+Q 547.2036 340.794 552.7908 340.794 
+z
+" clip-path="url(#pf90b06c3b7)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 259.812 235.8 
+L 259.812 34.02 
+" clip-path="url(#pf90b06c3b7)" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #595959; stroke-width: 1.5"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 539.172 235.8 
+L 539.172 34.02 
+" clip-path="url(#pf90b06c3b7)" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #595959; stroke-width: 1.5"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(60.894207 82.444141)">Người dùng / app</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(71.46452 104.126172)">ACCESS token</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(50.995281 124.016406)">Không tự cấp quyền</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(344.699324 82.444141)">Backend tin cậy</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(328.539852 102.794141)">Ownership / validate</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(365.255574 124.21084)">DB / audit</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(620.784316 82.933984)">Thiết bị / broker</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(626.735488 102.60293)">UUID / cmd_id</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(624.573086 123.864941)">Dữ liệu và ACK</text>
+   </g>
+   <g id="patch_8">
+    <path d="M 216.413712 99 
+Q 259.80959 99 301.863827 99 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 296.363827 96.25 
+L 301.863827 99 
+L 296.363827 101.75 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_4">
+    <g id="patch_9">
+     <path d="M 218.955164 91.3455 
+L 300.668836 91.3455 
+L 300.668836 77.6205 
+L 218.955164 77.6205 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="259.812" y="87.405363" transform="rotate(-0 259.812 87.405363)">REST / STOMP</text>
+   </g>
+   <g id="patch_10">
+    <path d="M 495.773712 99 
+Q 539.16959 99 581.223827 99 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 575.723827 96.25 
+L 581.223827 99 
+L 575.723827 101.75 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_5">
+    <g id="patch_11">
+     <path d="M 507.564773 91.3455 
+L 570.779227 91.3455 
+L 570.779227 77.6205 
+L 507.564773 77.6205 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="539.172" y="87.405363" transform="rotate(-0 539.172 87.405363)">MQTT1883</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(68.623934 283.03084)">Kiểm quyền mỗi API</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(58.635848 303.628984)">Token hết hạn / sai loại</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(66.577547 324.086406)">Thu hồi membership</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(323.639551 283.113555)">Kiểm dữ liệu / source</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(352.973242 303.139141)">ACK đúng ID</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(316.766699 324.821172)">Side effect sau commit</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(587.131828 282.514141)">Còn giới hạn broker</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(579.249211 303.139141)">Credential riêng / ACL</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(585.509758 324.878105)">TLS / thu hồi kết nối</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pf90b06c3b7">
+   <rect x="11.88" y="10.08" width="768.24" height="383.04"/>
+  </clipPath>
+ </defs>
+</svg>

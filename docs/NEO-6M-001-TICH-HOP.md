@@ -1,5 +1,7 @@
 # Quy trình tích hợp GPS NEO-6M-0-001 vào Smart Motorbike Guardian
 
+> Cập nhật 20/10/2026: đã lưu [log GPS cũ và phạm vi bằng chứng](evidence/gps/README.md). Người dùng xác nhận từng FIX ngoài trời; log đã gửi chỉ có NO_FIX/NMEA. Các phần thiết kế bên dưới có nội dung lịch sử; xem [trạng thái hiện tại](RELEASE.md).
+
 **Mục tiêu:** thêm vị trí GPS vào telemetry của hệ thống hai node hiện có và hiển thị tọa độ trên dashboard/map. Hướng dẫn hướng tới demo breadboard; không yêu cầu cloud sản xuất hay đấu nối xe thật.
 
 ## 1. Luồng dữ liệu cần đạt
@@ -139,7 +141,7 @@ struct TelemetryData {
 1. Bổ sung GPS snapshot vào `latestTelemetry` của Node B, cập nhật dưới cùng mutex hoặc một cơ chế snapshot rõ ràng.
 2. Khi Node B gửi `MSG_TELEMETRY`, copy snapshot có GPS và `gps_valid` vào payload.
 3. Node A kiểm tra `rxPacket.len == sizeof(TelemetryData)` như hiện tại; sau đó copy vị trí và cờ validity vào shared telemetry.
-4. Đồng bộ header trong `firmware/node_a_gateway/`, `firmware/node_b_sensor/`, `node_a/` và `node_b/`. Các mirror hiện giống nhau; sau sửa cần so sánh để không nạp nhầm bản cũ.
+4. Đồng bộ header giao thức trong `firmware/node_a_gateway/` và `firmware/node_b_sensor/`. Chỉ nạp từ hai thư mục chuẩn này để tránh dùng bản cũ.
 5. Không gọi tọa độ last-known là fix hiện tại: cờ validity/freshness phải đi cùng payload.
 
 ### 6.3. Kiểm tra UART
@@ -213,7 +215,7 @@ Ghi kết quả thực tế, không chỉ chép expected. GPS cần thử ngoài
 1. **Xác định model breakout/điện áp và pinout.**
 2. **Đọc NMEA bằng UART độc lập** trên Node B.
 3. **Parse và kiểm tra fix/freshness**; hoàn tất GPS-01/GPS-02.
-4. **Mở rộng `TelemetryData`** và đồng bộ cả hai node/header mirror.
+4. **Mở rộng `TelemetryData`** và đồng bộ header của cả hai node chuẩn.
 5. **Chuyển qua MQTT**, xác nhận JSON rồi kiểm tra DB.
 6. **Cập nhật dashboard** để thể hiện fix/no-fix/last-known.
 7. **Chạy lại test GPS-01 đến GPS-06**, cập nhật sơ đồ phần cứng và báo cáo.
@@ -239,7 +241,7 @@ Ghi kết quả thực tế, không chỉ chép expected. GPS cần thử ngoài
 - [Firmware Node B hiện tại](../firmware/node_b_sensor/node_b_sensor.ino)
 - [Firmware Node A hiện tại](../firmware/node_a_gateway/node_a_gateway.ino)
 - [Giao thức UART hiện tại](../firmware/node_b_sensor/uart_protocol.h)
-- [Schema database hiện tại](../database/schema.sql)
+- [Schema database hiện tại — Flyway migrations](../backend/src/main/resources/db/migration/)
 
 ## 13. Bổ sung ngày 08/10/2026: checklist ngày đầu và hợp đồng GPS hoàn chỉnh
 

@@ -1,0 +1,6 @@
+flowchart LR
+ U[REST STOMP] --> S[Service và transaction]
+ M[MQTT adapter] --> S
+ S --> D[(JPA DB)]
+ S -->|sau commit| E[Realtime Push]
+ E --> A[Web Mobile]

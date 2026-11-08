@@ -2,6 +2,10 @@
 
 Tắt nguồn trước khi đổi dây. Đối chiếu số GPIO in trên board, không dùng số thứ tự chân header. Hướng dẫn nạp/test: [hardware/firmware v2](../docs/HUONG-DAN-HARDWARE-FIRMWARE-V2-GPS.md).
 
+Cập nhật 20/10/2026: người phụ trách xác nhận S3/MPU đã hoạt động lại và relay/motor/nguồn đã ổn. Đây là xác nhận vận hành của người dùng, không phải số đo điện áp/dòng hoặc kết quả chạy lâu mới.
+
+**Bổ sung 21/10:** đã thêm cảnh báo bánh quay khi ARMED, phiên RAM và cảnh báo quá tốc độ. Không đổi chân/thêm linh kiện; cần nạp lại cả hai node. Xem [cách dùng và thử ba tính năng](../docs/BA-TINH-NANG-HALL-VA-TOC-DO.md).
+
 ## UART và cảm biến
 
 | Từ | Đến | Ghi chú |
@@ -16,6 +20,8 @@ Tắt nguồn trước khi đổi dây. Đối chiếu số GPIO in trên board,
 | GPS TX | Node B GPIO6 RX2 |9600baud |
 | GPS VCC/GND | Nguồn breakout/GND | Chỉ cấp5V nếu breakout hỗ trợ, tên receiver chưa đủ |
 | GPS RX/PPS | Để hở | GPIO7 đã cấu hình TX2 nhưng chưa cần dùng |
+
+Bánh xe đường kính **6,5 cm**, chu vi tính theo `pi × 0,065 ≈ 0,20420352 m`. Config của hai node dùng `WHEEL_CIRCUMFERENCE_M` tương ứng. Giữ `WHEEL_PULSES_PER_REV=1` theo cấu hình hiện tại; nếu có nhiều nam châm/xung mỗi vòng thì phải đổi tham số này. Đường kính đã biết chưa thay việc đối chiếu tốc độ thực tế sau nạp.
 
 ## Relay, motor và nguồn hiện tại
 
@@ -39,7 +45,7 @@ Adapter → jack DC MB102 → đầu ra đã chọn 5V → COM relay
 | NO | Motor (+) |
 | NC | Để trống |
 
-Jumper chọn LOW khớp RELAY_ACTIVE_LOW=true. Boot mặc định motorOFF; UNLOCK/ARM/DISARM có thể cấp lại theo code. PARKED không xác nhận tiếp điểm đang cấp motor.
+Jumper chọn **HIGH** khớp `RELAY_ACTIVE_LOW=false` trên Node A. `RELAY_POWER_ON_AT_BOOT=true` cấp motor sau khởi tạo. **ARM chỉ nhận khi bánh đã dừng và dữ liệu mới, sau đó ngắt motor để canh giữ**; LOCK cũng ngắt khi thỏa interlock. UNLOCK/DISARM cấp motor trở lại. PARKED là trạng thái an ninh, không xác nhận tiếp điểm đang cấp motor. Config relay trong Node B không điều khiển relay Node A. Cảnh báo quá tốc độ chỉ gửi sự kiện, không đóng/ngắt relay.
 
 Không cấp thẳng12V cho motorTT3–6V, cảm biến hoặc chân5V board. Chỉ dùng adapter12V ở jackMB102 nếu đúng giới hạn/cực tính của module. Hạ12V bằng ổn áp tuyến tính có thể nóng, sụt áp/ngắt nhiệt; sơ đồ không xác nhận MB102 đủ dòng motor. Nếu không có dụng cụ đo, giữ nguyên cấu hình đã chạy và chưa đánh dấu kiểm chứng nguồn.
 

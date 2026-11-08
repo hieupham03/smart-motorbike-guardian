@@ -57,6 +57,8 @@ public class MqttSubscriberService implements MqttCallbackExtended {
 
     @Autowired
     private DevicePresenceService presenceService;
+    @Autowired
+    private WheelSessionService wheelSessions;
 
     @PostConstruct
     public void init() {
@@ -103,6 +105,7 @@ public class MqttSubscriberService implements MqttCallbackExtended {
         log.info("MQTT connection established (reconnect={}). Subscribing to topics...", reconnect);
         try {
             mqttClient.subscribe("guardian/+/telemetry", 0);
+            mqttClient.subscribe("guardian/+/wheel_session", 0);
             mqttClient.subscribe("guardian/+/event", 1);
             mqttClient.subscribe("guardian/+/alert", 1);
             mqttClient.subscribe("guardian/+/heartbeat", 0);
@@ -136,6 +139,9 @@ public class MqttSubscriberService implements MqttCallbackExtended {
             if (node.has("device_id") && !deviceId.equals(node.path("device_id").asText())) return;
 
             switch (type) {
+                case "wheel_session":
+                    wheelSessions.accept(deviceId, node);
+                    break;
                 case "telemetry":
                     handleTelemetry(deviceId, node);
                     break;

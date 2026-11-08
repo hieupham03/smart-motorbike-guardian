@@ -1,0 +1,295 @@
+{
+  "status": "PASS",
+  "checks": {
+    "fourteenDiagrams": true,
+    "allPngNonempty": true,
+    "allSvgContainText": true,
+    "allReadViaMcp": true,
+    "correctOpenProject": true,
+    "erdUsesNativeTables": true,
+    "statesUseState2": true,
+    "bothSequencesHaveLifelines": true,
+    "noPastedDiagramImages": true
+  },
+  "projectSha256": "adea5015cdef98ffde290cf2bdcbb41b3998e29b837cfd828b81186c0dc8b244",
+  "inventory": [
+    {
+      "stem": "01-boi-canh",
+      "type": "ComponentDiagram",
+      "diagramId": "zAZs7YWGAqACBAnA",
+      "pixelSize": [
+        1431,
+        570
+      ],
+      "svgTextLabels": 19,
+      "nativeNodes": 5,
+      "nativeNodeTypes": [
+        "Actor",
+        "Component"
+      ],
+      "modelConnectors": 5,
+      "readThroughMcp": true,
+      "projectName": "Smart Motorbike Guardian - Kiến trúc và thiết kế IoT",
+      "pngSha256": "0c62f9727b09b7a746df532dd56ca4b580fa98a74289c9b91b41686551c52a34",
+      "svgSha256": "6b9ff34dbbdf6910cc805b49ec5963be2bb9853fac26388ac65aafd9ca7cd6a7"
+    },
+    {
+      "stem": "02-use-case",
+      "type": "UseCaseDiagram",
+      "diagramId": "bwZs7YWGAqACBAnj",
+      "pixelSize": [
+        1176,
+        1176
+      ],
+      "svgTextLabels": 13,
+      "nativeNodes": 12,
+      "nativeNodeTypes": [
+        "Actor",
+        "UseCase"
+      ],
+      "modelConnectors": 20,
+      "readThroughMcp": true,
+      "projectName": "Smart Motorbike Guardian - Kiến trúc và thiết kế IoT",
+      "pngSha256": "2d96fee9e9fb305ab4fe72ba1af3bdcc40d9464ae6372137584b9e5ac35d6e0c",
+      "svgSha256": "459206bae8e583f94aa588d854be0c1cf5ffd11c0baaf623c2e17a0d900a8795"
+    },
+    {
+      "stem": "03-kien-truc-5-tang",
+      "type": "ComponentDiagram",
+      "diagramId": "zEZs7YWGAqACBArs",
+      "pixelSize": [
+        1106,
+        906
+      ],
+      "svgTextLabels": 25,
+      "nativeNodes": 5,
+      "nativeNodeTypes": [
+        "Component"
+      ],
+      "modelConnectors": 4,
+      "readThroughMcp": true,
+      "projectName": "Smart Motorbike Guardian - Kiến trúc và thiết kế IoT",
+      "pngSha256": "ccbc26069dca985ef0caea6da2b9534c4afc7408a7d3fccd9fbfd3da4b00ed4a",
+      "svgSha256": "5ee7447aa9c0eb1374caee047993731902c5e5b9a8abe3b1a8629ef2a07c88f3"
+    },
+    {
+      "stem": "04-cau-truc-phan-mem",
+      "type": "ComponentDiagram",
+      "diagramId": "xkZs7YWGAqACBAsJ",
+      "pixelSize": [
+        1396,
+        816
+      ],
+      "svgTextLabels": 35,
+      "nativeNodes": 7,
+      "nativeNodeTypes": [
+        "Component"
+      ],
+      "modelConnectors": 6,
+      "readThroughMcp": true,
+      "projectName": "Smart Motorbike Guardian - Kiến trúc và thiết kế IoT",
+      "pngSha256": "0e82a46a178be45d4c4f344c55521f2a3c0fc38f7b7d6ab686faa1498e1f4fc6",
+      "svgSha256": "58fe201ec489e098fecf5fa722e4160e5c0667ccac66d1d56d391e309fe11167"
+    },
+    {
+      "stem": "05-khoi-phan-cung",
+      "type": "ComponentDiagram",
+      "diagramId": "JUZs7YWGAqACBAsy",
+      "pixelSize": [
+        1746,
+        746
+      ],
+      "svgTextLabels": 45,
+      "nativeNodes": 9,
+      "nativeNodeTypes": [
+        "Component"
+      ],
+      "modelConnectors": 9,
+      "readThroughMcp": true,
+      "projectName": "Smart Motorbike Guardian - Kiến trúc và thiết kế IoT",
+      "pngSha256": "6fe1281f5ace56f20c7180d535fd4a4496a937652753df9534be6f236cc235de",
+      "svgSha256": "7a452f9810a7fe1de2625fda9973ff784f363f77ef7eee0106d2f3cad51d2807"
+    },
+    {
+      "stem": "06-trien-khai",
+      "type": "DeploymentDiagram",
+      "diagramId": "oMZs7YWGAqACBAtq",
+      "pixelSize": [
+        1466,
+        866
+      ],
+      "svgTextLabels": 28,
+      "nativeNodes": 8,
+      "nativeNodeTypes": [
+        "Node"
+      ],
+      "modelConnectors": 9,
+      "readThroughMcp": true,
+      "projectName": "Smart Motorbike Guardian - Kiến trúc và thiết kế IoT",
+      "pngSha256": "381998003b5dfd690b5b0e9f1f01298c565bd96633e66a9ec2ef603a5bc63e53",
+      "svgSha256": "b5d7e6b92bb4825c3f15c7ba30d4ec881688160462c523744a13bffac6f33ab9"
+    },
+    {
+      "stem": "07-erd-9-bang",
+      "type": "ERDiagram",
+      "diagramId": "hsZs7YWGAqACBAug",
+      "pixelSize": [
+        1606,
+        1120
+      ],
+      "svgTextLabels": 66,
+      "nativeNodes": 9,
+      "nativeNodeTypes": [
+        "DBTable"
+      ],
+      "modelConnectors": 11,
+      "readThroughMcp": true,
+      "projectName": "Smart Motorbike Guardian - Kiến trúc và thiết kế IoT",
+      "pngSha256": "d32a3be509721fb1ddea4eaad2f0b0d3eea8719d4596e649b7343b2fb313da0b",
+      "svgSha256": "37f6aa15a5ad281e7dddca447575086a0f8b4fd45f03da28b9d43ff83f4b4394"
+    },
+    {
+      "stem": "08-sequence-telemetry",
+      "type": "InteractionDiagram",
+      "diagramId": "bCZs7YWGAqACBAwl",
+      "pixelSize": [
+        1676,
+        1116
+      ],
+      "svgTextLabels": 17,
+      "nativeNodes": 6,
+      "nativeNodeTypes": [
+        "InteractionLifeLine"
+      ],
+      "modelConnectors": 10,
+      "readThroughMcp": true,
+      "projectName": "Smart Motorbike Guardian - Kiến trúc và thiết kế IoT",
+      "pngSha256": "85e008f363f24b801581c455fbd5bca86a081ae0a049028e3f4346ba095e8558",
+      "svgSha256": "76edb200470a87b64773603982f84f73aaba847ce802eed88d0e0e5df8d44075"
+    },
+    {
+      "stem": "09-sequence-command-ack",
+      "type": "InteractionDiagram",
+      "diagramId": "_SZs7YWGAqACBAxw",
+      "pixelSize": [
+        1730,
+        1236
+      ],
+      "svgTextLabels": 18,
+      "nativeNodes": 5,
+      "nativeNodeTypes": [
+        "InteractionLifeLine"
+      ],
+      "modelConnectors": 12,
+      "readThroughMcp": true,
+      "projectName": "Smart Motorbike Guardian - Kiến trúc và thiết kế IoT",
+      "pngSha256": "b40b65e2b8995ab5d7be61c3aa3b4a330e83fefb78f7e4d884fdf6be27c320f0",
+      "svgSha256": "5c65828392ea01a5e620bcf42f6748a63108c98d216fc6a63fa5f523c2cede1d"
+    },
+    {
+      "stem": "10-state-bao-ve",
+      "type": "StateDiagram",
+      "diagramId": "eKZs7YWGAqACBAy.",
+      "pixelSize": [
+        1339,
+        720
+      ],
+      "svgTextLabels": 18,
+      "nativeNodes": 5,
+      "nativeNodeTypes": [
+        "InitialPseudoState",
+        "State2"
+      ],
+      "modelConnectors": 9,
+      "readThroughMcp": true,
+      "projectName": "Smart Motorbike Guardian - Kiến trúc và thiết kế IoT",
+      "pngSha256": "d8357fce443ee556b815d5152f6ed3ebcaf8a8d27ba34bb28c7f0b0e28177e52",
+      "svgSha256": "f1d7c83280c2f5113e2849e8ca102ae7a69b3c0d2d62e28b45db17897dd0a710"
+    },
+    {
+      "stem": "11-lifecycle-device",
+      "type": "StateDiagram",
+      "diagramId": "_qZs7YWGAqACBAz1",
+      "pixelSize": [
+        1412,
+        821
+      ],
+      "svgTextLabels": 19,
+      "nativeNodes": 6,
+      "nativeNodeTypes": [
+        "InitialPseudoState",
+        "State2"
+      ],
+      "modelConnectors": 8,
+      "readThroughMcp": true,
+      "projectName": "Smart Motorbike Guardian - Kiến trúc và thiết kế IoT",
+      "pngSha256": "54e53eec2fccc2145b61a10120d42c90a8f61079421f18cf109a4e094bf21bea",
+      "svgSha256": "56dffdd2e3f7f9fbc6b7ed8c737beb2dbebaba65aca1d74ea2e165a15908dadb"
+    },
+    {
+      "stem": "12-activity-onboarding",
+      "type": "ActivityDiagram",
+      "diagramId": "w6Zs7YWGAqACBA0n",
+      "pixelSize": [
+        1066,
+        1291
+      ],
+      "svgTextLabels": 14,
+      "nativeNodes": 11,
+      "nativeNodeTypes": [
+        "ActivityAction",
+        "ActivityFinalNode",
+        "DecisionNode",
+        "InitialNode"
+      ],
+      "modelConnectors": 10,
+      "readThroughMcp": true,
+      "projectName": "Smart Motorbike Guardian - Kiến trúc và thiết kế IoT",
+      "pngSha256": "d6aef3785bf8af61c1ac3e908f5383fa71415040d7314512fa9a530463eea361",
+      "svgSha256": "6c16ae63412c0a1a60064fa7dd3a3874f9d0aa35d20d3e5ded07890176cbb891"
+    },
+    {
+      "stem": "13-activity-control",
+      "type": "ActivityDiagram",
+      "diagramId": "vGZs7YWGAqACBA1t",
+      "pixelSize": [
+        1056,
+        1361
+      ],
+      "svgTextLabels": 18,
+      "nativeNodes": 10,
+      "nativeNodeTypes": [
+        "ActivityAction",
+        "ActivityFinalNode",
+        "DecisionNode",
+        "InitialNode"
+      ],
+      "modelConnectors": 10,
+      "readThroughMcp": true,
+      "projectName": "Smart Motorbike Guardian - Kiến trúc và thiết kế IoT",
+      "pngSha256": "55f502b968f30e4e24c78c4f8476f1dbc279ba7e67372f5a255c19b9283d9a64",
+      "svgSha256": "c5001e8bf1d8dc226239b7feffd2727959e4811d334087cacf5be67a39bded37"
+    },
+    {
+      "stem": "14-state-command",
+      "type": "StateDiagram",
+      "diagramId": "WWZs7YWGAqACBA2r",
+      "pixelSize": [
+        1311,
+        591
+      ],
+      "svgTextLabels": 14,
+      "nativeNodes": 5,
+      "nativeNodeTypes": [
+        "InitialPseudoState",
+        "State2"
+      ],
+      "modelConnectors": 5,
+      "readThroughMcp": true,
+      "projectName": "Smart Motorbike Guardian - Kiến trúc và thiết kế IoT",
+      "pngSha256": "8062d6c08c6fe932ff4da4a3f4c8178814ff904b7afce0d0940ce9b07ccbd386",
+      "svgSha256": "ab8c4680419f4ff5485beb53eb2c4977699d4b3c73b1b207b1be9d1047b54b8e"
+    }
+  ],
+  "physicalHardwareAcceptance": false
+}

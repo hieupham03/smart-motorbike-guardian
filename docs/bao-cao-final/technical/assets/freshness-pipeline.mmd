@@ -1,0 +1,4 @@
+flowchart LR
+ B[Node B timestamp validity GPS age] --> A[Node A UART1.5s heartbeat3s interlock]
+ A --> S[Backend receivedAt source snapshot history]
+ S --> U[App freshness5s and growing GPS age]

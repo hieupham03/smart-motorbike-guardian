@@ -48,7 +48,7 @@ Yêu cầu Java 17/Maven, Node 20+; PostgreSQL 15 hoặc profile H2. Broker mặ
 
 ### Docker + PostgreSQL
 
-1. Copy `deployment/.env.example` thành `deployment/.env`; điền POSTGRES_PASSWORD, JWT_SECRET tối thiểu 32 ký tự ngẫu nhiên, DEMO_PASSWORD tối thiểu 8 ký tự. Không commit `.env`.
+1. Copy `.env.example` thành `deployment/.env`; điền POSTGRES_PASSWORD, JWT_SECRET tối thiểu 32 ký tự ngẫu nhiên, DEMO_PASSWORD tối thiểu 8 ký tự. Không commit `.env`.
 2. Trong `deployment/`: `docker compose up --build -d`.
 3. Mở `http://localhost:3000`; API `http://localhost:8080/api/health`. DB `UP`, MQTT `CONNECTED` là kiểm tra kết nối backend, không chứng minh node đã gửi số đo.
 4. Bật DEMO_SEED_ENABLED cho DB demo mới để tạo owner@guardian.iot, viewer@guardian.iot, admin@guardian.iot với mật khẩu DEMO_PASSWORD tự đặt. UI yêu cầu nhập mật khẩu; đã bỏ mật khẩu cứng/đổi vai trò bằng một click.

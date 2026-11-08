@@ -1,0 +1,9 @@
+flowchart LR
+ U[React web và Expo mobile] <--> API[REST STOMP JWT]
+ API --> S[Device Telemetry Command Alert Wheel services]
+ S --> DB[(PostgreSQL H2)]
+ S --> E[After commit realtime push]
+ E --> API
+ B[Node B UART Node A] <--> M[MQTT broker]
+ M <--> I[MQTT adapter]
+ I <--> S

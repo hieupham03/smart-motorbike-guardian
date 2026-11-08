@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="560" viewBox="0 90 1100 560">
+<rect x="0" y="0" width="1100" height="700" rx="0" fill="white" stroke="white" stroke-width="2"/>
+<rect x="60" y="170" width="350" height="250" rx="12" fill="#176fa1" stroke="#1e293b" stroke-width="2"/>
+<circle cx="76" cy="186" r="9" fill="white" stroke="#aab5c4" stroke-width="2"/>
+<circle cx="76" cy="404" r="9" fill="white" stroke="#aab5c4" stroke-width="2"/>
+<circle cx="394" cy="186" r="9" fill="white" stroke="#aab5c4" stroke-width="2"/>
+<circle cx="394" cy="404" r="9" fill="white" stroke="#aab5c4" stroke-width="2"/>
+<text x="235.0" y="212" font-family="Arial, sans-serif" font-size="29" fill="white" text-anchor="middle" font-weight="bold">NEO-6M</text>
+<rect x="90" y="100" width="95" height="95" rx="8" fill="#e8c58a" stroke="#b78b4b" stroke-width="2"/>
+<rect x="106" y="116" width="63" height="63" rx="6" fill="#ded5c9" stroke="#9d978c" stroke-width="2"/>
+<rect x="680" y="170" width="350" height="300" rx="8" fill="#653984" stroke="#1e293b" stroke-width="2"/>
+<text x="855" y="217" font-family="Arial, sans-serif" font-size="34" fill="white" text-anchor="middle" font-weight="bold">NODE B</text>
+<text x="855" y="257" font-family="Arial, sans-serif" font-size="27" fill="white" text-anchor="middle" font-weight="normal">ESP32-S3 N16R8</text>
+<circle cx="100" cy="420" r="8" fill="#f6cb6c" stroke="#475569" stroke-width="2"/>
+<text x="100" y="397" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle" font-weight="normal">VCC</text>
+<circle cx="170" cy="420" r="8" fill="#f6cb6c" stroke="#475569" stroke-width="2"/>
+<text x="170" y="397" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle" font-weight="normal">GND</text>
+<circle cx="240" cy="420" r="8" fill="#f6cb6c" stroke="#475569" stroke-width="2"/>
+<text x="240" y="397" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle" font-weight="normal">TX</text>
+<circle cx="310" cy="420" r="8" fill="#f6cb6c" stroke="#475569" stroke-width="2"/>
+<text x="310" y="397" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle" font-weight="normal">RX</text>
+<circle cx="380" cy="420" r="8" fill="#f6cb6c" stroke="#475569" stroke-width="2"/>
+<text x="380" y="397" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle" font-weight="normal">PPS</text>
+<circle cx="680" cy="320" r="8" fill="#f6cb6c" stroke="#475569" stroke-width="2"/>
+<circle cx="680" cy="430" r="8" fill="#f6cb6c" stroke="#475569" stroke-width="2"/>
+<text x="705" y="328" font-family="Arial, sans-serif" font-size="31" fill="white" text-anchor="start" font-weight="bold">GPIO6 / RX2</text>
+<text x="705" y="438" font-family="Arial, sans-serif" font-size="31" fill="white" text-anchor="start" font-weight="bold">GND</text>
+<polyline data-net="GPS.TX -&gt; B.GPIO6 closeup" points="240,420 240,500 580,500 580,320 680,320" fill="none" stroke="white" stroke-width="12" stroke-linejoin="round"/>
+<polyline data-net="GPS.TX -&gt; B.GPIO6 closeup" points="240,420 240,500 580,500 580,320 680,320" fill="none" stroke="#1674c8" stroke-width="6" stroke-linejoin="round"/>
+<circle cx="240" cy="420" r="4" fill="#1674c8" stroke="#1674c8" stroke-width="2"/>
+<circle cx="680" cy="320" r="4" fill="#1674c8" stroke="#1674c8" stroke-width="2"/>
+<polyline data-net="GPS.GND -&gt; B.GND closeup" points="170,420 170,550 630,550 630,430 680,430" fill="none" stroke="white" stroke-width="12" stroke-linejoin="round"/>
+<polyline data-net="GPS.GND -&gt; B.GND closeup" points="170,420 170,550 630,550 630,430 680,430" fill="none" stroke="#252a30" stroke-width="6" stroke-linejoin="round"/>
+<circle cx="170" cy="420" r="4" fill="#252a30" stroke="#252a30" stroke-width="2"/>
+<circle cx="680" cy="430" r="4" fill="#252a30" stroke="#252a30" stroke-width="2"/>
+<polyline data-net="GPS.VCC -&gt; compatible supply closeup" points="100,420 100,610 530,610" fill="none" stroke="white" stroke-width="12" stroke-linejoin="round"/>
+<polyline data-net="GPS.VCC -&gt; compatible supply closeup" points="100,420 100,610 530,610" fill="none" stroke="#cb3333" stroke-width="6" stroke-linejoin="round"/>
+<circle cx="100" cy="420" r="4" fill="#cb3333" stroke="#cb3333" stroke-width="2"/>
+<circle cx="530" cy="610" r="4" fill="#cb3333" stroke="#cb3333" stroke-width="2"/>
+<text x="545" y="618" font-family="Arial, sans-serif" font-size="30" fill="#b91c1c" text-anchor="start" font-weight="bold">VCC</text>
+</svg>

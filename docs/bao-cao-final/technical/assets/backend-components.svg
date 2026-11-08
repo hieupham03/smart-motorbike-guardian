@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="792pt" height="410.4pt" viewBox="0 0 792 410.4" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-11-05T20:26:32.316167</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 410.4 
+L 792 410.4 
+L 792 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 28.9908 149.454 
+L 190.3212 149.454 
+Q 195.9084 149.454 195.9084 143.982 
+L 195.9084 68.058 
+Q 195.9084 62.586 190.3212 62.586 
+L 28.9908 62.586 
+Q 23.4036 62.586 23.4036 68.058 
+L 23.4036 143.982 
+Q 23.4036 149.454 28.9908 149.454 
+z
+" clip-path="url(#pd6db0b8f89)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 294.3828 149.454 
+L 490.6332 149.454 
+Q 496.2204 149.454 496.2204 143.982 
+L 496.2204 68.058 
+Q 496.2204 62.586 490.6332 62.586 
+L 294.3828 62.586 
+Q 288.7956 62.586 288.7956 68.058 
+L 288.7956 143.982 
+Q 288.7956 149.454 294.3828 149.454 
+z
+" clip-path="url(#pd6db0b8f89)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 594.6948 149.454 
+L 756.0252 149.454 
+Q 761.6124 149.454 761.6124 143.982 
+L 761.6124 68.058 
+Q 761.6124 62.586 756.0252 62.586 
+L 594.6948 62.586 
+Q 589.1076 62.586 589.1076 68.058 
+L 589.1076 143.982 
+Q 589.1076 149.454 594.6948 149.454 
+z
+" clip-path="url(#pd6db0b8f89)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 28.9908 334.134 
+L 190.3212 334.134 
+Q 195.9084 334.134 195.9084 328.662 
+L 195.9084 252.738 
+Q 195.9084 247.266 190.3212 247.266 
+L 28.9908 247.266 
+Q 23.4036 247.266 23.4036 252.738 
+L 23.4036 328.662 
+Q 23.4036 334.134 28.9908 334.134 
+z
+" clip-path="url(#pd6db0b8f89)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 294.3828 334.134 
+L 490.6332 334.134 
+Q 496.2204 334.134 496.2204 328.662 
+L 496.2204 252.738 
+Q 496.2204 247.266 490.6332 247.266 
+L 294.3828 247.266 
+Q 288.7956 247.266 288.7956 252.738 
+L 288.7956 328.662 
+Q 288.7956 334.134 294.3828 334.134 
+z
+" clip-path="url(#pd6db0b8f89)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 594.6948 334.134 
+L 756.0252 334.134 
+Q 761.6124 334.134 761.6124 328.662 
+L 761.6124 252.738 
+Q 761.6124 247.266 756.0252 247.266 
+L 594.6948 247.266 
+Q 589.1076 247.266 589.1076 252.738 
+L 589.1076 328.662 
+Q 589.1076 334.134 594.6948 334.134 
+z
+" clip-path="url(#pd6db0b8f89)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(61.232367 89.859453)">REST / STOMP</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(62.034809 110.411406)">Auth + quyền</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(75.83852 131.771172)">Controller</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(321.576262 89.98084)">Service / transaction</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(326.649797 109.814141)">Device • Telemetry</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(332.382902 131.771172)">Command • Alert</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(622.104531 89.189141)">Repository / DB</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(632.659805 109.814141)">JPA • Flyway</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(619.869082 130.317754)">PostgreSQL / H2</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(60.942328 273.869141)">MQTT adapter</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(52.447406 294.494141)">Ingest / dispatch</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(95.764203 316.329785)">ACK</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(351.40302 275.201172)">Sau commit</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(336.743156 295.826172)">RealtimeService</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(349.374895 316.451172)">Push service</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(630.366348 274.66084)">Web / mobile</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(616.952578 294.494141)">Snapshot / event</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(624.256191 315.119141)">Transport push</text>
+   </g>
+   <g id="patch_8">
+    <path d="M 195.466188 106.02 
+Q 242.35204 106.02 287.896252 106.02 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 282.396252 103.27 
+L 287.896252 106.02 
+L 282.396252 108.77 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 495.778188 106.02 
+Q 542.66404 106.02 588.208252 106.02 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 582.708252 103.27 
+L 588.208252 106.02 
+L 582.708252 108.77 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 194.485981 288.984155 
+Q 242.351436 208.620948 289.530342 129.410412 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 284.353205 132.728505 
+L 289.530342 129.410412 
+L 289.078535 135.542978 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_7">
+    <g id="patch_11">
+     <path d="M 203.569383 200.9655 
+L 281.134617 200.9655 
+L 281.134617 186.675363 
+L 203.569383 186.675363 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="242.352" y="197.025363" transform="rotate(-0 242.352 197.025363)">MQTT bản tin</text>
+   </g>
+   <g id="patch_12">
+    <path d="M 392.508 149.060775 
+Q 392.508 198.361088 392.508 246.31976 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 395.258 240.81976 
+L 392.508 246.31976 
+L 389.758 240.81976 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_8">
+    <g id="patch_13">
+     <path d="M 369.174797 190.7055 
+L 415.841203 190.7055 
+L 415.841203 176.979621 
+L 369.174797 176.979621 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="392.508" y="186.765363" transform="rotate(-0 392.508 186.765363)">Commit</text>
+   </g>
+   <g id="patch_14">
+    <path d="M 495.778188 290.7 
+Q 542.66404 290.7 588.208252 290.7 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 582.708252 287.95 
+L 588.208252 290.7 
+L 582.708252 293.45 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_9">
+    <g id="patch_15">
+     <path d="M 506.210484 283.0455 
+L 579.117516 283.0455 
+L 579.117516 269.319621 
+L 506.210484 269.319621 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="542.664" y="279.105363" transform="rotate(-0 542.664 279.105363)">Event / push</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'; text-anchor: middle" x="396" y="383.04" transform="rotate(-0 396 383.04)">Firmware quyết định interlock; backend quyết định quyền và lưu kết quả.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pd6db0b8f89">
+   <rect x="11.88" y="10.26" width="768.24" height="389.88"/>
+  </clipPath>
+ </defs>
+</svg>

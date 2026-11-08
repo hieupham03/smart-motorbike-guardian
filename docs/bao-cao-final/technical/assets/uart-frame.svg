@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="792pt" height="266.4pt" viewBox="0 0 792 266.4" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-11-05T20:26:32.026359</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 266.4 
+L 792 266.4 
+L 792 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 28.9908 145.854 
+L 116.9892 145.854 
+Q 122.5764 145.854 122.5764 140.382 
+L 122.5764 78.138 
+Q 122.5764 72.666 116.9892 72.666 
+L 28.9908 72.666 
+Q 23.4036 72.666 23.4036 78.138 
+L 23.4036 140.382 
+Q 23.4036 145.854 28.9908 145.854 
+z
+" clip-path="url(#p8937d68abe)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 123.2748 145.854 
+L 211.2732 145.854 
+Q 216.8604 145.854 216.8604 140.382 
+L 216.8604 78.138 
+Q 216.8604 72.666 211.2732 72.666 
+L 123.2748 72.666 
+Q 117.6876 72.666 117.6876 78.138 
+L 117.6876 140.382 
+Q 117.6876 145.854 123.2748 145.854 
+z
+" clip-path="url(#p8937d68abe)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 217.5588 145.854 
+L 305.5572 145.854 
+Q 311.1444 145.854 311.1444 140.382 
+L 311.1444 78.138 
+Q 311.1444 72.666 305.5572 72.666 
+L 217.5588 72.666 
+Q 211.9716 72.666 211.9716 78.138 
+L 211.9716 140.382 
+Q 211.9716 145.854 217.5588 145.854 
+z
+" clip-path="url(#p8937d68abe)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 311.8428 145.854 
+L 598.8852 145.854 
+Q 604.4724 145.854 604.4724 140.382 
+L 604.4724 78.138 
+Q 604.4724 72.666 598.8852 72.666 
+L 311.8428 72.666 
+Q 306.2556 72.666 306.2556 78.138 
+L 306.2556 140.382 
+Q 306.2556 145.854 311.8428 145.854 
+z
+" clip-path="url(#p8937d68abe)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 605.1708 145.854 
+L 756.0252 145.854 
+Q 761.6124 145.854 761.6124 140.382 
+L 761.6124 78.138 
+Q 761.6124 72.666 756.0252 72.666 
+L 605.1708 72.666 
+Q 599.5836 72.666 599.5836 78.138 
+L 599.5836 140.382 
+Q 599.5836 145.854 605.1708 145.854 
+z
+" clip-path="url(#p8937d68abe)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(51.781699 103.952285)">START</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(54.94957 124.577285)">0xAA</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(150.386207 103.959805)">TYPE</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(145.355641 123.366641)">1 byte</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(233.788371 103.952285)">LENGTH</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(239.639641 123.366641)">1 byte</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(424.415758 103.952285)">PAYLOAD</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(366.302672 123.366641)">Telemetry39B / Wheel13B</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(641.645754 103.952285)">CHECKSUM</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(644.220656 123.366641)">XOR,1byte</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'; text-anchor: middle" x="396" y="201.6" transform="rotate(-0 396 201.6)">8N1: 10 bit/byte • 115200 baud • max payload128B • timeout parser50ms</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'; text-anchor: middle" x="396" y="242.64" transform="rotate(-0 396 242.64)">43B ≈3,73ms;17B ≈1,48ms lý tưởng; chưa gồm queue / jitter / mạng.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p8937d68abe">
+   <rect x="11.88" y="6.66" width="768.24" height="253.08"/>
+  </clipPath>
+ </defs>
+</svg>

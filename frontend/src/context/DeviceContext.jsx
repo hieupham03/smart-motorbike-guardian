@@ -48,10 +48,11 @@ export function DeviceProvider({ children }) {
   const fetchSelected = useCallback(async (id = selectedRef.current) => {
     if (!id || !isAuthenticated) return;
     const session = generation.current;
-    const results = await Promise.allSettled([api.getLatestTelemetry(id), api.getCommands(id)]);
+    const results = await Promise.allSettled([api.getLatestTelemetry(id), api.getCommands(id), api.getWheelSession(id)]);
     if (session !== generation.current) return;
     if (results[0].status === 'fulfilled' && results[0].value.data) dispatch({ type: 'TELEMETRY', deviceId: id, data: results[0].value.data });
     if (results[1].status === 'fulfilled') dispatch({ type: 'COMMANDS', deviceId: id, data: results[1].value.data || [] });
+    if (results[2].status === 'fulfilled' && results[2].value.data) dispatch({ type: 'WHEEL_SESSION', deviceId: id, data: results[2].value.data });
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -101,6 +102,7 @@ export function DeviceProvider({ children }) {
     devices: state.devices, selectedDevice,
     setSelectedDevice: device => setSelectedId(device?.deviceId || null), selectDeviceById: setSelectedId,
     telemetry: state.telemetry[id] || null, telemetryHistory: state.histories[id] || [], commands: state.commands[id] || [],
+    wheelSession: state.wheelSessions[id] || null,
     alerts: state.alerts, unreadAlertsCount: state.alerts.filter(a => a.status === 'OPEN').length,
     loading, error, realtimeStatus, isArming, fetchDevices, fetchAlerts, sendDeviceCommand,
   }}>{children}</DeviceContext.Provider>;

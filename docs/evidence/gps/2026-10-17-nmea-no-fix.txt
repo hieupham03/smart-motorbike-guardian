@@ -1,0 +1,12 @@
+VI TRI: chua co fix hien tai hop le; khong dung 0,0 lam vi tri.
+THU: mat gom antenna huong troi, noi thoang, giu nguon lien tuc.
+Raw NMEA: ON | go r de bat/tat
+$GPGGA,121636.293,,,,,0,00,,,M,0.0,M,,0000*5F
+$GPGSA,A,1,,,,,,,,,,,,,,,*1E
+$GPRMC,121636.293,V,,,,,,,171026,,,N*47
+$GPGGA,121637.293,,,,,0,00,,,M,0.0,M,,0000*5E
+$GPGSA,A,1,,,,,,,,,,,,,,,*1E
+$GPGSV,3,1,12,07,82,265,04,14,36,031,09,17,33,256,15,30,47,314,04*7A
+$GPGSV,3,2,12,22,62,001,,18,60,355,,31,59,028,,09,39,032,*74
+$GPGSV,3,3,12,21,36,182,,12,31,140,,27,29,034,,06,00,230,*7D
+$GPRMC,121637.293,V,,,,,,,171026,,,N*46

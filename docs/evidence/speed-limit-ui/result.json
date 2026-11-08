@@ -1,0 +1,22 @@
+{
+  "source": "SOFTWARE_FIXTURE",
+  "result": "PASS",
+  "checks": [
+    "web: invalid threshold is not sent",
+    "web: payload and pending state; no optimistic applied value",
+    "web: applied threshold follows device snapshot after ACK",
+    "web: rejection preserves the reported threshold",
+    "web: older firmware cannot submit settings",
+    "web: stale device cannot submit settings",
+    "web: viewer cannot edit",
+    "mobile: invalid threshold is not sent",
+    "mobile: payload and pending state; no optimistic applied value",
+    "mobile: applied threshold follows device snapshot after ACK",
+    "mobile: rejection preserves the reported threshold",
+    "mobile: older firmware cannot submit settings",
+    "mobile: stale device cannot submit settings",
+    "mobile: viewer cannot edit"
+  ],
+  "pageErrors": [],
+  "physicalDeviceVerified": false
+}

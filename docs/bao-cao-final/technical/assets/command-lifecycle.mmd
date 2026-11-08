@@ -1,0 +1,6 @@
+stateDiagram-v2
+ [*] --> PENDING: request hợp lệ
+ PENDING --> EXECUTED: ACK EXECUTED
+ PENDING --> REJECTED: ACK REJECTED hoặc MQTT_UNAVAILABLE
+ PENDING --> TIMEOUT: ACK_TIMEOUT
+ TIMEOUT --> TIMEOUT: lưu lateAckAt lateAckResult lateAckReason

@@ -1,0 +1,11 @@
+flowchart LR
+ USB[USB laptop] --> A[Node A]
+ USB --> B[Node B]
+ AD[Adapter đúng định mức] --> MB[MB102 đầu ra 5V]
+ MB --> COM[Relay COM]
+ COM --> NO[Relay NO]
+ NO --> MOTOR[Motor plus]
+ MOTOR --> G[GND nguồn]
+ A -->|GPIO23 IN| COM
+ G --- A
+ G --- B

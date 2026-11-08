@@ -1,0 +1,7 @@
+flowchart LR
+ B[Node B] <-->|UART| A[Node A]
+ A <-->|Wi-Fi MQTT| M[Broker1883]
+ M <--> S[Spring Boot8080]
+ S <--> D[(PostgreSQL15 volume)]
+ W[Web Nginx3000] <-->|REST STOMP| S
+ U[Expo mobile] <-->|REST STOMP| S

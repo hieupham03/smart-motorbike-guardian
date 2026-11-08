@@ -1,0 +1,5 @@
+flowchart BT
+ P["1. Cảm nhận và chấp hành: Hall MPU GPS relay motor còi"] <--> N["2. Mạng: UART Wi-Fi MQTT REST STOMP"]
+ N <--> R["3. Xử lý: edge hai node, Spring Boot, DB"]
+ R <--> A["4. Ứng dụng: web và mobile"]
+ A <--> B["5. Nghiệp vụ: bảo vệ, giám sát và quản lý quyền"]

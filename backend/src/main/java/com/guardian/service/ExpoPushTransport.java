@@ -5,13 +5,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
+import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.Map;
 
 @Component
 public class ExpoPushTransport implements PushTransport {
  private final RestClient client;
  public ExpoPushTransport(RestClient.Builder builder,@Value("${app.push.base-url:https://exp.host}") String baseUrl,@Value("${app.push.access-token:}") String accessToken){
-  RestClient.Builder configured=builder.baseUrl(baseUrl).defaultHeader("Accept","application/json").defaultHeader("Accept-Encoding","gzip, deflate");
+  var factory=new JdkClientHttpRequestFactory(HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3)).build());
+  factory.setReadTimeout(Duration.ofSeconds(5));
+  RestClient.Builder configured=builder.requestFactory(factory).baseUrl(baseUrl).defaultHeader("Accept","application/json");
   if(accessToken!=null&&!accessToken.isBlank()) configured.defaultHeader("Authorization","Bearer "+accessToken);
   client=configured.build();
  }

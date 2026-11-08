@@ -1,0 +1,13 @@
+{
+  "result": "PASS",
+  "source": "SOFTWARE_FIXTURE",
+  "checks": [
+    "REST snapshot renders pulse/revolution/distance/max-speed session",
+    "STOMP wheel session changes overspeed indicator",
+    "reset waits for ACK and next session snapshot",
+    "older session cannot overwrite reset snapshot",
+    "Viewer cannot reset session",
+    "stale snapshot retains totals and disables reset"
+  ],
+  "pageErrors": []
+}

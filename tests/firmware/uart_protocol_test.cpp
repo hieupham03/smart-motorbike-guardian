@@ -13,6 +13,10 @@ int main() {
     assert(send_msg(serial,MSG_TELEMETRY,t)==43);
     assert(feed(serial.bytes,packet));assert(packet.len==39);
     assert(std::memcmp(packet.data,&t,sizeof(t))==0);
+    WheelSampleData wheel={1,0x12345678,42,1500};HardwareSerial wheelSerial;
+    assert(send_msg(wheelSerial,MSG_WHEEL_SAMPLE,wheel)==17);
+    assert(feed(wheelSerial.bytes,packet));assert(packet.type==MSG_WHEEL_SAMPLE && packet.len==13);
+    assert(std::memcmp(packet.data,&wheel,sizeof(wheel))==0);
     auto corrupt=serial.bytes;corrupt[9]^=1;
     assert(!feed(corrupt,packet));assert(feed(serial.bytes,packet));
     // Truncated packet times out; the next valid frame is recovered.

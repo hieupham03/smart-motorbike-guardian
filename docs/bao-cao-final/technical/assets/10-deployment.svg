@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="792pt" height="396pt" viewBox="0 0 792 396" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-11-05T19:22:41.302441</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 396 
+L 792 396 
+L 792 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 22.0068 149.094 
+L 176.3532 149.094 
+Q 181.9404 149.094 181.9404 143.622 
+L 181.9404 74.538 
+Q 181.9404 69.066 176.3532 69.066 
+L 22.0068 69.066 
+Q 16.4196 69.066 16.4196 74.538 
+L 16.4196 143.622 
+Q 16.4196 149.094 22.0068 149.094 
+z
+" clip-path="url(#p9fbdbcaba7)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 280.4148 149.094 
+L 441.7452 149.094 
+Q 447.3324 149.094 447.3324 143.622 
+L 447.3324 74.538 
+Q 447.3324 69.066 441.7452 69.066 
+L 280.4148 69.066 
+Q 274.8276 69.066 274.8276 74.538 
+L 274.8276 143.622 
+Q 274.8276 149.094 280.4148 149.094 
+z
+" clip-path="url(#p9fbdbcaba7)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 545.8068 149.094 
+L 756.0252 149.094 
+Q 761.6124 149.094 761.6124 143.622 
+L 761.6124 74.538 
+Q 761.6124 69.066 756.0252 69.066 
+L 545.8068 69.066 
+Q 540.2196 69.066 540.2196 74.538 
+L 540.2196 143.622 
+Q 540.2196 149.094 545.8068 149.094 
+z
+" clip-path="url(#p9fbdbcaba7)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 545.8068 320.094 
+L 756.0252 320.094 
+Q 761.6124 320.094 761.6124 314.622 
+L 761.6124 245.538 
+Q 761.6124 240.066 756.0252 240.066 
+L 545.8068 240.066 
+Q 540.2196 240.066 540.2196 245.538 
+L 540.2196 314.622 
+Q 540.2196 320.094 545.8068 320.094 
+z
+" clip-path="url(#p9fbdbcaba7)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 22.0068 320.094 
+L 176.3532 320.094 
+Q 181.9404 320.094 181.9404 314.622 
+L 181.9404 245.538 
+Q 181.9404 240.066 176.3532 240.066 
+L 22.0068 240.066 
+Q 16.4196 240.066 16.4196 245.538 
+L 16.4196 314.622 
+Q 16.4196 320.094 22.0068 320.094 
+z
+" clip-path="url(#p9fbdbcaba7)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 280.4148 320.094 
+L 441.7452 320.094 
+Q 447.3324 320.094 447.3324 314.622 
+L 447.3324 245.538 
+Q 447.3324 240.066 441.7452 240.066 
+L 280.4148 240.066 
+Q 274.8276 240.066 274.8276 245.538 
+L 274.8276 314.622 
+Q 274.8276 320.094 280.4148 320.094 
+z
+" clip-path="url(#p9fbdbcaba7)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(72.682246 103.893672)">Testbed</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(39.369648 124.518672)">Node B ↔ Node A</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(317.234688 103.105195)">MQTT broker</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(330.840742 124.397285)">TCP1883</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(579.135629 102.561641)">Backend Spring Boot</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(593.15848 123.856953)">8080 / REST / ws</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(602.907016 273.440254)">PostgreSQL15</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(591.377426 294.186641)">Volume + Flyway</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(54.186348 274.35334)">Web / mobile</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(30.308613 293.97502)">Mạng LAN / Internet</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(324.833711 273.561641)">Nginx web</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(324.70373 295.397285)">3000 → 80</text>
+   </g>
+   <g id="patch_8">
+    <path d="M 181.498188 109.08 
+Q 228.38404 109.08 273.928252 109.08 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 268.428252 106.33 
+L 273.928252 109.08 
+L 268.428252 111.83 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_7">
+    <g id="patch_9">
+     <path d="M 213.728238 101.4255 
+L 243.039762 101.4255 
+L 243.039762 87.699621 
+L 213.728238 87.699621 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="228.384" y="97.485363" transform="rotate(-0 228.384 97.485363)">Wi-Fi</text>
+   </g>
+   <g id="patch_10">
+    <path d="M 446.890188 109.08 
+Q 493.77604 109.08 539.320252 109.08 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 533.820252 106.33 
+L 539.320252 109.08 
+L 533.820252 111.83 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_8">
+    <g id="patch_11">
+     <path d="M 476.484398 101.4255 
+L 511.067602 101.4255 
+L 511.067602 87.7005 
+L 476.484398 87.7005 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="493.776" y="97.485363" transform="rotate(-0 493.776 97.485363)">MQTT</text>
+   </g>
+   <g id="patch_12">
+    <path d="M 650.916 148.701819 
+Q 650.916 194.580895 650.916 239.11833 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 653.666 233.61833 
+L 650.916 239.11833 
+L 648.166 233.61833 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_9">
+    <g id="patch_13">
+     <path d="M 635.999203 186.9255 
+L 665.832797 186.9255 
+L 665.832797 173.2005 
+L 635.999203 173.2005 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="650.916" y="182.985363" transform="rotate(-0 650.916 182.985363)">JDBC</text>
+   </g>
+   <g id="patch_14">
+    <path d="M 181.498188 280.08 
+Q 228.38404 280.08 273.928252 280.08 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 268.428252 277.33 
+L 273.928252 280.08 
+L 268.428252 282.83 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_10">
+    <g id="patch_15">
+     <path d="M 212.751773 272.4255 
+L 244.016227 272.4255 
+L 244.016227 258.7005 
+L 212.751773 258.7005 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="228.384" y="268.485363" transform="rotate(-0 228.384 268.485363)">HTTP</text>
+   </g>
+   <g id="patch_16">
+    <path d="M 446.071111 278.466073 
+Q 493.776525 213.389283 540.688732 149.394539 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 535.219111 152.204476 
+L 540.688732 149.394539 
+L 539.65491 155.456198 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_11">
+    <g id="patch_17">
+     <path d="M 452.919164 205.7355 
+L 534.632836 205.7355 
+L 534.632836 192.0105 
+L 452.919164 192.0105 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="493.776" y="201.795363" transform="rotate(-0 493.776 201.795363)">REST / STOMP</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="396" y="369" transform="rotate(-0 396 369)">Compose chạy backend / DB / web; broker local là profile tùy chọn; H2 dùng cho phát triển.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p9fbdbcaba7">
+   <rect x="11.88" y="9.9" width="768.24" height="376.2"/>
+  </clipPath>
+ </defs>
+</svg>

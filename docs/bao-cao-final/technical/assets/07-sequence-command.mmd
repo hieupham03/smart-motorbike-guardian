@@ -1,0 +1,12 @@
+sequenceDiagram
+ actor U as Chủ xe
+ participant S as Backend DB
+ participant M as MQTT
+ participant A as Node A
+ U->>S: POST command ACCESS
+ S->>S: quyền và PENDING commit
+ S->>M: cmd_id, retain false
+ M->>A: lệnh
+ A->>A: interlock và thực thi
+ A-->>S: ACK đúng cmd_id
+ S-->>U: kết quả hoặc TIMEOUT

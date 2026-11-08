@@ -1,208 +1,136 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useDevice } from '../../context/DeviceContext';
-import { ShieldCheck, ShieldOff, Lock, Unlock, Volume2, RotateCcw, AlertCircle, CheckCircle2 } from 'lucide-react';
-import StepUpConfirmModal from './StepUpConfirmModal';
+import React, { useState, useEffect } from "react";
+import {
+  ShieldCheck,
+  ShieldOff,
+  Lock,
+  Unlock,
+  Volume2,
+  VolumeX,
+  RotateCcw,
+} from "lucide-react";
+import { useDevice } from "../../context/DeviceContext";
+import {
+  commandLabel,
+  commandFeedback,
+  reasonLabel,
+} from "../../services/presentation";
+import StepUpConfirmModal from "./StepUpConfirmModal";
 
-export default function QuickControlPanel() {
-  const { role } = useAuth();
-  const { selectedDevice, sendDeviceCommand, isArming, commands } = useDevice();
-  const [isLockModalOpen, setIsLockModalOpen] = useState(false);
-  const [commandFeedback, setCommandFeedback] = useState(null);
-
-  const isViewer = !['OWNER', 'ADMIN'].includes(selectedDevice?.currentUserRole);
-  const [activeCommandId, setActiveCommandId] = useState(null);
-  const activeCommand = commands.find(c => c.cmdId === activeCommandId);
+export default function QuickControlPanel({ developer = false }) {
+  const {
+    selectedDevice: device,
+    sendDeviceCommand,
+    isArming,
+    commands,
+  } = useDevice();
+  const [lockOpen, setLockOpen] = useState(false);
+  const [commandId, setCommandId] = useState(null);
+  const [error, setError] = useState(null);
+  const active = commands.find((c) => c.cmdId === commandId);
+  const pending = isArming || commands.some((c) => c.status === "PENDING");
+  const allowed = ["OWNER", "ADMIN"].includes(device?.currentUserRole);
+  const ready = device?.lifecycleState === "ACTIVE";
   useEffect(() => {
-    if (!activeCommand) return;
-    const status = activeCommand.status;
-    setCommandFeedback({ type: status === 'EXECUTED' ? 'success' : status === 'PENDING' ? 'info' : 'error', message: status === 'PENDING' ? `Đã gửi ${activeCommand.type} · PENDING, đang chờ ACK` : `${activeCommand.type}: ${status}${activeCommand.reasonIfFailed ? ' · ' + activeCommand.reasonIfFailed : ''}${activeCommand.lateAckAt ? ' · ACK muộn: ' + activeCommand.lateAckResult : ''}` });
-  }, [activeCommand]);
-  useEffect(() => { setActiveCommandId(null); setCommandFeedback(null); }, [selectedDevice?.deviceId]);
-  const currentState = selectedDevice?.securityState || 'PARKED';
-  const speed = selectedDevice?.speedValid ? selectedDevice.lastSpeedKmh : null;
-
-  const handleCommand = async (type, payload = null, password = null) => {
+    setCommandId(null);
+    setError(null);
+    setLockOpen(false);
+  }, [device?.deviceId, device?.currentUserRole]);
+  const send = async (type, password) => {
+    if (!allowed || !ready || pending) return;
+    setError(null);
     try {
-      setCommandFeedback({ type: 'info', message: `Đang gửi lệnh ${type} xuống thiết bị qua MQTT...` });
-      const res = await sendDeviceCommand(type, payload, password);
-      
-      if (res?.success && res.data) {
-        setActiveCommandId(res.data.cmdId);
-        setCommandFeedback({ type: 'info', message: 'Đã gửi lệnh · ' + res.data.status + ', đang chờ phản hồi thiết bị' });
-      }
-    } catch (err) {
-      setCommandFeedback({
-        type: 'error',
-        message: err.message || 'Lỗi gửi lệnh điều khiển'
-      });
+      const result = await sendDeviceCommand(type, null, password);
+      if (result?.data) setCommandId(result.data.cmdId);
+    } catch (e) {
+      setError(reasonLabel(e.message));
+      throw e;
     }
-
-
   };
-
+  const request = (type) => {
+    if (type === "LOCK_ENGINE") {
+      setLockOpen(true);
+      return;
+    }
+    if (
+      ["REBOOT", "SIREN_ON"].includes(type) &&
+      !window.confirm(`${commandLabel(type)} cho ${device?.name}?`)
+    )
+      return;
+    void send(type).catch(() => {});
+  };
+  const actions = [
+    ["ARM", ShieldCheck],
+    ["DISARM", ShieldOff],
+    ["LOCK_ENGINE", Lock],
+    ["UNLOCK_ENGINE", Unlock],
+    ["SIREN_ON", Volume2],
+    ["SIREN_OFF", VolumeX],
+    ...(developer ? [["REBOOT", RotateCcw]] : []),
+  ];
   return (
-    <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-        <div>
-          <h3 style={{ fontSize: '1.05rem', fontWeight: '800', color: '#0c4a6e' }}>
-            BẢNG ĐIỀU KHIỂN TÁC VỤ (ACTUATOR CONTROL)
-          </h3>
-          <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
-            Gửi lệnh bảo mật hai chiều qua MQTT Broker xuống Gateway ESP32
-          </p>
-        </div>
-        {isViewer && (
-          <span className="badge badge-medium" title="Bạn chỉ có quyền xem trạng thái">
-            Chỉ xem (Viewer Mode)
+    <section className="glass-card user-section">
+      <div className="section-heading">
+        <h2>Điều khiển xe</h2>
+        {!allowed && (
+          <span className="status-pill status-pill--neutral">
+            Chỉ được theo dõi
           </span>
         )}
       </div>
-
-      {/* Action Buttons Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.85rem' }}>
-        
-        {/* Arm Button */}
-        <button
-          className="btn btn-secondary"
-          onClick={() => handleCommand('ARM')}
-          disabled={isViewer || isArming || activeCommand?.status === 'PENDING' || currentState === 'ARMED'}
-          style={{
-            flexDirection: 'column',
-            padding: '1rem 0.5rem',
-            background: currentState === 'ARMED' ? '#dcfce7' : '#ffffff',
-            borderColor: currentState === 'ARMED' ? '#86efac' : '#bae6fd',
-            color: currentState === 'ARMED' ? '#15803d' : '#0369a1',
-            opacity: isViewer ? 0.6 : 1
-          }}
-        >
-          <ShieldCheck size={26} color={currentState === 'ARMED' ? '#16a34a' : '#0284c7'} />
-          <span style={{ marginTop: '6px', fontWeight: '700' }}>Bật Canh Giữ</span>
-          <span style={{ fontSize: '0.7rem', color: '#64748b' }}>ARM SYSTEM</span>
-        </button>
-
-        {/* Disarm Button */}
-        <button
-          className="btn btn-secondary"
-          onClick={() => handleCommand('DISARM')}
-          disabled={isViewer || isArming || activeCommand?.status === 'PENDING' || currentState === 'PARKED'}
-          style={{
-            flexDirection: 'column',
-            padding: '1rem 0.5rem',
-            background: currentState === 'PARKED' ? '#f0f9ff' : '#ffffff',
-            borderColor: currentState === 'PARKED' ? '#7dd3fc' : '#bae6fd',
-            color: currentState === 'PARKED' ? '#0284c7' : '#475569',
-            opacity: isViewer ? 0.6 : 1
-          }}
-        >
-          <ShieldOff size={26} color="#64748b" />
-          <span style={{ marginTop: '6px', fontWeight: '700' }}>Tắt Canh Giữ</span>
-          <span style={{ fontSize: '0.7rem', color: '#64748b' }}>DISARM</span>
-        </button>
-
-        {/* Lock Engine Button (Opens Step-up modal) */}
-        <button
-          className="btn btn-danger"
-          onClick={() => setIsLockModalOpen(true)}
-          disabled={isViewer || isArming || activeCommand?.status === 'PENDING' || currentState === 'THEFT_LOCK'}
-          style={{
-            flexDirection: 'column',
-            padding: '1rem 0.5rem',
-            opacity: isViewer ? 0.6 : 1
-          }}
-        >
-          <Lock size={26} />
-          <span style={{ marginTop: '6px', fontWeight: '700' }}>Khoá Động Cơ</span>
-          <span style={{ fontSize: '0.7rem', color: '#fecaca' }}>LOCK ENGINE</span>
-        </button>
-
-        {/* Unlock Engine Button */}
-        <button
-          className="btn btn-success"
-          onClick={() => handleCommand('UNLOCK_ENGINE')}
-          disabled={isViewer || isArming || activeCommand?.status === 'PENDING'}
-          style={{
-            flexDirection: 'column',
-            padding: '1rem 0.5rem',
-            opacity: isViewer ? 0.6 : 1
-          }}
-        >
-          <Unlock size={26} />
-          <span style={{ marginTop: '6px', fontWeight: '700' }}>Mở Khoá Xe</span>
-          <span style={{ fontSize: '0.7rem', color: '#dcfce7' }}>UNLOCK RELAY</span>
-        </button>
-
-        {/* Siren Alert Button */}
-        <button
-          className="btn btn-secondary"
-          onClick={() => handleCommand('SIREN_ON')}
-          disabled={isViewer || isArming}
-          style={{
-            flexDirection: 'column',
-            padding: '1rem 0.5rem',
-            background: currentState === 'ALARM' ? '#fee2e2' : '#ffffff',
-            borderColor: currentState === 'ALARM' ? '#fca5a5' : '#bae6fd',
-            color: currentState === 'ALARM' ? '#dc2626' : '#0369a1',
-            opacity: isViewer ? 0.6 : 1
-          }}
-        >
-          <Volume2 size={26} color={currentState === 'ALARM' ? '#ef4444' : '#0284c7'} />
-          <span style={{ marginTop: '6px', fontWeight: '700' }}>
-            Bật Còi Báo Động
-          </span>
-          <span style={{ fontSize: '0.7rem', color: '#64748b' }}>SIREN BUZZER</span>
-        </button>
-
-        <button className="btn btn-secondary" onClick={() => handleCommand('SIREN_OFF')}
-          disabled={isViewer || isArming || activeCommand?.status === 'PENDING'} style={{ flexDirection: 'column', padding: '1rem 0.5rem' }}>
-          <Volume2 size={26} /><span>Tắt Còi</span><span style={{ fontSize: '0.7rem' }}>SIREN_OFF</span>
-        </button>
-
-        {/* Reboot Gateway Button */}
-        <button
-          className="btn btn-secondary"
-          onClick={() => handleCommand('REBOOT')}
-          disabled={isViewer || isArming}
-          style={{
-            flexDirection: 'column',
-            padding: '1rem 0.5rem',
-            opacity: isViewer ? 0.6 : 1
-          }}
-        >
-          <RotateCcw size={26} color="#64748b" />
-          <span style={{ marginTop: '6px', fontWeight: '700' }}>Khởi Động Lại</span>
-          <span style={{ fontSize: '0.7rem', color: '#64748b' }}>REBOOT NODE</span>
-        </button>
-
-      </div>
-
-      {/* Realtime Command Feedback Alert Banner */}
-      {commandFeedback && (
-        <div style={{
-          marginTop: '1.25rem',
-          padding: '0.85rem 1rem',
-          borderRadius: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          fontSize: '0.875rem',
-          fontWeight: '600',
-          background: commandFeedback.type === 'error' ? '#fef2f2' : commandFeedback.type === 'success' ? '#f0fdf4' : '#f0f9ff',
-          border: `1px solid ${commandFeedback.type === 'error' ? '#fecaca' : commandFeedback.type === 'success' ? '#bbf7d0' : '#bae6fd'}`,
-          color: commandFeedback.type === 'error' ? '#991b1b' : commandFeedback.type === 'success' ? '#166534' : '#0369a1'
-        }}>
-          {commandFeedback.type === 'error' ? <AlertCircle size={20} /> : <CheckCircle2 size={20} />}
-          <span>{commandFeedback.message}</span>
-        </div>
+      <p className="muted">
+        Bật bảo vệ sau khi bánh xe đã dừng. Thiết bị sẽ kiểm tra điều kiện trước
+        khi thực hiện.
+      </p>
+      {allowed && !ready && (
+        <p className="notice notice-warning">
+          Thiết bị chưa kết nối. Bạn có thể điều khiển khi kết nối được khôi
+          phục.
+        </p>
       )}
-
-      {/* Step-up Confirmation Modal */}
+      <div className="control-actions">
+        {actions.map(([type, Icon]) => (
+          <button
+            key={type}
+            className={`control-action${type === "LOCK_ENGINE" ? " control-action--danger" : ""}`}
+            onClick={() => request(type)}
+            disabled={
+              !allowed ||
+              !ready ||
+              pending ||
+              (type === "ARM" && device.securityState === "ARMED") ||
+              (type === "DISARM" && device.securityState === "PARKED") ||
+              (type === "LOCK_ENGINE" && device.securityState === "THEFT_LOCK")
+            }
+          >
+            <Icon size={23} aria-hidden="true" />
+            <span>{commandLabel(type)}</span>
+          </button>
+        ))}
+      </div>
+      {pending && !active && (
+        <p role="status" className="notice notice-info">
+          Đang gửi yêu cầu, vui lòng chờ thiết bị phản hồi.
+        </p>
+      )}
+      {active && (
+        <p
+          role="status"
+          className={`notice ${active.status === "EXECUTED" ? "notice-success" : active.status === "PENDING" ? "notice-info" : "notice-warning"}`}
+        >
+          {commandFeedback(active)}
+        </p>
+      )}
+      {error && (
+        <p role="alert" className="notice notice-danger">
+          {error}
+        </p>
+      )}
       <StepUpConfirmModal
-        isOpen={isLockModalOpen}
-        onClose={() => setIsLockModalOpen(false)}
-        onConfirm={(password) => handleCommand('LOCK_ENGINE', null, password)}
-        currentSpeed={speed}
+        isOpen={lockOpen}
+        onClose={() => setLockOpen(false)}
+        onConfirm={(password) => send("LOCK_ENGINE", password)}
+        currentSpeed={device?.speedValid ? device.lastSpeedKmh : null}
       />
-    </div>
+    </section>
   );
 }

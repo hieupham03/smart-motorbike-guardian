@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "checks": [
+    "web: no marker/map before a position exists",
+    "web: bundled Leaflet CSS, marker, tile failure feedback and retry",
+    "web: realtime coordinates update map and full-map link",
+    "web: keeps last-known location with stale warning",
+    "mobile: no marker/map before a position exists",
+    "mobile web: embedded map carries vehicle coordinates and fits viewport",
+    "mobile: realtime coordinates update map and full-map link",
+    "mobile: keeps last-known location with stale warning"
+  ],
+  "pageErrors": [],
+  "source": "CONTROLLED_API_STOMP_AND_MAP_PROVIDER",
+  "physicalBoard": false,
+  "nativePhone": false,
+  "realTilesVerified": false
+}

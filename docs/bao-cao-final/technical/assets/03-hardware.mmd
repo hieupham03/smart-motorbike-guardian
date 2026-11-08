@@ -1,0 +1,7 @@
+flowchart LR
+ H[Hall GPIO4] --> B[Node B ESP32-S3]
+ M[MPU SDA8 SCL9] --> B
+ G[GPS TX RX6] --> B
+ B <-->|UART115200| A[Node A gateway]
+ A --> R[Relay GPIO23 và motor]
+ A --> Z[Còi GPIO18 LED2]

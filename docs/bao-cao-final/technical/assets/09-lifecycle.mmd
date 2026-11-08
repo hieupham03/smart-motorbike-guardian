@@ -1,0 +1,8 @@
+stateDiagram-v2
+ [*] --> REGISTERED
+ REGISTERED --> ACTIVE: onboard
+ ACTIVE --> OFFLINE: LWT hoặc timeout
+ OFFLINE --> ACTIVE: bản tin hợp lệ
+ ACTIVE --> FAULT: revoke tại server
+ ACTIVE --> DECOMMISSIONED: decommission
+ DECOMMISSIONED --> [*]

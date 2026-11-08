@@ -53,4 +53,4 @@ PostgreSQL15, FlywayV1/V2 là nguồn schema duy nhất. Không chạy SQLseed c
 3. Mất UART/mạng, GPS FIX/STALE/phục hồi và phân quyền có actual/log.
 4. Hiệu chỉnh Hall, kiểm tra nguồn/reset, chạy30–60phút, đo khoảng20lượt latency; không lấy uptime trừ epoch.
 5. ADC nếu rubric bắt buộc; nếu giảm scope phải ghi rõ. Mobile chỉ nghiệm thu khi có app thật.
-6. Báo cáo/slide10phút khớp bản chạy. Trạng thái cụ thể: HOAN-THIEN-VA-NGHIEM-THU.md; không gán100% khi actual thiếu.
+6. Báo cáo/slide10phút khớp bản chạy. Trạng thái cụ thể: RELEASE.md; không gán100% khi actual thiếu.

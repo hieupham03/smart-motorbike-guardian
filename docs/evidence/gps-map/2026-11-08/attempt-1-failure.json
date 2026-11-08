@@ -1,0 +1,11 @@
+{
+  "error": "page.waitForFunction: Timeout 30000ms exceeded.\n    at test (D:\\Firmware-IoT\\tests\\integration\\gps-map-ui.cjs:79:14)\n    at async main (D:\\Firmware-IoT\\tests\\integration\\gps-map-ui.cjs:119:25)",
+  "checks": [
+    "web: no marker/map before a position exists",
+    "web: bundled Leaflet CSS, marker, tile failure feedback and retry",
+    "web: realtime coordinates update map and full-map link",
+    "web: keeps last-known location with stale warning",
+    "mobile: no marker/map before a position exists"
+  ],
+  "errors": []
+}

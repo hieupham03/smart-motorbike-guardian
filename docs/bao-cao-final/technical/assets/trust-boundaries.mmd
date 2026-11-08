@@ -1,0 +1,6 @@
+flowchart LR
+ U[Client không tin cậy] -->|JWT| A[API quyền và validate]
+ A --> D[(DB audit)]
+ B[Broker và thiết bị] -->|MQTT| A
+ A -->|cmd_id| B
+ N[Giới hạn broker credential ACL TLS] -.-> B

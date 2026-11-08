@@ -1,0 +1,10 @@
+{
+  "purpose": "Public coursework fixture; not a database export",
+  "deviceUuid": "550e8400-e29b-41d4-a716-446655440001",
+  "name": "Xe mô hình",
+  "dataSource": "HARDWARE",
+  "wheelDiameterM": 0.065,
+  "wheelPulsesPerRevolution": 1,
+  "defaultSpeedLimitKmh": 2,
+  "notes": "The applied speed limit is reported by Node A, not inferred from this fixture."
+}

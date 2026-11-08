@@ -1,94 +1,81 @@
-# =========================================================================
-# SMART MOTORBIKE GUARDIAN - GITIGNORE
-# =========================================================================
-
-# Dependencies & Package Managers
+# Dependencies and generated output
 node_modules/
-frontend/node_modules/
-!frontend/package-lock.json
-yarn.lock
-pnpm-lock.yaml
-
-# Build Outputs & Bundles
 dist/
-frontend/dist/
 build/
-backend/target/
+target/
+.expo/
+.eas/
+.vite/
+.npm-cache/
+.kotlin/
+web-build/
+coverage/
+*.tsbuildinfo
 *.class
 *.jar
 *.war
-*.ear
+*.apk
+*.aab
+expo-env.d.ts
 
-# Environment Variables & Secrets
+# Local configuration, runtime data and secrets
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+!**/.env.example
+network_config.h
+credentials.json
+google-services.json
+GoogleService-Info.plist
 *.pem
 *.key
-credentials.json
+*.jks
+*.keystore
+*.p8
+*.p12
+*.mobileprovision
+*.db
+*.db.*
+*.sqlite*
+postgres_data/
+logs/
+*.log
+*.tmp
+*.temp
+.local/
 
-# IDE & Editor Configs
-.idea/
+# Agent/editor working files are not release content
+AGENTS.md
+.agents/
 .vscode/
+.idea/
+.github/modernize/
+.settings/
+.classpath
+.project
 *.iml
 *.ipr
 *.iws
-.classpath
-.project
-.settings/
-*.sublime-project
-*.sublime-workspace
 
-# Operating System Files
+# Native folders are generated from the Expo configuration
+/frontend/mobile/android/
+/frontend/mobile/ios/
+.metro-health-check*
+.tmp-*/
+
+# Editor locks, backups and operating-system files
+~$*
+*.lck
+*.bak_*
+*.bak
+__pycache__/
+*.pyc
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 desktop.ini
 
-# Logs & Temporary Files
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-logs/
-*.tmp
-*.temp
-
-# Database & Runtime Data
-postgres_data/
-*.db
-*.sqlite
-*.sqlite3
-
-# Local firmware Wi-Fi credentials
-network_config.h
-
-# Local dependency caches
-.npm-cache/
-
-# Expo / React Native mobile
-mobile/.expo/
-mobile/.eas/
-mobile/.metro-health-check*
-mobile/expo-env.d.ts
-mobile/.kotlin/
-mobile/android/
-mobile/ios/
-mobile/web-build/
-mobile/.tmp-*/
-mobile/*.apk
-mobile/*.aab
-mobile/*.jks
-mobile/*.keystore
-mobile/*.p8
-mobile/*.p12
-mobile/*.mobileprovision
-mobile/google-services.json
-mobile/GoogleService-Info.plist
-mobile/*.tsbuildinfo
-.vite/
+# Retired top-level layout
+/mobile/
+/node_a/
+/node_b/
+/scripts/

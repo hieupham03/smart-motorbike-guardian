@@ -73,6 +73,7 @@ export const api = {
 
   // Telemetry
   getLatestTelemetry: id => request(`/devices/${id}/telemetry/latest`),
+  getWheelSession: id => request(`/devices/${id}/wheel-session`),
   getTelemetryHistory: (deviceId, from, to, page = 0, size = 5000) => {
     let url = `/devices/${deviceId}/telemetry`;
     const params = new URLSearchParams();

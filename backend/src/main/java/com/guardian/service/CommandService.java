@@ -55,8 +55,16 @@ public class CommandService {
             throw new BadRequestException("Thiết bị đang ở trạng thái lỗi/thu hồi (Revoked), không thể nhận lệnh");
         }
 
-        if (request.getType() == null || request.getType() == CommandType.CONFIG_THRESHOLDS)
+        if (request.getType() == null)
             throw new BadRequestException("Lệnh không được firmware hiện tại hỗ trợ");
+        if(request.getType()==CommandType.RESET_WHEEL_SESSION && !"HARDWARE".equals(device.getDataSource()))
+            throw new BadRequestException("Phiên quay bánh chỉ hỗ trợ thiết bị HARDWARE");
+        if (request.getType() == CommandType.CONFIG_THRESHOLDS) {
+            if (!"HARDWARE".equals(device.getDataSource()))
+                throw new BadRequestException("Đổi ngưỡng từ xa chỉ hỗ trợ thiết bị thật; thiết bị mô phỏng dùng cài đặt mô phỏng.");
+            // Saving a request is not confirmation that the device has applied it.
+            request.setPayload(SpeedLimitConfig.parse(request.getPayload()).toString());
+        }
 
         // Step-up confirmation for dangerous commands (LOCK_ENGINE)
         if (request.getType() == CommandType.LOCK_ENGINE) {

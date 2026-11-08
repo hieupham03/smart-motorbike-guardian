@@ -1,6 +1,8 @@
-> Cập nhật 18/10/2026: tài liệu có các mục lịch sử. Xem [trạng thái tích hợp và nghiệm thu hiện tại](HOAN-THIEN-VA-NGHIEM-THU.md) trước khi dùng làm báo cáo.
+> Cập nhật 20/10/2026: S3/MPU và relay/motor/nguồn được người dùng xác nhận đã ổn; bánh xe 6,5 cm đã cập nhật chu vi. Tài liệu có các mục lịch sử; xem [trạng thái tích hợp và nghiệm thu hiện tại](RELEASE.md) trước khi dùng làm báo cáo.
 
 # Hardware/Firmware v2 GPS — hướng dẫn nạp và thử breadboard
+
+> Bổ sung 21/10/2026: [ba tính năng Hall/tốc độ](BA-TINH-NANG-HALL-VA-TOC-DO.md) đã có code/test phần mềm. Telemetry vẫn 39 byte, thêm counter frame 13 byte; nạp lại cả hai node. ARM yêu cầu bánh dừng và ngắt motor; DISARM/UNLOCK cấp lại.
 
 Cập nhật 08/10/2026 cho Node A ESP32-WROOM và Node B ESP32-S3 N16R8. Đây là cấu hình testbed môn học. Firmware v2 đã có đường GPS Node B → UART → Node A → MQTT; chưa có kết quả đo mạch thật trong phiên sửa code.
 
@@ -8,9 +10,10 @@ Cập nhật 08/10/2026 cho Node A ESP32-WROOM và Node B ESP32-S3 N16R8. Đây 
 
 - Node A: `firmware/node_a_gateway/node_a_gateway.ino`.
 - Node B: `firmware/node_b_sensor/node_b_sensor.ino`.
-- `node_a/` và `node_b/` là mirror, đã đồng bộ cả sketch/header/config. Chọn một bộ để nạp.
+- Chỉ nạp từ `firmware/node_a_gateway/` và `firmware/node_b_sensor/`; các bản mirror ở gốc đã được bỏ khỏi bản phát hành.
 - Node B cần **TinyGPSPlus**; Node A cần **PubSubClient** và **ArduinoJson**. Phiên này dùng ESP32 core 2.0.17, TinyGPSPlus 1.0.3, ArduinoJson 7.4.3; ArduinoJson 7 có thể cảnh báo API StaticJsonDocument tương thích cũ.
 - Chỉnh `guardian_config.h` để đổi chân GPS, timeout, chu vi bánh, số nam châm và mức kích relay.
+- Bánh xe hiện tại: đường kính `0,065 m`, chu vi `0,20420352 m`; giữ cấu hình `1` xung Hall/vòng. Giá trị đường kính do người dùng cung cấp ngày 20/10/2026; cần nạp lại Node B để áp dụng. Nếu số xung/vòng khác `1`, sửa `WHEEL_PULSES_PER_REV` trước khi nạp.
 - Wi-Fi Node A nằm trong `network_config.h` đã được gitignore. Trên máy mới, copy `network_config.example.h` thành `network_config.h` rồi điền Wi-Fi. Những credential cũ đã được chuyển sang file local, không bị in ra hướng dẫn.
 
 ## 2. Đấu dây theo bản firmware mới
@@ -28,7 +31,7 @@ Tắt nguồn khi đổi dây. Đối chiếu tên GPIO in trên header, không 
 | GPS RX | Để hở khi thử lần đầu | GPIO7 là TX2 đã cấu hình nhưng chưa cần nối |
 | GPS GND | Node B GND | Chung tham chiếu |
 | GPS VCC | Nguồn theo breakout cụ thể | NEO-6M-0-001 là tên receiver, không đủ để khẳng định breakout nhận 5 V |
-| Relay IN | Node A GPIO23 | Jumper chọn LOW để khớp RELAY_ACTIVE_LOW=true |
+| Relay IN | Node A GPIO23 | Jumper chọn HIGH để khớp RELAY_ACTIVE_LOW=false |
 | Relay VCC/GND | Nguồn đúng module/GND điều khiển | Kiểm tra module nhận điều khiển 3.3 V |
 | Relay COM/NO | Nối tiếp nguồn motor DC testbed | Đo mức logic khi chưa nối motor trước |
 | LED trạng thái | GPIO2 onboard Node A | LED ngoài GPIO19 trong sơ đồ cũ không được firmware này điều khiển |
@@ -38,7 +41,7 @@ GPS module trần dùng điện áp theo datasheet; breakout có regulator có t
 
 Motor dùng nguồn riêng đúng định mức motor (motor TT 3–6 V không cấp 12 V). Với tải motor, dùng diode chống xung ngược phù hợp. Không nối chập nguồn ngoài với 5 V USB. Không tuyên bố cách ly quang chỉ vì relay có optocoupler; nối GND/jumper có thể làm mất cách ly.
 
-**Relay chọn HIGH/LOW:** mặc định đặt jumper LOW; `true` → cấp motor bằng LOW, cắt motor bằng HIGH khi dùng COM-NO. Nếu chọn HIGH, đổi RELAY_ACTIVE_LOW=false trên Node A và xác minh thực tế. Khởi động mặc định motor tắt (`RELAY_POWER_ON_AT_BOOT=false`); nhấn `u`, `d` hoặc `a` để cấp motor. Trạng thái PARKED là trạng thái an ninh, không phải xác nhận tiếp điểm đang cấp motor. Mức chân lúc reset/boot vẫn phải đo trên module thật.
+**Relay hiện dùng HIGH:** config local Node A là `RELAY_ACTIVE_LOW=false`; HIGH cấp motor qua COM-NO, LOW ngắt. `RELAY_POWER_ON_AT_BOOT=true` cấp motor sau khởi tạo. Bản Hall mới yêu cầu ARM khi bánh dừng, sau đó ngắt motor để canh giữ; DISARM/UNLOCK cấp lại. Khi đổi module LOW phải đổi jumper và `RELAY_ACTIVE_LOW=true`. PARKED là trạng thái an ninh, không xác nhận tiếp điểm đang cấp motor. Xác nhận vận hành trước đó không thay nghiệm thu hành vi ARM mới hoặc phép đo lúc reset/boot.
 
 ## 3. GPS hoạt động như thế nào
 
@@ -57,7 +60,9 @@ GpsTask đọc byte mỗi khoảng 10 ms, không chờ GPS có fix. Hall/MPU v�
 
 Payload UART v2 **39 byte**: speed + ax/ay/az + timestamp + lat/lon + gps_age_ms + wheel_idle_ms + gps_valid/imu_valid/speed_valid. Nạp cả hai node; node chạy header cũ 20 byte không tương thích. UART frame vẫn start/type/len/payload/XOR; version v2 hiện là quy ước build/size, chưa thêm byte version vào frame.
 
-MQTT giữ tên speed_kmh, accel_x/y/z, latitude, longitude tương thích backend hiện tại; thêm gps_valid, gps_age_ms, sensor_connected, imu_valid, speed_valid và data_source. `ts` vẫn là uptime, không phải GPS UTC. Backend hiện chưa xử lý đầy đủ metadata, state và offline: giao việc đó cho người làm backend/app. Firmware ngừng gửi battery_v cố định, nhưng backend vẫn có default pin 12.6 V; app chưa phải bằng chứng đo pin thật.
+MQTT giữ tên speed_kmh, accel_x/y/z, latitude, longitude; thêm gps_valid, gps_age_ms, sensor_connected, imu_valid, speed_valid và data_source. `ts` là uptime, không phải GPS UTC. Backend/web local đã có xử lý metadata/realtime; nghiệm thu với board thật vẫn cần bằng chứng. Chưa đo ADC thì điện áp HARDWARE phải null, không dùng giá trị seed/simulator làm số đo pin thật. Bản backend/mobile mới trên GitHub được tạm hoãn đưa về local theo yêu cầu ngày 20/10/2026.
+
+Log GPS cũ đã được lưu tại [evidence/gps/README.md](evidence/gps/README.md): có NO_FIX/NMEA và xác nhận người dùng về FIX ngoài trời; chưa có đoạn tọa độ FIX trong log đã gửi.
 
 ## 4. Những sửa chữa firmware và lý do
 
@@ -89,7 +94,7 @@ Hall không tự kiểm tra dây đã đứt. Timeout 4 giây là heuristic test
 
 ## 6. Test firmware sau nạp
 
-Serial Node A: `a` ARM, `d` DISARM, `k` LOCK, `u` UNLOCK, `b` SIREN_ON, `s` SIREN_OFF. `2` giờ chỉ bật còi thủ công, không ép trạng thái ALARM.
+Serial Node A: `a` ARM (bánh dừng, ngắt motor), `d` DISARM, `k` LOCK, `u` UNLOCK, `b` SIREN_ON, `s` SIREN_OFF, `r` reset phiên quay bánh. `2` chỉ bật còi thủ công, không ép trạng thái ALARM.
 
 | Thử | Mong đợi |
 |---|---|
@@ -118,7 +123,7 @@ Chỉ đánh dấu PASS khi có log và quan sát breadboard. Không nạp tự 
 | Node B, esp32s3, FlashSize=16M, PSRAM=opi, CDCOnBoot=cdc | Build PASS; flash 301525 byte, static RAM 20448 byte |
 | GPS bringup, cùng cấu hình S3 | Build PASS; flash 279877 byte, static RAM 19412 byte |
 | Host test UART v2 | PASS: roundtrip payload GPS, checksum sai, timeout gói thiếu, phục hồi, giới hạn length, null/empty payload |
-| Mirror sketch Node A/Node B | SHA256 giống nhau giữa firmware/ và node_a/, node_b/ |
+| Nguồn firmware | Một bộ sketch/header/config chuẩn trong firmware/ |
 | git diff --check | PASS |
 
 Static RAM ở bảng không bao gồm toàn bộ heap/task stack cấp phát lúc chạy. Chưa chạy test phần cứng, chưa nạp board, chưa đo GPS fix/relay/latency. Đây không phải xác nhận nghiệm thu end-to-end với app.

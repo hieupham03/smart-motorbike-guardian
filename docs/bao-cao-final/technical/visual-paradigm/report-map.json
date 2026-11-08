@@ -1,0 +1,20 @@
+{
+  "replace": {
+    "assets/01-context.png": "visual-paradigm/exports/01-boi-canh.png",
+    "assets/02-layers.png": "visual-paradigm/exports/03-kien-truc-5-tang.png",
+    "assets/architecture-components.png": "visual-paradigm/exports/04-cau-truc-phan-mem.png",
+    "assets/10-deployment.png": "visual-paradigm/exports/06-trien-khai.png",
+    "assets/08-erd.png": "visual-paradigm/exports/07-erd-9-bang.png",
+    "assets/06-sequence-data.png": "visual-paradigm/exports/08-sequence-telemetry.png",
+    "assets/07-sequence-command.png": "visual-paradigm/exports/09-sequence-command-ack.png",
+    "assets/security-state.png": "visual-paradigm/exports/10-state-bao-ve.png",
+    "assets/09-lifecycle.png": "visual-paradigm/exports/11-lifecycle-device.png",
+    "assets/command-lifecycle.png": "visual-paradigm/exports/14-state-command.png"
+  },
+  "append": [
+    {"chapter": 5, "position": "start", "caption": "Use case và phạm vi thao tác của Owner, Viewer, Admin.", "path": "visual-paradigm/exports/02-use-case.png"},
+    {"chapter": 8, "position": "start", "caption": "Sơ đồ khối phần cứng hai node và các cảm biến, đầu ra.", "path": "visual-paradigm/exports/05-khoi-phan-cung.png"},
+    {"chapter": 11, "caption": "Luồng tiếp nhận thiết bị và chia sẻ quyền theo dõi.", "path": "visual-paradigm/exports/12-activity-onboarding.png"},
+    {"chapter": 9, "caption": "Luồng kiểm quyền và kiểm điều kiện thực thi lệnh.", "path": "visual-paradigm/exports/13-activity-control.png"}
+  ]
+}

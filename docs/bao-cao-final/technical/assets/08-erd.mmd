@@ -1,0 +1,12 @@
+erDiagram
+ users ||--o{ ownership : owns
+ devices ||--o{ ownership : assigned
+ devices ||--o{ telemetry_readings : records
+ devices ||--o{ commands : receives
+ devices ||--o{ alerts : emits
+ users ||--o{ commands : issues
+ users ||--o{ alerts : resolves
+ users ||--o{ audit_logs : acts
+ devices ||--o{ audit_logs : audited
+ users ||--o{ push_tokens : registers
+ push_tokens ||--o{ push_deliveries : delivers

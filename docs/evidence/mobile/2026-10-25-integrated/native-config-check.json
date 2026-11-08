@@ -1,0 +1,10 @@
+{
+  "result": "PASS",
+  "source": "EXPO_CONFIG_AND_PLUGIN_INTROSPECTION_ONLY",
+  "developmentAllowsLanHttp": true,
+  "productionCleartextDisabled": true,
+  "mapsPluginReceivesConfiguredKey": true,
+  "easProjectIdWired": true,
+  "androidManifestFlagsAndMapsKeyVerified": true,
+  "nativeBuildPerformed": false
+}

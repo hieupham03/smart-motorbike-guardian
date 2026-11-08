@@ -9,6 +9,7 @@
 #define RXD1 18
 #define TXD1 17
 #define UART_BAUD 115200
+#define FIRMWARE_VERSION "v1.0.0"
 
 #define PIN_I2C_SDA 8
 #define PIN_I2C_SCL 9
@@ -21,6 +22,7 @@ struct GpsSnapshot {float lat, lon; uint32_t lastFix; bool hasFix;};
 static GpsSnapshot gpsSnapshot={};
 static SemaphoreHandle_t gpsMutex;
 static volatile uint32_t droppedSamples=0;
+static uint32_t sensorBootId=0;
 
 
 // --- Cấu trúc dữ liệu & Biến chia sẻ FreeRTOS ---
@@ -338,6 +340,12 @@ void UARTTxRxTask(void *pvParameters) {
                 telemToSend.speed_valid=telemToSend.speed_valid && sampleFresh;
                 telemToSend.imu_valid=telemToSend.imu_valid && sampleFresh;
                 send_msg(CommSerial, MSG_TELEMETRY, telemToSend);
+                uint32_t pulses;
+                portENTER_CRITICAL(&hallMux);
+                pulses=hallPulseCount;
+                portEXIT_CRITICAL(&hallMux);
+                WheelSampleData wheel={1,sensorBootId,pulses,millis()};
+                send_msg(CommSerial, MSG_WHEEL_SAMPLE, wheel);
             }
         }
 
@@ -364,11 +372,13 @@ void setup() {
         delay(10);
     }
     delay(200);
+    sensorBootId=esp_random();
 
     CommSerial.begin(UART_BAUD, SERIAL_8N1, RXD1, TXD1);
     GpsSerial.begin(GPS_BAUD,SERIAL_8N1,GPS_RX_PIN,GPS_TX_PIN);
 
     Serial.println("\n--- ESP32-S3 Sensor Node (Node B) Initializing ---");
+    Serial.printf("[FIRMWARE] Node B %s\n", FIRMWARE_VERSION);
 
     pinMode(PIN_HALL, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(PIN_HALL), hall_isr, FALLING);

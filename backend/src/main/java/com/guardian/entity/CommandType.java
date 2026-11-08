@@ -8,5 +8,6 @@ public enum CommandType {
     SIREN_ON,
     SIREN_OFF,
     CONFIG_THRESHOLDS,
-    REBOOT
+    REBOOT,
+    RESET_WHEEL_SESSION
 }

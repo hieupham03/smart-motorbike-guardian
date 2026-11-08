@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="792pt" height="374.4pt" viewBox="0 0 792 374.4" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-11-05T19:22:40.236670</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 374.4 
+L 792 374.4 
+L 792 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 22.0068 114.354 
+L 162.3852 114.354 
+Q 167.9724 114.354 167.9724 108.882 
+L 167.9724 46.638 
+Q 167.9724 41.166 162.3852 41.166 
+L 22.0068 41.166 
+Q 16.4196 41.166 16.4196 46.638 
+L 16.4196 108.882 
+Q 16.4196 114.354 22.0068 114.354 
+z
+" clip-path="url(#pfbdc8428bc)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 22.0068 216.954 
+L 162.3852 216.954 
+Q 167.9724 216.954 167.9724 211.482 
+L 167.9724 149.238 
+Q 167.9724 143.766 162.3852 143.766 
+L 22.0068 143.766 
+Q 16.4196 143.766 16.4196 149.238 
+L 16.4196 211.482 
+Q 16.4196 216.954 22.0068 216.954 
+z
+" clip-path="url(#pfbdc8428bc)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 22.0068 319.554 
+L 162.3852 319.554 
+Q 167.9724 319.554 167.9724 314.082 
+L 167.9724 251.838 
+Q 167.9724 246.366 162.3852 246.366 
+L 22.0068 246.366 
+Q 16.4196 246.366 16.4196 251.838 
+L 16.4196 314.082 
+Q 16.4196 319.554 22.0068 319.554 
+z
+" clip-path="url(#pfbdc8428bc)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 238.5108 326.394 
+L 385.8732 326.394 
+Q 391.4604 326.394 391.4604 320.922 
+L 391.4604 46.638 
+Q 391.4604 41.166 385.8732 41.166 
+L 238.5108 41.166 
+Q 232.9236 41.166 232.9236 46.638 
+L 232.9236 320.922 
+Q 232.9236 326.394 238.5108 326.394 
+z
+" clip-path="url(#pfbdc8428bc)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 468.9828 326.394 
+L 609.3612 326.394 
+Q 614.9484 326.394 614.9484 320.922 
+L 614.9484 46.638 
+Q 614.9484 41.166 609.3612 41.166 
+L 468.9828 41.166 
+Q 463.3956 41.166 463.3956 46.638 
+L 463.3956 320.922 
+Q 463.3956 326.394 468.9828 326.394 
+z
+" clip-path="url(#pfbdc8428bc)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 664.5348 148.554 
+L 763.0092 148.554 
+Q 768.5964 148.554 768.5964 143.082 
+L 768.5964 67.158 
+Q 768.5964 61.686 763.0092 61.686 
+L 664.5348 61.686 
+Q 658.9476 61.686 658.9476 67.158 
+L 658.9476 143.082 
+Q 658.9476 148.554 664.5348 148.554 
+z
+" clip-path="url(#pfbdc8428bc)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 664.5348 292.194 
+L 763.0092 292.194 
+Q 768.5964 292.194 768.5964 286.722 
+L 768.5964 210.798 
+Q 768.5964 205.326 763.0092 205.326 
+L 664.5348 205.326 
+Q 658.9476 205.326 658.9476 210.798 
+L 658.9476 286.722 
+Q 658.9476 292.194 664.5348 292.194 
+z
+" clip-path="url(#pfbdc8428bc)" style="fill: #ffffff; stroke: #000000; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(32.36309 72.848672)">Hall + nam châm</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(70.909281 93.077285)">GPIO4</text>
+   </g>
+   <g id="patch_9">
+    <path d="M 167.527204 77.76 
+Q 200.447629 77.76 232.026414 77.76 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 226.526414 75.01 
+L 232.026414 77.76 
+L 226.526414 80.51 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(57.109867 175.052285)">MPU-6050</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(46.461137 195.136953)">I2C GPIO8 / 9</text>
+   </g>
+   <g id="patch_10">
+    <path d="M 167.527204 180.36 
+Q 200.447629 180.36 232.026414 180.36 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 226.526414 177.61 
+L 232.026414 180.36 
+L 226.526414 183.11 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(64.318949 277.652285)">NEO-6M</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(53.56602 298.277285)">UART2 RX6</text>
+   </g>
+   <g id="patch_11">
+    <path d="M 167.527204 282.96 
+Q 200.447629 282.96 232.026414 282.96 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 226.526414 280.21 
+L 232.026414 282.96 
+L 226.526414 285.71 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(285.09698 137.222285)">NODE B</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(254.142293 157.847285)">ESP32-S3 N16R8</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(312.192 173.4675)"/>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(282.627352 198.67834)">Lấy mẫu</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(266.911531 218.856465)">Xử lý tại biên</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(271.146102 239.411641)">GPS độc lập</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(512.090945 137.222285)">NODE A</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(485.976688 156.515254)">ESP32 gateway</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(539.172 173.4675)"/>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(488.95657 198.161641)">Máy trạng thái</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(496.089383 218.957441)">Lệnh / MQTT</text>
+    <text style="font-size: 13.75px; font-family: 'DejaVu Sans'" transform="translate(477.983426 241.172285)">Điều khiển đầu ra</text>
+   </g>
+   <g id="patch_12">
+    <path d="M 391.018188 166.68 
+Q 427.431257 166.68 462.502685 166.68 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 457.002685 163.93 
+L 462.502685 166.68 
+L 457.002685 169.43 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_6">
+    <g id="patch_13">
+     <path d="M 411.291281 159.0255 
+L 443.564719 159.0255 
+L 443.564719 145.3005 
+L 411.291281 145.3005 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="427.428" y="155.085363" transform="rotate(-0 427.428 155.085363)">UART</text>
+   </g>
+   <g id="patch_14">
+    <path d="M 463.837812 214.56 
+Q 427.424743 214.56 392.353315 214.56 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 397.853315 217.31 
+L 392.353315 214.56 
+L 397.853315 211.81 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_7">
+    <g id="patch_15">
+     <path d="M 397.850168 243.1575 
+L 457.005832 243.1575 
+L 457.005832 229.431621 
+L 397.850168 229.431621 
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 11.25px; font-family: 'DejaVu Sans'; text-anchor: middle" x="427.428" y="239.217363" transform="rotate(-0 427.428 239.217363)">Heartbeat</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(696.598172 99.194219)">Relay</text>
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'" transform="translate(695.711453 118.962773)">Motor</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 12.5px; font-family: 'DejaVu Sans'; text-anchor: middle" x="713.772" y="253.178945" transform="rotate(-0 713.772 253.178945)">Còi / LED</text>
+   </g>
+   <g id="patch_16">
+    <path d="M 614.506188 105.12 
+Q 636.948936 105.12 658.050043 105.12 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 652.550043 102.37 
+L 658.050043 105.12 
+L 652.550043 107.87 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 614.506188 248.76 
+Q 636.948936 248.76 658.050043 248.76 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 652.550043 246.01 
+L 658.050043 248.76 
+L 652.550043 251.51 
+" style="fill: none; stroke: #000000; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pfbdc8428bc">
+   <rect x="11.88" y="9.36" width="768.24" height="355.68"/>
+  </clipPath>
+ </defs>
+</svg>

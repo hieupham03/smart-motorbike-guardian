@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Map;
 
 @Service
 public class CommandDispatchService {
@@ -28,8 +27,18 @@ public class CommandDispatchService {
             return;
         }
         try {
-            String payload = new ObjectMapper().writeValueAsString(Map.of("cmd_id", id, "type", command.getType().name()));
+            String payload = mqttPayload(command);
             if (!mqtt.publishCommand(command.getDevice().getDeviceUuid(), command.getType().name(), payload)) lifecycle.failPublish(id);
         } catch (Exception e) { lifecycle.failPublish(id); }
+    }
+
+    static String mqttPayload(Command command) throws com.fasterxml.jackson.core.JsonProcessingException {
+        ObjectMapper json = new ObjectMapper();
+        var payload = json.createObjectNode();
+        payload.put("cmd_id", command.getCmdId());
+        payload.put("type", command.getType().name());
+        if (command.getType() == CommandType.CONFIG_THRESHOLDS)
+            payload.set("speed_limit_kmh", SpeedLimitConfig.parse(command.getPayload()).get("speed_limit_kmh"));
+        return json.writeValueAsString(payload);
     }
 }

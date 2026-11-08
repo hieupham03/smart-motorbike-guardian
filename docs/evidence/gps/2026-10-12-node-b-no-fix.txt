@@ -1,0 +1,11 @@
+23:03:23.618 -> [GPS NO_FIX] lat=0.000000 lon=0.000000 age=4294967295 chars=39039 checksum_errors=0
+23:03:25.607 -> [GPS NO_FIX] lat=0.000000 lon=0.000000 age=4294967295 chars=39409 checksum_errors=0
+23:03:27.590 -> [GPS NO_FIX] lat=0.000000 lon=0.000000 age=4294967295 chars=39593 checksum_errors=0
+23:03:29.613 -> [GPS NO_FIX] lat=0.000000 lon=0.000000 age=4294967295 chars=39777 checksum_errors=0
+23:03:31.608 -> [GPS NO_FIX] lat=0.000000 lon=0.000000 age=4294967295 chars=40147 checksum_errors=0
+23:03:33.611 -> [GPS NO_FIX] lat=0.000000 lon=0.000000 age=4294967295 chars=40331 checksum_errors=0
+23:03:35.573 -> [GPS NO_FIX] lat=0.000000 lon=0.000000 age=4294967295 chars=40701 checksum_errors=0
+23:03:37.589 -> [GPS NO_FIX] lat=0.000000 lon=0.000000 age=4294967295 chars=40885 checksum_errors=0
+23:03:39.608 -> [GPS NO_FIX] lat=0.000000 lon=0.000000 age=4294967295 chars=41069 checksum_errors=0
+23:03:41.608 -> [GPS NO_FIX] lat=0.000000 lon=0.000000 age=4294967295 chars=41439 checksum_errors=0
+23:03:43.619 -> [GPS NO_FIX] lat=0.000000 lon=0.000000 age=4294967295 chars=41623 checksum_errors=0
