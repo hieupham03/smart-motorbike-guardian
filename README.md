@@ -11,6 +11,7 @@ Hệ thống IoT bảo vệ và giám sát mô hình xe máy trên breadboard. H
 - Định vị NEO-6M; phân biệt vị trí mới, vị trí lần cuối và chưa định vị được.
 - Điều khiển relay/còi; từ chối ARM/LOCK khi bánh chưa dừng hoặc dữ liệu không đủ mới.
 - Owner/Viewer/Admin, lịch sử lệnh và cảnh báo, REST/WebSocket realtime, lịch sử telemetry và CSV.
+- Broker classroom có khóa riêng từng thiết bị, ACL theo UUID và ngắt kết nối khi thu hồi; web demo có HTTPS/WSS bằng chứng chỉ local.
 
 ## Kiến trúc
 
@@ -66,7 +67,7 @@ docker compose --env-file deployment/.env -f deployment/docker-compose.yml up --
 - OpenAPI: **http://localhost:8080/swagger-ui.html**
 - Khi bật seed, tài khoản mẫu: `owner@guardian.iot`; dùng mật khẩu đã đặt trong `DEMO_PASSWORD`.
 
-Mặc định dùng broker công cộng cho mô hình. Có thể chạy profile `local-broker`; backend và Node A phải cùng broker/topic. Xem [triển khai](deployment/README.md).
+Cấu hình Docker cơ bản có thể trỏ broker ngoài. Để demo xác thực và thu hồi thiết bị theo đề bài, dùng bộ chạy classroom bên dưới hoặc [Compose classroom](deployment/docker-compose.classroom.yml) cùng cấu hình riêng; broker công cộng không thay thế bằng chứng bảo mật thiết bị. Xem [triển khai](deployment/README.md).
 
 ## Chạy cục bộ và mobile
 
@@ -80,18 +81,16 @@ npm ci
 cd mobile
 npm ci
 cd ../..
-.\deployment\start-mobile-demo.bat
+.\deployment\start-classroom-demo.bat -WebOnly
 ```
 
-Bộ chạy tạo cấu hình riêng ở `.local/`, hỏi mật khẩu trong lần đầu và dùng backend cổng **8082**, Expo cổng **8081**. Điện thoại và máy tính cần cùng mạng và truy cập được backend. Để mở web với cùng backend, dùng terminal khác:
+Bộ chạy classroom tạo cấu hình riêng ở `.local/classroom-demo/`, dùng backend **8082**, broker có xác thực **1883** và web HTTPS **5173**. Đọc [chuẩn bị demo](docs/CHUAN-BI-DEMO-TAI-TRUONG.md) để Prepare khóa, nạp Node A và kích hoạt mạch bằng mã một lần. HTTPS cần OpenSSL; chứng chỉ tự ký chỉ dùng cho đúng laptop/LAN, không tự cài CA. Bỏ `-WebOnly` để mở cả Expo **8081**, hoặc mở mobile sau bằng:
 
 ```powershell
-cd frontend
-$env:BACKEND_URL = 'http://127.0.0.1:8082'
-npm run dev
+.\deployment\start-mobile-client.bat
 ```
 
-Web cục bộ: **http://localhost:5173**. [Hướng dẫn mobile](frontend/mobile/README.md) phân biệt Expo Go, development build và APK preview. Remote push cần native build cùng cấu hình EAS/FCM/APNs; cài Expo Go không xác nhận tính năng này.
+Web classroom: **https://localhost:5173**. Điện thoại phải cùng mạng và truy cập được laptop. [Hướng dẫn mobile](frontend/mobile/README.md) phân biệt Expo Go, development build và APK preview. Remote push cần native build cùng cấu hình EAS/FCM/APNs; cài Expo Go không xác nhận tính năng này. MQTT TCP và Expo Go HTTP chỉ dùng trong LAN thử nghiệm riêng; HTTPS của web không mã hóa thay hai kênh này.
 
 ## Phần cứng và firmware
 
@@ -105,4 +104,4 @@ Node A bật nguồn motor theo cấu hình khởi động. Tắt nhánh nguồn
 - [Đổi ngưỡng tốc độ](docs/CAI-DAT-NGUONG-TOC-DO-WEB-MOBILE.md), [chạy web/mobile với mạch](docs/CHAY-WEB-MOBILE-VOI-PHAN-CUNG-THAT.md).
 - [Báo cáo, slide và thiết kế](docs/README.md), [hồ sơ phát hành](docs/RELEASE.md), [quy tắc repository](docs/REPOSITORY-POLICY.md).
 
-Lịch sử commit giữ đóng góp của từng tài khoản thành viên; mỗi người tiếp tục commit/push bằng tài khoản của mình. Tag `v1.0.0` xác định snapshot bàn giao. Kết quả kiểm thử phần mềm, xác nhận của người vận hành và các ca native/phần cứng chưa nghiệm thu được ghi riêng trong [hồ sơ phát hành](docs/RELEASE.md). Xem [đối chiếu điều kiện đồ án](docs/DOI-CHIEU-DIEU-KIEN-DO-AN.md) để chuẩn bị demo và vấn đáp.
+Lịch sử commit giữ đóng góp của từng tài khoản thành viên; mỗi người tiếp tục commit/push bằng tài khoản của mình. Tag `v1.1.0` xác định snapshot chuẩn bị demo hiện hành; tag `v1.0.0` trước đó được giữ nguyên. Kết quả phần mềm, mạch thật và phần chưa nghiệm thu nằm trong [hồ sơ phát hành](docs/RELEASE.md). Xem [đối chiếu đề bài](docs/DOI-CHIEU-DIEU-KIEN-DO-AN.md) để chuẩn bị demo và vấn đáp.
