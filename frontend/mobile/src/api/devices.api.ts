@@ -8,6 +8,14 @@ import type {
   WheelSession,
 } from "@/types/api";
 
+export interface DeviceMqttCredentials {
+  username: string;
+  password: string;
+  brokerHost: string;
+  brokerPort: number;
+  deviceUuid: string;
+}
+
 export function createDevicesApi(client: GuardianApiClient = apiClient) {
   return {
     list: () =>
@@ -17,6 +25,10 @@ export function createDevicesApi(client: GuardianApiClient = apiClient) {
         url: `/api/devices/${deviceId}`,
         method: "GET",
       }),
+    rotateCredentials: (deviceId: string) =>
+      client.request<DeviceMqttCredentials>({ url: `/api/devices/${deviceId}/mqtt-credentials`, method: "POST" }),
+    reactivate: (deviceId: string) =>
+      client.request<DeviceMqttCredentials>({ url: `/api/devices/${deviceId}/reactivate`, method: "POST" }),
     latestTelemetry: (deviceId: string) =>
       client.request<Telemetry | null>({
         url: `/api/devices/${deviceId}/telemetry/latest`,

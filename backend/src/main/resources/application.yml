@@ -33,6 +33,7 @@ app:
   seed:
     enabled: ${DEMO_SEED_ENABLED:false}
     password: ${DEMO_PASSWORD:}
+    hardware-unclaimed: ${DEMO_HARDWARE_UNCLAIMED:false}
   realtime:
     command-timeout-seconds: ${COMMAND_TIMEOUT_SECONDS:10}
     offline-timeout-seconds: ${DEVICE_OFFLINE_TIMEOUT_SECONDS:45}
@@ -51,6 +52,12 @@ app:
     connection-timeout: 3
     keep-alive-interval: 30
     auto-reconnect: true
+    embedded:
+      enabled: ${MQTT_EMBEDDED_ENABLED:false}
+      host: ${MQTT_EMBEDDED_HOST:0.0.0.0}
+      advertised-host: ${MQTT_PUBLIC_HOST:${MQTT_ADVERTISED_HOST:}}
+      port: ${MQTT_EMBEDDED_PORT:1883}
+    demo-device-password: ${DEMO_DEVICE_MQTT_PASSWORD:}
   push:
     enabled: ${EXPO_PUSH_ENABLED:true}
     base-url: ${EXPO_PUSH_BASE_URL:https://exp.host}

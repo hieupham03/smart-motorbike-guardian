@@ -26,6 +26,25 @@ public class DeviceController {
     @Autowired
     private CommandService commandService;
 
+    @Autowired
+    private com.guardian.service.DeviceCredentialService credentials;
+
+    @PostMapping("/{id}/mqtt-credentials")
+    @Operation(summary="Cấp lại mật khẩu kết nối riêng; chỉ trả mật khẩu một lần")
+    public ResponseEntity<ApiResponse<MqttCredentialResponse>> rotateMqttCredentials(
+            @PathVariable("id") String id,@AuthenticationPrincipal User user,HttpServletRequest request) {
+        var result=credentials.rotate(id,user,request.getRemoteAddr(),request.getServerName());
+        return ResponseEntity.ok().header("Cache-Control","no-store").body(ApiResponse.ok(result));
+    }
+
+    @PostMapping("/{id}/reactivate")
+    @Operation(summary="Kích hoạt lại thiết bị tạm thu hồi bằng mật khẩu mới; không phục hồi thiết bị đã ngừng sử dụng")
+    public ResponseEntity<ApiResponse<MqttCredentialResponse>> reactivateDevice(
+            @PathVariable("id") String id,@AuthenticationPrincipal User user,HttpServletRequest request) {
+        var result=credentials.reactivate(id,user,request.getRemoteAddr(),request.getServerName());
+        return ResponseEntity.ok().header("Cache-Control","no-store").body(ApiResponse.ok(result));
+    }
+
     @GetMapping
     @Operation(summary = "Danh sách thiết bị người dùng có quyền truy cập (Owner hoặc Viewer)")
     public ResponseEntity<ApiResponse<List<DeviceDto>>> getDevices(@AuthenticationPrincipal User currentUser) {

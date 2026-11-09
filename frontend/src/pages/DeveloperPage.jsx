@@ -10,6 +10,7 @@ import VirtualTestbedSimulator from "../components/dashboard/VirtualTestbedSimul
 import QuickControlPanel from "../components/dashboard/QuickControlPanel";
 import WheelSessionCard from "../components/dashboard/WheelSessionCard";
 import DeviceConfigModal from "../components/devices/DeviceConfigModal";
+import DeviceConnectionTools from "../components/devices/DeviceConnectionTools";
 
 export default function DeveloperPage() {
   const { role } = useAuth();
@@ -71,6 +72,7 @@ export default function DeveloperPage() {
             deviceUuid: device?.deviceUuid,
             source: device?.dataSource,
             firmware: device?.firmwareVersion,
+            hardware: device?.hwVersion,
             lifecycle: device?.lifecycleState,
             security: device?.securityState,
             sensorConnected: device?.sensorConnected,
@@ -104,6 +106,7 @@ export default function DeveloperPage() {
         />
       </div>
       <QuickControlPanel developer />
+      <DeviceConnectionTools key={device?.deviceId} device={device} admin={role === 'ADMIN'} onRefresh={fetchDevices} />
       <WheelSessionCard developer />
       {device?.dataSource === "SIMULATED" && (
         <button

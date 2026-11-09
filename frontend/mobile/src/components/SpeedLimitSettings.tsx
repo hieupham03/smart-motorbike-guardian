@@ -31,7 +31,7 @@ export function SpeedLimitSettings() {
   }
   return <View style={{ gap: 12 }}>
     <Text style={ui.heading}>Ngưỡng cảnh báo tốc độ</Text>
-    <Text style={ui.body}>Ngưỡng thiết bị báo về: {session ? `${session.speedLimitKmh.toLocaleString('vi-VN')} km/h` : 'Chưa có thông tin'}.</Text>
+    <Text style={ui.body}>Ngưỡng thiết bị báo về: {session && Number.isFinite(session.speedLimitKmh) ? `${session.speedLimitKmh.toLocaleString('vi-VN')} km/h` : 'Chưa có thông tin'}.</Text>
     {allowed ? <>
       <Text style={ui.label}>Ngưỡng mới (km/h)</Text>
       <TextInput accessibilityLabel="Ngưỡng mới (km/h)" style={ui.input} value={value}

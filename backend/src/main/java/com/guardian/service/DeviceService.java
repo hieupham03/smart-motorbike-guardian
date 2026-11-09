@@ -34,6 +34,9 @@ public class DeviceService {
     @Autowired
     private RealtimeService realtime;
 
+    @Autowired
+    private org.springframework.beans.factory.ObjectProvider<com.guardian.config.EmbeddedMqttBroker> embeddedBroker;
+
     @Transactional(readOnly = true)
     public List<DeviceDto> getDevicesForUser(User user) {
         if (user.getRole() == Role.ADMIN) {
@@ -87,12 +90,17 @@ public class DeviceService {
         Device device = deviceRepository.findByClaimToken(token)
                 .orElseThrow(() -> new BadRequestException("Mã Claim Token không hợp lệ hoặc không tồn tại"));
 
+        if(device.getClaimTokenExpiry()!=null && !device.getClaimTokenExpiry().isAfter(Instant.now()))
+            throw new BadRequestException("Mã kích hoạt đã hết hạn");
+
         if (!ownershipRepository.findByDevice(device).isEmpty()) {
             throw new BadRequestException("Thiết bị này đã được kích hoạt trước đó");
         }
         if (device.getLifecycleState() == LifecycleState.DECOMMISSIONED) {
             throw new BadRequestException("Thiết bị đã bị vô hiệu hoá vĩnh viễn");
         }
+        if(device.getLifecycleState()!=LifecycleState.REGISTERED && device.getLifecycleState()!=LifecycleState.PROVISIONED)
+            throw new BadRequestException("Thiết bị không ở trạng thái chờ kích hoạt");
 
         device.setName(request.getName().trim());
         if (request.getLicensePlate() != null && !request.getLicensePlate().isBlank()) {
@@ -104,6 +112,7 @@ public class DeviceService {
 
         device.setLifecycleState(LifecycleState.ACTIVE);
         device.setClaimToken(null); // Invalidate claim token after onboarding
+        device.setClaimTokenExpiry(null);
         deviceRepository.save(device);
 
         // Create Ownership
@@ -194,6 +203,8 @@ public class DeviceService {
         auditLogService.log(user, device, "DEVICE_REVOKED", "SUCCESS",
                 "Thu hồi quyền kết nối của thiết bị " + device.getName(), sourceIp);
 
+        realtime.afterCommit(() -> embeddedBroker.ifAvailable(b -> b.disconnectUsername(device.getMqttUsername())));
+
         realtime.publish(device, "DEVICE", null);
         return new DeviceDto(device, getUserRoleForDevice(user, device));
     }
@@ -208,6 +219,8 @@ public class DeviceService {
 
         auditLogService.log(user, device, "DEVICE_DECOMMISSIONED", "SUCCESS",
                 "Ngừng sử dụng vĩnh viễn thiết bị " + device.getName(), sourceIp);
+
+        realtime.afterCommit(() -> embeddedBroker.ifAvailable(b -> b.disconnectUsername(device.getMqttUsername())));
 
         realtime.publish(device, "DEVICE", null);
         return new DeviceDto(device, getUserRoleForDevice(user, device));
@@ -243,5 +256,22 @@ public class DeviceService {
         return deviceRepository.findAll().stream()
                 .map(d -> new DeviceDto(d, Role.ADMIN))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public DeviceDto registerDevice(DeviceRegistrationRequest request,User admin,String sourceIp) {
+        if(admin.getRole()!=Role.ADMIN) throw new ForbiddenException("Chỉ quản trị viên được cấp thiết bị mới");
+        String uuid=request.deviceUuid()==null || request.deviceUuid().isBlank()?UUID.randomUUID().toString():request.deviceUuid().trim();
+        try {uuid=UUID.fromString(uuid).toString();} catch(IllegalArgumentException invalid) {throw new BadRequestException("Mã định danh phải là UUID hợp lệ");}
+        if(deviceRepository.findByDeviceUuid(uuid).isPresent()) throw new BadRequestException("Mã định danh thiết bị đã tồn tại");
+        Device d=new Device(UUID.randomUUID().toString(),uuid,request.name().trim(),null,null);
+        d.setDataSource(request.dataSource()==null?"HARDWARE":request.dataSource());
+        d.setLifecycleState(LifecycleState.PROVISIONED);
+        if(request.hwVersion()!=null && !request.hwVersion().isBlank()) d.setHwVersion(request.hwVersion().trim());
+        if(request.firmwareVersion()!=null && !request.firmwareVersion().isBlank()) d.setFirmwareVersion(request.firmwareVersion().trim());
+        d.setClaimToken("CLAIM-"+UUID.randomUUID());d.setClaimTokenExpiry(Instant.now().plusSeconds(7*86400));
+        deviceRepository.save(d);
+        auditLogService.log(admin,d,"DEVICE_REGISTERED","SUCCESS","Cấp thiết bị mới và mã kích hoạt có thời hạn",sourceIp);
+        return new DeviceDto(d,Role.ADMIN);
     }
 }

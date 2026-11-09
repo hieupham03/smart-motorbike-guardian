@@ -36,6 +36,8 @@ public class UserService {
 
     @Transactional
     public UserDto updateUserStatus(String userId, String status, User adminUser, String sourceIp) {
+        if (status == null || !java.util.Set.of("ACTIVE", "LOCKED").contains(status.toUpperCase(java.util.Locale.ROOT)))
+            throw new com.guardian.exception.BadRequestException("Trạng thái tài khoản phải là ACTIVE hoặc LOCKED");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId));
 

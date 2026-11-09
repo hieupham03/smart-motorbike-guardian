@@ -5,6 +5,7 @@ export function createAdminApi(client: GuardianApiClient = apiClient) {
   return {
     users: () => client.request<User[]>({ url: '/api/admin/users', method: 'GET' }),
     devices: () => client.request<Device[]>({ url: '/api/admin/devices', method: 'GET' }),
+    provisionDevice: (name: string) => client.request<Device>({ url: '/api/admin/devices', method: 'POST', data: { name, dataSource: 'HARDWARE' } }),
     auditLog: () => client.request<AuditLog[]>({ url: '/api/admin/audit-log', method: 'GET' }),
     updateUserStatus: (userId: string, status: 'ACTIVE' | 'LOCKED') =>
       client.request<User>({ url: `/api/admin/users/${userId}/status`, method: 'PATCH', data: { status } }),

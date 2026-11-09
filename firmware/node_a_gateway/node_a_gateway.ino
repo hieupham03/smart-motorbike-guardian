@@ -10,10 +10,22 @@
 // --- Cấu hình Wi-Fi & MQTT Broker ---
 #include "network_config.h"
 
-#define MQTT_BROKER     "broker.emqx.io"          // MQTT Broker công cộng hoặc IP local
-#define MQTT_PORT       1883
-#define FIRMWARE_VERSION "v1.0.0"
+#ifndef MQTT_BROKER
+#define MQTT_BROKER ""
+#endif
+#ifndef MQTT_PORT
+#define MQTT_PORT 1883
+#endif
+#ifndef MQTT_USERNAME
+#define MQTT_USERNAME ""
+#endif
+#ifndef MQTT_PASSWORD
+#define MQTT_PASSWORD ""
+#endif
+#define FIRMWARE_VERSION "v1.1.0"
+#ifndef DEVICE_ID
 #define DEVICE_ID       "550e8400-e29b-41d4-a716-446655440001" // UUID xe mau Honda SH 150i ABS
+#endif
 
 // Topic MQTT chuẩn hóa
 #define TOPIC_STATUS    "guardian/" DEVICE_ID "/status"
@@ -365,6 +377,10 @@ void ControlTask(void*) {
 }
 
 void MQTTTask(void *pvParameters) {
+    if (!MQTT_BROKER[0] || !MQTT_USERNAME[0] || !MQTT_PASSWORD[0]) {
+        Serial.println("[MQTT] Missing private broker credentials; network connection disabled");
+        for (;;) vTaskDelay(pdMS_TO_TICKS(1000));
+    }
     mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
     mqttClient.setCallback(mqtt_callback);
     if(!mqttClient.setBufferSize(1024)) Serial.println("[MQTT] buffer allocation failed");
@@ -389,29 +405,31 @@ void MQTTTask(void *pvParameters) {
         // 2. Quản lý kết nối MQTT Broker kèm LWT (Last Will)
         if (WiFi.status() == WL_CONNECTED && !mqttClient.connected()) {
             char clientId[48];
-            snprintf(clientId, sizeof(clientId), "Guardian-NodeA-%08X", (uint32_t)ESP.getEfuseMac());
+            snprintf(clientId, sizeof(clientId), "Guardian-%s", DEVICE_ID);
 
             const char* willTopic = TOPIC_STATUS;
             const char* willMessage = "{\"status\":\"offline\",\"reason\":\"lwt_disconnect\"}";
             uint8_t willQos = 1;
             bool willRetain = true;
 
-            if (mqttClient.connect(clientId, NULL, NULL, willTopic, willQos, willRetain, willMessage)) {
+            const char* mqttUser=MQTT_USERNAME[0]?MQTT_USERNAME:nullptr;
+            const char* mqttPassword=MQTT_USERNAME[0]?MQTT_PASSWORD:nullptr;
+            if (mqttClient.connect(clientId, mqttUser, mqttPassword, willTopic, willQos, willRetain, willMessage)) {
                 Serial.println("[MQTT] Kết nối thành công tới Broker!");
 
                 // Báo Online
-                char onlineMsg[128];
-                snprintf(onlineMsg, sizeof(onlineMsg), "{\"status\":\"online\",\"ip\":\"%s\",\"fw\":\"%s\"}",
+                char onlineMsg[192];
+                snprintf(onlineMsg, sizeof(onlineMsg), "{\"status\":\"online\",\"ip\":\"%s\",\"fw\":\"%s\",\"hw\":\"ESP32-WROOM-32 + ESP32-S3-N16R8\"}",
                          WiFi.localIP().toString().c_str(), FIRMWARE_VERSION);
                 mqttClient.publish(TOPIC_STATUS, onlineMsg, true);
 
-                // Lắng nghe topic nhận lệnh (cả UUID lẫn Device ID)
+                // Only the authenticated device UUID command namespace.
                 mqttClient.subscribe(TOPIC_CMD_SUB);
-                mqttClient.subscribe("guardian/dev-550e8400-0001/cmd/#");
 
                 // NFR-05: Ngay khi phục hồi mạng, xả toàn bộ bản tin lưu trữ trong Offline Buffer
                 flush_offline_messages();
             } else {
+                Serial.printf("[MQTT] Connect rejected/failed rc=%d; check broker access and device lifecycle\n", mqttClient.state());
                 vTaskDelay(pdMS_TO_TICKS(4000));
             }
         }

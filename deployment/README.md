@@ -1,5 +1,13 @@
 # Triển khai
 
+## Demo tại trường: không cần Docker
+
+Ưu tiên [bộ chuẩn bị demo](../docs/CHUAN-BI-DEMO-TAI-TRUONG.md). Sau build, Prepare cấu hình riêng và nạp Node A, dùng `deployment/start-classroom-demo.bat -WebOnly`: backend/H2 **8082**, broker xác thực **1883**, web HTTPS/WSS **5173**. Bỏ `-WebOnly` để chạy cả Expo **8081**, hoặc mở `start-mobile-client.bat` sau khi backend đã chạy.
+
+HTTPS dùng OpenSSL trên laptop, chứng chỉ tự ký và private key nằm trong `.local/classroom-demo/tls/`. Kiểm fingerprint trước khi chấp nhận chứng chỉ, không tự cài CA vào máy khác. HTTP nội bộ, MQTT TCP và Expo Go LAN không được gọi là mã hóa toàn hệ thống. Script `start-classroom-https.bat -LanIp <IPv4>` mở thêm web HTTPS **5443** nếu cần.
+
+Classroom lưu DPAPI/database riêng tại `.local/classroom-demo/`; database `.local/mobile-demo/` cũ không bị thay thế. Mạch mới cần Owner kích hoạt bằng mã Admin xem được. Mỗi thiết bị có mật khẩu MQTT riêng, khác tài khoản dịch vụ backend. Xem [xác thực/vòng đời](../docs/BAO-MAT-MQTT-VA-VONG-DOI.md).
+
 ## Docker Compose
 
 Từ gốc repository, copy `.env.example` thành `deployment/.env`, đặt mật khẩu PostgreSQL/JWT và mật khẩu tài khoản mẫu nếu bật seed. Chạy:
@@ -19,6 +27,14 @@ docker compose --env-file deployment/.env -f deployment/docker-compose.yml --pro
 Đặt `MQTT_BROKER_URL=tcp://mosquitto:1883` cho backend trong Docker; Node A dùng IP LAN của máy chạy broker. Không dùng tên `mosquitto` làm địa chỉ trên ESP32. Cấu hình Mosquitto hiện phục vụ mạng thử nghiệm, không có TLS/ACL theo thiết bị.
 
 Các file `start-backend.bat`, `start-database.bat`, `start-frontend.bat` gọi cùng Compose và dùng `deployment/.env`.
+
+Để dùng broker xác thực trong backend với Docker, điền riêng `MQTT_PASSWORD` cho dịch vụ và `DEMO_DEVICE_MQTT_PASSWORD` cho board trong file local, đặt `MQTT_PUBLIC_HOST` là IP LAN rồi chạy:
+
+```powershell
+docker compose --env-file deployment/.env -f deployment/docker-compose.yml -f deployment/docker-compose.classroom.yml up --build -d
+```
+
+Không bật profile Mosquitto `local-broker` đồng thời vì cùng cổng 1883. Override này không tự cấp chứng chỉ HTTPS cho Nginx; bộ chạy Windows HTTPS ở trên là cấu hình đã chuẩn bị cho buổi demo.
 
 ## Bộ chạy thử trên Windows
 

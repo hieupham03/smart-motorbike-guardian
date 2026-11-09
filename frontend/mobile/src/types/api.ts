@@ -54,6 +54,7 @@ export interface Device {
   securityState: SecurityState;
   firmwareVersion: string | null;
   hwVersion: string | null;
+  claimToken?: string | null;
   dataSource: DataSource;
   sensorConnected: boolean | null;
   imuValid: boolean | null;

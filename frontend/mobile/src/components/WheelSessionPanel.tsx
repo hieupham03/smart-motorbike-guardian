@@ -9,7 +9,7 @@ import { colors } from "@/theme/colors";
 import { ui } from "@/theme/userInterface";
 import { confirmAction } from "./confirmAction";
 const number = (value: number, digits = 0) =>
-  value.toLocaleString("vi-VN", { maximumFractionDigits: digits });
+  Number.isFinite(value) ? value.toLocaleString("vi-VN", { maximumFractionDigits: digits }) : "—";
 export function WheelSessionPanel({
   developer = false,
 }: {

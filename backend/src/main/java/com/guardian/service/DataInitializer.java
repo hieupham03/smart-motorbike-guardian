@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Component
+@org.springframework.core.annotation.Order(0)
 @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true")
 public class DataInitializer implements CommandLineRunner {
 
@@ -38,6 +39,9 @@ public class DataInitializer implements CommandLineRunner {
 
     @org.springframework.beans.factory.annotation.Value("${app.seed.password:}")
     private String demoPassword;
+
+    @org.springframework.beans.factory.annotation.Value("${app.seed.hardware-unclaimed:false}")
+    private boolean hardwareUnclaimed;
 
     @Override
     public void run(String... args) {
@@ -68,6 +72,11 @@ public class DataInitializer implements CommandLineRunner {
         dev1.setBatteryLowThresholdV(11.8);
         dev1.setTiltThresholdDeg(45.0);
         dev1.setClaimToken("CLAIM-SH150-2026");
+        if(hardwareUnclaimed) {
+            dev1.setLifecycleState(LifecycleState.PROVISIONED);
+            dev1.setClaimToken("CLAIM-"+UUID.randomUUID());
+            dev1.setClaimTokenExpiry(Instant.now().plusSeconds(7*86400));
+        }
 
         Device dev2 = new Device("dev-550e8400-0002", "550e8400-e29b-41d4-a716-446655440002", "Yamaha Exciter 155 VVA", "59F2-666.66", "Yamaha Exciter 2023");
         dev2.setDataSource("SIMULATED");
@@ -93,9 +102,9 @@ public class DataInitializer implements CommandLineRunner {
         deviceRepository.save(dev3);
 
         // 3. Ownerships
-        ownershipRepository.save(new Ownership("own-001", owner, dev1, Role.OWNER));
+        if(!hardwareUnclaimed) ownershipRepository.save(new Ownership("own-001", owner, dev1, Role.OWNER));
         ownershipRepository.save(new Ownership("own-002", owner, dev2, Role.OWNER));
-        ownershipRepository.save(new Ownership("own-003", viewer, dev1, Role.VIEWER));
+        if(!hardwareUnclaimed) ownershipRepository.save(new Ownership("own-003", viewer, dev1, Role.VIEWER));
 
         log.info("Initial data seeded successfully!");
     }

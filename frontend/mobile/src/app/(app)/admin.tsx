@@ -13,6 +13,7 @@ export default function AdminScreen() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [shownClaim, setShownClaim] = useState<string | null>(null);
   const load = async () => {
     try {
       const [u, d, l] = await Promise.all([adminApi.users(), adminApi.devices(), adminApi.auditLog()]);
@@ -30,6 +31,20 @@ export default function AdminScreen() {
   return <ScrollView contentContainerStyle={styles.content}>
     {!!error && <Text style={styles.error}>{error}</Text>}
     <View style={styles.summary}><Metric label="Tài khoản" value={users.length} /><Metric label="Thiết bị" value={devices.length} /><Metric label="Audit" value={logs.length} /></View>
+    <View style={styles.card}>
+      <Text style={styles.heading}>Thiết bị và kích hoạt lần đầu</Text>
+      {devices.map(item => <View key={item.deviceId} style={styles.log}>
+        <Text style={styles.strong}>{item.name}</Text>
+        <Text selectable style={styles.detail}>{item.deviceUuid}</Text>
+        <Text style={styles.muted}>{item.lifecycleState} · {item.firmwareVersion} · {item.hwVersion}</Text>
+        {!!item.claimToken && ['REGISTERED', 'PROVISIONED'].includes(item.lifecycleState) && <>
+          <Pressable accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center' }} onPress={() => setShownClaim(shownClaim === item.deviceId ? null : item.deviceId)}>
+            <Text style={styles.action}>{shownClaim === item.deviceId ? 'Ẩn mã kích hoạt' : 'Xem mã kích hoạt'}</Text>
+          </Pressable>
+          {shownClaim === item.deviceId && <Text selectable style={styles.detail}>{item.claimToken}</Text>}
+        </>}
+      </View>)}
+    </View>
     <View style={styles.card}><Text style={styles.heading}>Tài khoản</Text>{users.map((item) => <View key={item.userId} style={styles.row}><View style={styles.grow}><Text style={styles.strong}>{item.fullName}</Text><Text style={styles.muted}>{item.email} · {item.role} · {item.status}</Text></View>{item.userId !== user.userId && <Pressable onPress={() => void toggle(item)}><Text style={item.status === 'ACTIVE' ? styles.danger : styles.action}>{item.status === 'ACTIVE' ? 'Khóa' : 'Mở'}</Text></Pressable>}</View>)}</View>
     <View style={styles.card}><Text style={styles.heading}>Audit log gần nhất</Text>{logs.slice(0, 50).map((item) => <View key={item.logId} style={styles.log}><Text style={styles.strong}>{item.action} · {item.result}</Text><Text style={styles.muted}>{item.userEmail ?? 'system'} · {new Date(item.createdAt).toLocaleString('vi-VN')}</Text>{!!item.details && <Text style={styles.detail}>{item.details}</Text>}</View>)}</View>
   </ScrollView>;

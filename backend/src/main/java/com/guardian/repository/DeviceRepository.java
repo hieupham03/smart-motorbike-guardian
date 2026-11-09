@@ -18,6 +18,7 @@ public interface DeviceRepository extends JpaRepository<Device, String> {
     @org.springframework.data.jpa.repository.Query("select d from Device d where d.deviceId = :id")
     Optional<Device> findLockedById(@org.springframework.data.repository.query.Param("id") String id);
     Optional<Device> findByClaimToken(String claimToken);
+    Optional<Device> findByMqttUsername(String mqttUsername);
     List<Device> findByLifecycleState(LifecycleState lifecycleState);
     @org.springframework.data.jpa.repository.Query("select d.deviceId from Device d where d.lifecycleState = com.guardian.entity.LifecycleState.ACTIVE order by d.deviceId")
     List<String> findActiveIds();

@@ -7,6 +7,7 @@ import { devicesApi } from "@/api/devices.api";
 import { normalizeApiError } from "@/api/errors";
 import { DeviceSelector } from "@/components/DeviceSelector";
 import { WheelSessionPanel } from "@/components/WheelSessionPanel";
+import { DeviceConnectionTools } from "@/components/DeviceConnectionTools";
 import { confirmAction } from "@/components/confirmAction";
 import { ui } from "@/theme/userInterface";
 import {
@@ -118,6 +119,7 @@ export default function DeveloperScreen() {
         chỉ dùng cho xe có nguồn SIMULATED.
       </Text>
       <DeviceSelector />
+      <DeviceConnectionTools key={device?.deviceId} device={device} admin={user?.role === 'ADMIN'} onRefresh={refresh} />
       <View style={ui.card}>
         <Text style={ui.heading}>Kết nối & dữ liệu thiết bị</Text>
         {Object.entries({
@@ -126,6 +128,7 @@ export default function DeveloperScreen() {
           deviceUuid: device?.deviceUuid,
           source: device?.dataSource,
           firmware: device?.firmwareVersion,
+          hardware: device?.hwVersion,
           state: device?.securityState,
           lifecycle: device?.lifecycleState,
           sensorConnected: device?.sensorConnected,

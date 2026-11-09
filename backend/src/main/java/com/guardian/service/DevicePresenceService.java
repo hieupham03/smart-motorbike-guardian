@@ -16,12 +16,16 @@ public class DevicePresenceService {
     @Value("${app.realtime.offline-timeout-seconds:45}") private long timeout;
     public DevicePresenceService(DeviceRepository devices, RealtimeService realtime, PushNotificationService push) { this.devices = devices; this.realtime = realtime; this.push = push; }
     @Transactional public void status(String id, boolean online, String firmware) {
+        status(id,online,firmware,null);
+    }
+    @Transactional public void status(String id, boolean online, String firmware,String hardware) {
         var device = devices.findLockedByUuid(id).orElseGet(() -> devices.findLockedById(id).orElse(null));
         if (device == null || !"HARDWARE".equals(device.getDataSource()) || device.getLifecycleState() == LifecycleState.FAULT || device.getLifecycleState() == LifecycleState.DECOMMISSIONED) return;
         boolean becameOffline = !online && device.getLifecycleState() != LifecycleState.OFFLINE;
         device.setLifecycleState(online ? LifecycleState.ACTIVE : LifecycleState.OFFLINE);
         if (online) device.setLastSeenAt(Instant.now()); else invalidate(device);
-        if (firmware != null) device.setFirmwareVersion(firmware);
+        if (firmware != null && !firmware.isBlank() && firmware.length()<=50) device.setFirmwareVersion(firmware);
+        if (hardware != null && !hardware.isBlank() && hardware.length()<=50) device.setHwVersion(hardware);
         devices.save(device); realtime.publish(device, "DEVICE", null); if (becameOffline) notifyOffline(device);
     }
     private void invalidate(Device device) {

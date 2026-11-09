@@ -39,7 +39,7 @@ export default function AdminPage() {
   }, [tab, role]);
 
   const handleToggleUserStatus = async (userId, currentStatus) => {
-    const newStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+    const newStatus = currentStatus === 'ACTIVE' ? 'LOCKED' : 'ACTIVE';
     try {
       await api.updateUserStatus(userId, newStatus);
       setFeedback(`Đã chuyển trạng thái người dùng thành ${newStatus}`);
@@ -165,6 +165,7 @@ export default function AdminPage() {
                   <th>Lifecycle</th>
                   <th>An Ninh</th>
                   <th>Firmware</th>
+                  <th>Kích hoạt lần đầu</th>
                 </tr>
               </thead>
               <tbody>
@@ -180,6 +181,7 @@ export default function AdminPage() {
                       <span className={`badge badge-${d.securityState.toLowerCase().replace('_', '-')}`}>{d.securityState}</span>
                     </td>
                     <td>{d.firmwareVersion} ({d.hwVersion})</td>
+                    <td>{d.claimToken && ['REGISTERED', 'PROVISIONED'].includes(d.lifecycleState) ? <details><summary>Xem mã kích hoạt</summary><code>{d.claimToken}</code></details> : '—'}</td>
                   </tr>
                 ))}
               </tbody>

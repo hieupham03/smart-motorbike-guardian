@@ -62,6 +62,8 @@ export const api = {
   onboardDevice: (payload) => request('/devices/onboard', { method: 'POST', body: JSON.stringify(payload) }),
   updateConfig: (id, payload) => request(`/devices/${id}/config`, { method: 'PATCH', body: JSON.stringify(payload) }),
   revokeDevice: (id) => request(`/devices/${id}/revoke`, { method: 'POST' }),
+  rotateDeviceCredentials: (id) => request(`/devices/${id}/mqtt-credentials`, { method: 'POST' }),
+  reactivateDevice: (id) => request(`/devices/${id}/reactivate`, { method: 'POST' }),
   decommissionDevice: (id) => request(`/devices/${id}/decommission`, { method: 'POST' }),
   getDeviceUsers: (id) => request(`/devices/${id}/users`),
   inviteViewer: (id, payload) => request(`/devices/${id}/users`, { method: 'POST', body: JSON.stringify(payload) }),
@@ -118,6 +120,7 @@ export const api = {
   getAdminUsers: () => request('/admin/users'),
   updateUserStatus: (userId, status) => request(`/admin/users/${userId}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   getAdminDevices: () => request('/admin/devices'),
+  provisionDevice: (payload) => request('/admin/devices', { method: 'POST', body: JSON.stringify(payload) }),
   getAuditLogs: () => request('/admin/audit-log'),
 
   // Hardware Simulator

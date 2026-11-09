@@ -1,0 +1,14 @@
+services:
+  backend:
+    environment:
+      MQTT_EMBEDDED_ENABLED: "true"
+      MQTT_EMBEDDED_HOST: "0.0.0.0"
+      MQTT_EMBEDDED_PORT: "1883"
+      MQTT_PUBLIC_HOST: ${MQTT_PUBLIC_HOST:?Set laptop LAN address}
+      MQTT_BROKER_URL: tcp://127.0.0.1:1883
+      MQTT_USERNAME: ${MQTT_USERNAME:-backend-service}
+      MQTT_PASSWORD: ${MQTT_PASSWORD:?Set a separate backend MQTT password}
+      DEMO_DEVICE_MQTT_PASSWORD: ${DEMO_DEVICE_MQTT_PASSWORD:?Set a separate device password}
+      DEMO_HARDWARE_UNCLAIMED: ${DEMO_HARDWARE_UNCLAIMED:-false}
+    ports:
+      - "1883:1883"

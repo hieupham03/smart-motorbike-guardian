@@ -35,6 +35,15 @@ public class AdminController {
     @Autowired
     private AuditLogService auditLogService;
 
+    @PostMapping("/devices")
+    @Operation(summary="Cấp thiết bị và mã kích hoạt mới")
+    public ResponseEntity<ApiResponse<DeviceDto>> registerDevice(
+            @jakarta.validation.Valid @RequestBody com.guardian.dto.DeviceRegistrationRequest body,
+            @AuthenticationPrincipal User admin,HttpServletRequest request) {
+        return ResponseEntity.ok().header("Cache-Control","no-store")
+            .body(ApiResponse.ok(deviceService.registerDevice(body,admin,request.getRemoteAddr())));
+    }
+
     @GetMapping("/users")
     @Operation(summary = "Xem toàn bộ danh sách tài khoản người dùng trong hệ thống")
     public ResponseEntity<ApiResponse<List<UserDto>>> getAllUsers() {

@@ -60,6 +60,9 @@ public class MqttSubscriberService implements MqttCallbackExtended {
     @Autowired
     private WheelSessionService wheelSessions;
 
+    @Autowired(required=false)
+    private com.guardian.config.EmbeddedMqttBroker embeddedBroker; // Initialize the local broker before its service client.
+
     @PostConstruct
     public void init() {
         if (!mqttEnabled) {
@@ -227,7 +230,8 @@ public class MqttSubscriberService implements MqttCallbackExtended {
     private void handleStatus(String deviceId, JsonNode node) {
         String status = node.isTextual() ? node.asText() : node.path("status").asText();
         if ("online".equalsIgnoreCase(status) || "offline".equalsIgnoreCase(status))
-            presenceService.status(deviceId, "online".equalsIgnoreCase(status), node.has("fw") ? node.path("fw").asText() : null);
+            presenceService.status(deviceId, "online".equalsIgnoreCase(status), node.has("fw") ? node.path("fw").asText() : null,
+                node.has("hw") ? node.path("hw").asText() : null);
     }
 
     public boolean publishCommand(String deviceId, String cmdType, String jsonPayload) {
