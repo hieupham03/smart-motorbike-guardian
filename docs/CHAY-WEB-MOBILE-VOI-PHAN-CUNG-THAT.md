@@ -1,6 +1,6 @@
 # Chạy web và mobile cùng hai node thật
 
-Sử dụng **một backend duy nhất** để web và mobile nhìn cùng xe, cùng dữ liệu và kết quả lệnh. Hướng dẫn dùng launcher có sẵn, không yêu cầu Docker hoặc MQTT Explorer.
+Sử dụng **một backend duy nhất** để web và mobile nhìn cùng xe, cùng dữ liệu và kết quả lệnh. Chế độ chuẩn cho buổi demo là [classroom có broker xác thực riêng](CHUAN-BI-DEMO-TAI-TRUONG.md), không yêu cầu Docker hoặc MQTT Explorer. Cần chuẩn bị khóa và nạp Node A theo hướng dẫn đó trước khi chạy.
 
 ```text
 Hall / MPU / GPS → Node B → UART → Node A → MQTT broker → Backend 8082
@@ -16,7 +16,7 @@ Hall / MPU / GPS → Node B → UART → Node A → MQTT broker → Backend 8082
 - Khi đổi Wi-Fi, chỉnh `firmware/node_a_gateway/network_config.h` cục bộ rồi nạp lại Node A. Không chia sẻ mật khẩu hoặc đưa file này lên Git.
 - Dừng backend/Expo cũ bằng Ctrl+C tại cửa sổ đã mở chúng. Không chạy đồng thời một backend Docker khác cho cùng buổi thử.
 
-Node A và launcher hiện cùng dùng `broker.emqx.io:1883`, UUID của xe thật là `550e8400-e29b-41d4-a716-446655440001`. Nếu tự đổi broker/UUID thì hai phía phải khớp.
+Classroom dùng broker riêng trên IP LAN laptop, port 1883; UUID xe thật là `550e8400-e29b-41d4-a716-446655440001`. Node A có username/khóa riêng. Broker công cộng là cấu hình cũ để thử giao tiếp, không đáp ứng ca thu hồi quyền kết nối tại broker.
 
 Backend JAR đã được đóng gói lại từ source hiện tại trong lần chuẩn bị hướng dẫn. Sau các lần sửa backend tiếp theo, cần `mvn package` trong `backend/`; sửa frontend/mobile không yêu cầu đóng gói backend lại.
 
@@ -26,13 +26,13 @@ Trong VS Code mở Terminal → New Terminal, chạy:
 
 ```powershell
 cd D:\Firmware-IoT
-.\deployment\start-mobile-demo.bat -ClearCache
+.\deployment\start-classroom-demo.bat -ClearCache
 ```
 
 Giữ cửa sổ này mở. Launcher thực hiện:
 
 1. Mở backend cổng 8082, bật MQTT thật.
-2. Dùng DB H2 file riêng `.local/mobile-demo/guardian.mv.db` và tài khoản đã tạo trước đó.
+2. Dùng DB H2 file riêng `.local/classroom-demo/guardian.mv.db`, broker xác thực và tài khoản demo. DB mới cần kích hoạt đúng mạch qua mã một lần.
 3. Đặt URL API/WebSocket theo IP LAN và mở Metro cổng 8081.
 
 Chờ dòng `Backend OK` và QR của Expo. Lần đầu mới yêu cầu tạo mật khẩu; những lần sau dùng mật khẩu cũ. Không cần dán JWT secret hoặc đặt mật khẩu lại mỗi buổi.
@@ -135,9 +135,9 @@ Chờ thông tin xe mới và kết nối cảm biến. Giữ cả hai màn hìn
 
 ### F. Cảnh báo tốc độ
 
-- Thử trong PARKED với dữ liệu Hall hợp lệ. Giữ tốc độ trên ngưỡng firmware **2 km/h** ít nhất 2 giây nếu motor/bánh đạt được.
+- Thử trong PARKED với dữ liệu Hall hợp lệ. Giữ tốc độ trên ngưỡng board đang báo về ít nhất 2 giây nếu motor/bánh đạt được. Có thể đổi ngưỡng 1–120 km/h trên ứng dụng và đợi ACK; không giả định lúc nào cũng là 2 km/h.
 - Cả web và mobile nhận cảnh báo vượt ngưỡng. Chức năng chỉ cảnh báo, không giảm tốc hoặc cắt motor.
-- Hạ xuống không quá 1,5 km/h ít nhất 2 giây để phục hồi trạng thái trước khi thử đợt mới. Không tăng nguồn quá định mức motor để ép đạt ngưỡng.
+- Hạ xuống dưới ngưỡng ít nhất 0,5 km/h trong 2 giây để phục hồi trạng thái trước khi thử đợt mới. Không tăng nguồn quá định mức motor để ép đạt ngưỡng.
 
 ### G. GPS và bản đồ
 
@@ -164,7 +164,7 @@ Giữ app mở để thử cảnh báo realtime. Launcher đang tắt remote pus
 | Có tọa độ nhưng nền bản đồ trống | Thử Mở bản đồ lớn, kiểm Internet/DNS dịch vụ bản đồ; trên web có nút tải lại |
 | Cổng 8081/8082/5173 bận | Ctrl+C đúng terminal cũ; không xóa DB hoặc tắt ngẫu nhiên dịch vụ khác |
 
-Log backend tại `.local/mobile-demo/backend.log` và `backend-error.log`. Không chia sẻ file settings, mật khẩu hoặc token. Nếu đổi Wi-Fi, dừng launcher và chạy lại để URL/IP QR được cập nhật.
+Log backend classroom tại `.local/classroom-demo/backend.log` và `backend-error.log`. Không chia sẻ file settings, mật khẩu hoặc token. Nếu đổi Wi-Fi, dừng launcher và chạy lại để URL/IP QR được cập nhật.
 
 ## 7. Lưu kết quả và dừng
 

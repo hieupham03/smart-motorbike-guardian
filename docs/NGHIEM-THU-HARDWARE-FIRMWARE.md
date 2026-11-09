@@ -1,5 +1,7 @@
 # Chot hardware/firmware breadboard
 
+> Nhật ký dưới đây giữ nguyên kết quả tại từng lần thử. Các nhận xét về backend/mobile và mirror thuộc phiên bản cũ. Kết quả hiện hành xem [minh chứng mạch thật](evidence/classroom-hardware/README.md), [hồ sơ phát hành](RELEASE.md) và [hướng dẫn demo tại trường](CHUAN-BI-DEMO-TAI-TRUONG.md). Firmware hiện chỉ có nguồn chuẩn trong `firmware/`.
+
 ## Cập nhật 20/10/2026
 
 > Bổ sung 21/10/2026: [Hall guard/phiên RAM/cảnh báo tốc độ](BA-TINH-NANG-HALL-VA-TOC-DO.md) đã có code và kiểm thử phần mềm; cần nạp lại cả hai node. ARM mới ngắt motor sau khi xác nhận bánh dừng, DISARM/UNLOCK cấp lại. Xác nhận relay/motor ổn ngày 20/10 là baseline, không thay actual cho hành vi mới.

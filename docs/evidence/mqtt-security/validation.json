@@ -1,0 +1,76 @@
+{
+  "scope": "Local software tests with actual MQTT 3.1.1 broker and Paho clients; not physical-device evidence",
+  "physical_device_test": false,
+  "native_phone_test": false,
+  "broker": "Moquette 0.17 embedded classroom mode",
+  "total_tests": 36,
+  "security_broker_tests": 9,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "reports": [
+    {
+      "suite": "com.guardian.EmbeddedMqttSecurityIntegrationTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "recorded_timestamp": null,
+      "report_sha256": "867d305d8f4864cb92e69590b0bc8496612364946636447791b91235038ea092"
+    },
+    {
+      "suite": "com.guardian.MigrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "recorded_timestamp": null,
+      "report_sha256": "93b35ea5dc6043a30602fafa2c1f0883f95997d3cd9be1e1aee60122ef53c1e5"
+    },
+    {
+      "suite": "com.guardian.PushNotificationIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "recorded_timestamp": null,
+      "report_sha256": "cddbf849db1ff62a0539ace044e0720fa4a74b81f6bfd508efc721e42faeeb0c"
+    },
+    {
+      "suite": "com.guardian.RealtimeIntegrationTest",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "recorded_timestamp": null,
+      "report_sha256": "1c82ccbbd08e8e18d1928cc795c2127afa31e55e837ad5676a6137360ea66687"
+    },
+    {
+      "suite": "com.guardian.service.SpeedLimitConfigTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "recorded_timestamp": null,
+      "report_sha256": "6a3952106d8d18a5491c54bfd8210a13d237a2c033ccf7af3a2edc00b938a77c"
+    }
+  ],
+  "source_sha256": [
+    {
+      "path": "backend/src/main/java/com/guardian/config/EmbeddedMqttBroker.java",
+      "sha256": "1aa7dbc8a115dc97f5e8cc24414af67f2c4af59ee0a13dc1d7550389193e5e8b"
+    },
+    {
+      "path": "backend/src/main/java/com/guardian/service/MqttDeviceSecurityService.java",
+      "sha256": "3a4a2aea26e7e62a4c1e08c99fede731cad7ccf5b473b72c64fc7ecec856f48e"
+    },
+    {
+      "path": "backend/src/main/java/com/guardian/service/DeviceCredentialService.java",
+      "sha256": "39f57324ecfd7345be231b41755de1246af860e59a2f875b0937c6ad5a0f2487"
+    },
+    {
+      "path": "backend/src/test/java/com/guardian/EmbeddedMqttSecurityIntegrationTest.java",
+      "sha256": "a0286fb7d314d17bedd7e437036a5b2d2ad7b84dc1bbda5c5a382f74ead0d4c5"
+    }
+  ]
+}

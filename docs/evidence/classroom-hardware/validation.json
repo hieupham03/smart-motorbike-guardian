@@ -1,0 +1,119 @@
+{
+  "source": "PHYSICAL_HARDWARE",
+  "firmwareNodeA": "v1.1.0",
+  "firmwareNodeB": "v1.0.0",
+  "observedByAgent": [
+    "web onboarding",
+    "UART and MQTT telemetry to database",
+    "web realtime",
+    "command ACK",
+    "viewer HTTP403",
+    "configuration readback",
+    "power recovery",
+    "NVS retention",
+    "broker authentication rejection",
+    "reactivation with a new key",
+    "HTTPS/WSS"
+  ],
+  "confirmedByOperator": [
+    "both nodes power disconnected/reconnected",
+    "wheel rotated by hand",
+    "physical buzzer audible",
+    "motor supply kept switched off"
+  ],
+  "onboardingViaWeb": true,
+  "wheelGuard": {
+    "source": "PHYSICAL_HARDWARE",
+    "armExecuted": true,
+    "armCommandId": "b45d9669-2283-4117-9e73-4071be050945",
+    "gatewayState": "ALARM",
+    "wheelMovementAlert": true,
+    "alertId": "c2d8dc1c-2074-4486-93c5-5653eae8aebf",
+    "buzzerPhysicallyConfirmed": true,
+    "operatorConfirmationRequired": false,
+    "buzzerConfirmationSource": "Operator confirmed in chat",
+    "disarmViaWeb": true,
+    "finalState": "PARKED"
+  },
+  "configurationAndPermissions": {
+    "source": "PHYSICAL_HARDWARE",
+    "configViaWeb": true,
+    "originalLimitKmh": 2,
+    "appliedLimitKmh": 3.5,
+    "commandExecuted": true,
+    "commandId": "bd6e8830-f477-4871-9ee0-dd5729bdfc63",
+    "viewerReadStatus": 200,
+    "viewerCommandStatus": 403,
+    "alertAcknowledged": "ACKNOWLEDGED",
+    "alertResolved": "RESOLVED",
+    "nvsPowerCycleVerified": false
+  },
+  "offline": {
+    "source": "PHYSICAL_HARDWARE",
+    "beforeState": "OFFLINE",
+    "offlineState": "OFFLINE",
+    "lastSeenAt": "2026-11-09T15:16:40.980278Z",
+    "offlineObservedAt": "2026-11-09T15:17:22.054Z",
+    "lastSeenToObservedOfflineMs": 41075,
+    "method": "Already OFFLINE at the start of verification; timestamp difference is not detection latency",
+    "latencyMeasurementCensored": true
+  },
+  "powerRecovery": {
+    "source": "PHYSICAL_HARDWARE",
+    "state": "ACTIVE",
+    "freshSensor": true,
+    "firmware": "v1.1.0",
+    "speedLimitKmh": 3.5,
+    "deviceUptimeS": 3,
+    "nvsRetainedAfterPowerCycle": true
+  },
+  "revocation": {
+    "source": "PHYSICAL_HARDWARE",
+    "revokeReturnedState": "FAULT",
+    "afterState": "FAULT",
+    "noNewTelemetryFor10s": true,
+    "brokerRejectionOnSerial": true,
+    "mqttReturnCodes": [
+      4,
+      -2,
+      4
+    ],
+    "uartStillFresh": true,
+    "authRejectedObservations": 2,
+    "transportFailureObservations": 1
+  },
+  "reactivation": {
+    "credentialSavedLocally": true,
+    "source": "PHYSICAL_HARDWARE",
+    "reconnectedAfterReflash": true,
+    "newKeyDifferent": true
+  },
+  "https": {
+    "httpsLogin": true,
+    "websocketProtocols": [
+      "wss:",
+      "wss:"
+    ],
+    "physicalRealtimeFrames": 10,
+    "browserCertificateExceptionExplicit": true,
+    "certificatePinnedSeparately": true
+  },
+  "finalState": {
+    "source": "PHYSICAL_HARDWARE",
+    "state": "PARKED",
+    "speedLimitKmh": 2,
+    "privateKeyMatchesReactivatedDevice": true
+  },
+  "physicalRelayContactsMeasured": false,
+  "gpsFixVerifiedInThisRun": false,
+  "nativePhoneVerified": false,
+  "physicalPrototypePhotoProvided": false,
+  "rawSha256": "7ef9022720f950651821da01136fad5ab35bc4fbee90b99d516a0cc366a19018",
+  "limitations": [
+    "Reading polls are not MQTT packet counts",
+    "No sensor-to-dashboard latency was measured",
+    "Offline verification started after the state was already OFFLINE, so detection latency is not claimed",
+    "Browser fallback video does not show the physical bench in-frame",
+    "Identity is intentionally blank at the user request"
+  ]
+}

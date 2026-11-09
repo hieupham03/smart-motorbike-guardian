@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-11-09T14:42:54.330Z",
+  "endedAt": "2026-11-09T15:12:55.262Z",
+  "stopReason": "DURATION",
+  "source": "HARDWARE",
+  "requestedDurationS": 1800,
+  "pollIntervalMs": 1000,
+  "observedDurationMs": 1800930.6,
+  "successfulPolls": 1788,
+  "failedPolls": 0,
+  "errorCodes": {},
+  "uniqueBackendReadings": 1743,
+  "pollRoundTripMs": {
+    "count": 1788,
+    "min": 4.11,
+    "mean": 11.81,
+    "p50": 11.85,
+    "p95": 18.2,
+    "max": 41.08
+  },
+  "successfulPollStartGapMs": {
+    "count": 1787,
+    "min": 998.51,
+    "mean": 1007.23,
+    "p50": 1007.27,
+    "p95": 1014.1,
+    "max": 1015.56
+  },
+  "unchangedReadingThresholdMs": 5000,
+  "unchangedReadingStaleObservations": 0,
+  "sensorDisconnectedObservations": 0,
+  "sensorUnknownObservations": 0,
+  "speedValidObservations": 1787,
+  "gpsValidObservations": 0,
+  "lifecycleTransitions": [
+    {
+      "from": null,
+      "to": "ACTIVE",
+      "elapsedMs": 22.04
+    }
+  ],
+  "uptimeAvailableReadings": 1743,
+  "observedUptimeDecreases": [],
+  "networkCycles": [],
+  "newDataObserved": true,
+  "resetCommands": {
+    "requested": 5,
+    "completed": 5,
+    "results": [
+      {
+        "trial": 1,
+        "status": "EXECUTED",
+        "cmdId": "8ae02300-134e-441a-be62-cabfb87b3822",
+        "clientObservedMs": 310.19,
+        "serverIssuedToAckMs": 208
+      },
+      {
+        "trial": 2,
+        "status": "EXECUTED",
+        "cmdId": "6fc7a778-c69c-4c3e-a586-87480faea967",
+        "clientObservedMs": 561.83,
+        "serverIssuedToAckMs": 349
+      },
+      {
+        "trial": 3,
+        "status": "EXECUTED",
+        "cmdId": "4aaddf79-a24c-4061-bc9e-94aace1e2bba",
+        "clientObservedMs": 578.43,
+        "serverIssuedToAckMs": 407
+      },
+      {
+        "trial": 4,
+        "status": "EXECUTED",
+        "cmdId": "f58aa43f-89a6-4ee8-b1fb-260613e67f69",
+        "clientObservedMs": 308.69,
+        "serverIssuedToAckMs": 230
+      },
+      {
+        "trial": 5,
+        "status": "EXECUTED",
+        "cmdId": "b988caa5-8164-4f54-9bd7-d65ff5ee1bc5",
+        "clientObservedMs": 297.14,
+        "serverIssuedToAckMs": 231
+      }
+    ],
+    "executedClientObservedMs": {
+      "count": 5,
+      "min": 297.14,
+      "mean": 411.26,
+      "p50": 310.19,
+      "p95": 578.43,
+      "max": 578.43
+    },
+    "executedServerIssuedToAckMs": {
+      "count": 5,
+      "min": 208,
+      "mean": 285,
+      "p50": 231,
+      "p95": 407,
+      "max": 407
+    }
+  },
+  "limitations": [
+    "HARDWARE is the backend source label; the operator must separately confirm a physical board supplies it.",
+    "Polling observes latest readings, not every MQTT packet; no packet-loss rate can be derived from these counts.",
+    "Unchanged-reading age starts at first observation and uses the collector monotonic clock; it is not sensor age.",
+    "Uptime decreases can indicate reboot or counter rollover; this tool cannot prove the electrical cause.",
+    "Manual markers follow operator keypresses; timing includes human reaction, polling interval and request delay.",
+    "No unsynchronized device/server clocks are subtracted; sensor-to-dashboard latency is not measured.",
+    "No command trial is automatically a GPIO/relay acceptance test; RESET_WHEEL_SESSION changes RAM statistics only."
+  ]
+}

@@ -155,6 +155,6 @@ Mức 25% mỗi người chỉ là mục tiêu cân bằng công việc dự ki�
 - Khi tích hợp: dùng cùng backend/DB và deviceUuid, chạy [kịch bản test](TONG-HOP-TINH-NANG-VA-KICH-BAN-TEST.md), chốt Actual trước khi viết kết luận.
 - Trước nộp: TV1↔TV2 đối chiếu thiết bị/MQTT; TV2↔TV3 đối chiếu nhận/lưu/xử lý; TV3↔TV4 đối chiếu event/giám sát/điều khiển; cả nhóm duyệt kết luận và tỷ lệ đóng góp.
 
-Tài liệu bắt đầu: [hardware/firmware](HUONG-DAN-HARDWARE-FIRMWARE-V2-GPS.md), [Hall và tốc độ](BA-TINH-NANG-HALL-VA-TOC-DO.md), [backend/realtime](REALTIME-BACKEND-FRONTEND.md), [tích hợp mobile](CAI-DAT-NGUONG-TOC-DO-WEB-MOBILE.md), [checklist mobile](NGHIEM-THU-MOBILE-TRUC-TIEP.md), [thuyết trình](CAU-TRUC-SLIDE-THUYET-TRINH-15-PHUT.md).
+Tài liệu bắt đầu: [hardware/firmware](HUONG-DAN-HARDWARE-FIRMWARE-V2-GPS.md), [Hall và tốc độ](BA-TINH-NANG-HALL-VA-TOC-DO.md), [backend/realtime](REALTIME-BACKEND-FRONTEND.md), [tích hợp mobile](CAI-DAT-NGUONG-TOC-DO-WEB-MOBILE.md), [checklist mobile](NGHIEM-THU-MOBILE-TRUC-TIEP.md), [thuyết trình](KICH-BAN-DEMO-VA-VAN-DAP.md).
 
 Đối chiếu source và evidence hiện tại khi viết: báo cáo cũ có thể còn thông số hoặc trạng thái không còn đúng. Không gọi H2 trên laptop là cloud DB, không coi alert trong app là push hệ thống, không coi ACK là đo tải vật lý, và không biến ca chưa chạy thành PASS.
