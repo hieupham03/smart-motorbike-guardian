@@ -105,4 +105,4 @@ Node A bật nguồn motor theo cấu hình khởi động. Tắt nhánh nguồn
 - [Đổi ngưỡng tốc độ](docs/CAI-DAT-NGUONG-TOC-DO-WEB-MOBILE.md), [chạy web/mobile với mạch](docs/CHAY-WEB-MOBILE-VOI-PHAN-CUNG-THAT.md).
 - [Báo cáo, slide và thiết kế](docs/README.md), [hồ sơ phát hành](docs/RELEASE.md), [quy tắc repository](docs/REPOSITORY-POLICY.md).
 
-Lịch sử commit giữ đóng góp của từng tài khoản thành viên; mỗi người tiếp tục commit/push bằng tài khoản của mình. Tag `v1.0.0` sẽ xác định snapshot phát hành sau khi hoàn tất kiểm tra xuất bản trong [hồ sơ phát hành](docs/RELEASE.md). Kết quả kiểm thử phần mềm, xác nhận của người vận hành và các ca native/phần cứng chưa nghiệm thu được ghi riêng trong hồ sơ đó.
+Lịch sử commit giữ đóng góp của từng tài khoản thành viên; mỗi người tiếp tục commit/push bằng tài khoản của mình. Tag `v1.0.0` xác định snapshot bàn giao. Kết quả kiểm thử phần mềm, xác nhận của người vận hành và các ca native/phần cứng chưa nghiệm thu được ghi riêng trong [hồ sơ phát hành](docs/RELEASE.md). Xem [đối chiếu điều kiện đồ án](docs/DOI-CHIEU-DIEU-KIEN-DO-AN.md) để chuẩn bị demo và vấn đáp.

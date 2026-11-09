@@ -21,7 +21,7 @@ Dotfile Git/CI được giữ khi phục vụ quản lý mã nguồn. Không xu�
 
 ## Lịch sử và danh tính
 
-- Giữ lịch sử commit thể hiện tiến trình làm việc của nhóm; không force-push, squash toàn bộ lịch sử hoặc dựng commit giả để chia đều đóng góp.
+- Giữ lịch sử commit thể hiện tiến trình làm việc của nhóm; không tự force-push, squash toàn bộ lịch sử hoặc dựng commit giả để chia đều đóng góp. Ngoại lệ xử lý bí mật trong lịch sử cần người phụ trách xác nhận, có bản sao dự phòng riêng và kiểm tra không mất đóng góp trước khi cập nhật bằng lease cho từng nhánh.
 - Commit có nội dung cụ thể, chẳng hạn `feat: configure speed alert from web and mobile` hoặc `chore: prepare coursework release layout`.
 - Mỗi thành viên sử dụng tài khoản GitHub của mình để commit/push phần mình thực hiện. Không thay tác giả hoặc giả mạo tài khoản để đáp ứng yêu cầu.
 - Bản cuối có tag/release bất biến, ví dụ `v1.0.0`, trỏ tới commit đã kiểm. Bản sửa sau đó dùng phiên bản mới; không di chuyển tag cũ.
