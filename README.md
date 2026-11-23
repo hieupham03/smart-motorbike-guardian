@@ -4,8 +4,8 @@ Hệ thống IoT bảo vệ và giám sát mô hình xe máy trên breadboard. H
 
 ## Tài liệu và báo cáo
 
-- **Báo cáo:** [PDF](<report/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.pdf>) · [Word](<report/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.docx>) · [Markdown](<report/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.md>)
-- **Slide thuyết trình:** [PowerPoint](report/slides/Smart-Motorbike-Guardian.pptx) · [PDF](report/slides/Smart-Motorbike-Guardian.pdf) · [Kịch bản trình bày & vấn đáp](report/KICH-BAN-DEMO-VA-VAN-DAP.md)
+- **Báo cáo:** [PDF](<docs/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.pdf>) · [Word](<docs/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.doc>) · [Markdown](<docs/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.md>)
+- **Slide thuyết trình:** [PowerPoint](docs/slides/Smart-Motorbike-Guardian.pptx) · [PDF](docs/slides/Smart-Motorbike-Guardian.pdf)
 - **Hướng dẫn vận hành:** [Chạy Web/Mobile với mạch thật](report/CHAY-WEB-MOBILE-VOI-PHAN-CUNG-THAT.md) · [Xác thực MQTT & vòng đời thiết bị](report/BAO-MAT-MQTT-VA-VONG-DOI.md)
 - **Tổng hợp kiểm chứng & tài liệu:** [Hồ sơ sản phẩm & kiểm chứng](report/RELEASE.md) · [Danh mục tài liệu](report/README.md)
 
