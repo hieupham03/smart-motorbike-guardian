@@ -2,6 +2,13 @@
 
 Hệ thống IoT bảo vệ và giám sát mô hình xe máy trên breadboard. Hai node ESP32 thu nhận chuyển động, tốc độ bánh và vị trí GPS; backend Spring Boot xử lý dữ liệu, quản lý vòng đời thiết bị và phân quyền; ứng dụng Web (React) và Mobile (Expo / React Native) hiển thị trạng thái thời gian thực, cảnh báo và gửi lệnh điều khiển có xác nhận (ACK).
 
+## Tài liệu và báo cáo
+
+- **Báo cáo:** [PDF](<report/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.pdf>) · [Word](<report/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.docx>) · [Markdown](<report/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.md>)
+- **Slide thuyết trình:** [PowerPoint](report/slides/Smart-Motorbike-Guardian.pptx) · [PDF](report/slides/Smart-Motorbike-Guardian.pdf) · [Kịch bản trình bày & vấn đáp](report/KICH-BAN-DEMO-VA-VAN-DAP.md)
+- **Hướng dẫn vận hành:** [Đổi ngưỡng tốc độ](report/CAI-DAT-NGUONG-TOC-DO-WEB-MOBILE.md) · [Chạy Web/Mobile với mạch thật](report/CHAY-WEB-MOBILE-VOI-PHAN-CUNG-THAT.md) · [Xác thực MQTT & vòng đời thiết bị](report/BAO-MAT-MQTT-VA-VONG-DOI.md)
+- **Tổng hợp kiểm chứng & tài liệu:** [Hồ sơ sản phẩm & kiểm chứng](report/RELEASE.md) · [Danh mục tài liệu](report/README.md)
+
 ## Tính năng chính
 
 - **Bảo vệ chống trộm:** Bật/tắt chế độ canh giữ (`ARM`/`DISARM`); phát hiện rung lắc (MPU-6050) hoặc bánh quay (Hall) khi đang canh giữ và kích hoạt còi/báo động.
@@ -216,10 +223,3 @@ cd ../..
 ```
 
 Chi tiết các bộ kiểm thử xem tại [tests/README.md](tests/README.md).
-
-## Tài liệu và báo cáo
-
-- **Báo cáo cuối cùng:** [PDF](<report/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.pdf>) · [Word](<report/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.docx>) · [Markdown](<report/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.md>)
-- **Slide thuyết trình:** [PowerPoint](report/slides/Smart-Motorbike-Guardian.pptx) · [PDF](report/slides/Smart-Motorbike-Guardian.pdf) · [Kịch bản trình bày & vấn đáp](report/KICH-BAN-DEMO-VA-VAN-DAP.md)
-- **Hướng dẫn vận hành:** [Đổi ngưỡng tốc độ](report/CAI-DAT-NGUONG-TOC-DO-WEB-MOBILE.md) · [Chạy Web/Mobile với mạch thật](report/CHAY-WEB-MOBILE-VOI-PHAN-CUNG-THAT.md) · [Xác thực MQTT & vòng đời thiết bị](report/BAO-MAT-MQTT-VA-VONG-DOI.md)
-- **Tổng hợp kiểm chứng & tài liệu:** [Hồ sơ sản phẩm & kiểm chứng](report/RELEASE.md) · [Danh mục tài liệu](report/README.md)
