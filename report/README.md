@@ -2,7 +2,7 @@
 
 ## Báo cáo và thuyết trình
 
-- [Báo cáo PDF](report/technical/BAO-CAO-CUOI-CUNG-SMART-MOTORBIKE-GUARDIAN.pdf), [Word](report/technical/BAO-CAO-CUOI-CUNG-SMART-MOTORBIKE-GUARDIAN.docx), [Markdown](report/technical/BAO-CAO-CUOI-CUNG-SMART-MOTORBIKE-GUARDIAN.md).
+- [Báo cáo PDF](<report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.pdf>), [Word](<report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.docx>), [Markdown](<report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.md>).
 - [Slide PowerPoint](slides/Smart-Motorbike-Guardian.pptx), [slide PDF](slides/Smart-Motorbike-Guardian.pdf), [kịch bản trình bày, demo và vấn đáp](KICH-BAN-DEMO-VA-VAN-DAP.md).
 - [Đề bài môn IoT](assignment/DE-BAI-IOT.pdf).
 
