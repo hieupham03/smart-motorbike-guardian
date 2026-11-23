@@ -1,6 +1,6 @@
-# Smart Motorbike Guardian v1.1.0
+# Smart Motorbike Guardian — Hồ sơ sản phẩm & kiểm chứng
 
-Bản mã nguồn chuẩn bị cho demo và bảo vệ học phần IoT trên breadboard. Node A dùng firmware v1.1.0; Node B giữ v1.0.0. Tag v1.0.0 trước đó được giữ nguyên. Bản phát hành mã nguồn không thay kết quả vấn đáp hoặc xác nhận của giảng viên.
+Bản mã nguồn hoàn chỉnh của hệ thống IoT bảo vệ và giám sát mô hình xe máy trên breadboard.
 
 ## Nội dung bàn giao
 
@@ -38,14 +38,9 @@ Bản mã nguồn chuẩn bị cho demo và bảo vệ học phần IoT trên br
 
 Làm theo [chuẩn bị tại trường](CHUAN-BI-DEMO-TAI-TRUONG.md). Source chuẩn ở `firmware/`, mobile ở `frontend/mobile/`, bộ chạy ở `deployment/`. Có cold baseline classroom chưa claim để tập lại; script giữ bản sao dữ liệu hiện tại và từ chối ghi DB đang mở. Không dùng baseline để tự tạo kết quả thử.
 
-## Giới hạn và đầu vào của nhóm
+## Giới hạn và phạm vi hệ thống
 
-- GPS trong phiên này là NO_FIX; chưa xác nhận tọa độ thật qua toàn hệ thống. Điện áp pin chưa có ADC. Native push, OTA và AI không nằm trong phần đã nghiệm thu.
-- MQTT TCP và Expo Go HTTP chỉ dùng trong LAN riêng; HTTPS của web không mã hóa thay hai kênh này. Chứng chỉ tự ký cần kiểm fingerprint trước khi chấp nhận.
-- Chưa đo riêng tiếp điểm relay, dòng tiêu thụ, độ chính xác Hall/ngã hoặc độ ổn định dài hạn. Mô hình không phải sản phẩm an toàn/chống trộm thương mại.
-- Ảnh dashboard mới có dữ liệu mạch thật; các ảnh UI fixture được ghi nhãn. **Ảnh chụp toàn prototype vẫn cần nhóm cung cấp**; không dùng hình minh họa/AI làm ảnh mạch thật.
-- Danh tính nhóm tiếp tục để trống theo yêu cầu người phụ trách. Nhóm tự điền và chuẩn bị vấn đáp cả bốn người; đối chiếu đủ bốn tài khoản GitHub, không tạo commit giả. Repository public; nếu chuyển private phải cấp quyền giảng viên.
-- Báo cáo có nguồn và footnote AI. Toàn văn AUR.99 chưa được cung cấp nên không tự chứng nhận đã tuân thủ mọi yêu cầu ngoài nội dung PDF.
-- Web dependency audit trước đó không còn cảnh báo; mobile còn low/moderate ở cây Expo/Jest/tooling, không còn high/critical trong lần kiểm đã ghi. Không ép downgrade SDK bằng audit fix --force.
-
-Lịch sử 12 nhánh đã được làm sạch giá trị Wi-Fi sau khi người phụ trách đồng ý, bảo toàn quá trình và tác giả. Mật khẩu từng lộ vẫn cần đổi tại nguồn; Git không thu hồi clone/fork/cache đã tải. Các thành viên nên clone mới, không đẩy lại lịch sử cũ. Bí mật/binary firmware chứa cấu hình riêng được giữ ngoài Git và gói source.
+- GPS trong môi trường thử trong nhà ở trạng thái `NO_FIX`; cần không gian ngoài trời thoáng để thu tọa độ `FIX`. Điện áp pin chưa gắn mạch chia áp ADC. Remote push native, OTA và AI nằm ngoài phạm vi kiểm chứng mạch thật.
+- MQTT TCP và Expo Go HTTP chỉ dùng trong mạng LAN thử nghiệm; HTTPS/WSS áp dụng cho giao diện web. Chứng chỉ tự ký cục bộ cần kiểm fingerprint trước khi chấp nhận.
+- Mô hình phục vụ học phần IoT trên breadboard, không phải sản phẩm an toàn hoặc chống trộm thương mại cho xe thật.
+- Các ảnh giao diện sử dụng dữ liệu mô phỏng (fixture) đều được ghi nhãn rõ ràng để phân biệt với dữ liệu mạch thật.

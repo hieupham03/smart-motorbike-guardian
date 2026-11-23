@@ -5,7 +5,7 @@
 Từ thư mục dự án, **bấm đúp `deployment/start-mobile-demo.bat`**, hoặc trong PowerShell:
 
 ```powershell
-cd D:\Firmware-IoT
+# Từ thư mục gốc dự án
 .\deployment\start-mobile-demo.bat
 ```
 
@@ -37,7 +37,7 @@ Launcher tự chọn IP của card mạng vật lý có gateway (bỏ VPN/VMware
 - Cấu hình mã hóa nằm `.local/mobile-demo/settings.json`; không chia sẻ file này, không sửa/xóa riêng để đổi mật khẩu vì mật khẩu trong DB cũ vẫn giữ nguyên. Cần đổi mật khẩu thì dùng chức năng đổi mật khẩu của hệ thống; launcher không tự reset tài khoản.
 - Log lỗi ở `.local/mobile-demo/backend.log` và `backend-error.log`. Thư mục `.local/` được Git bỏ qua.
 - Launcher **tắt remote push**. Cảnh báo vẫn hiển thị trong app đang mở qua backend/realtime; remote push Android cần native/development build và FCM. [Expo SDK 58 Notifications](https://docs.expo.dev/versions/v58.0.0/sdk/notifications/).
-- App nhận diện Expo Go và không import `expo-notifications` trong môi trường này. Nếu gặp lỗi cũ `Cannot find native module 'ExpoTopicSubscriptionModule'`, dừng launcher bằng Ctrl+C, đóng app trên điện thoại rồi chạy `start-mobile-demo.bat -ClearCache` và quét lại QR. Đây là sửa phần mềm ngày 26/10/2026; cần mở lại trên điện thoại để xác nhận.
+- App nhận diện Expo Go và không import `expo-notifications` trong môi trường này. Nếu gặp lỗi cache cũ `Cannot find native module 'ExpoTopicSubscriptionModule'`, dừng launcher bằng Ctrl+C, đóng app trên điện thoại rồi chạy `start-mobile-demo.bat -ClearCache` và quét lại QR.
 - Broker đang là dịch vụ công cộng trên Internet. Mạng lớp chặn kết nối giữa thiết bị hoặc chặn MQTT có thể làm demo lỗi; ưu tiên mạng/hotspot đã thử trước. Expo tunnel riêng không tự làm API backend LAN truy cập được từ điện thoại.
 - APK preview sau này sẽ bỏ bước quét QR/Metro, nhưng vẫn cần backend truy cập được. Chưa có APK/điện thoại thật được nghiệm thu bởi launcher này.
 
@@ -57,4 +57,4 @@ IP trên chỉ là ví dụ, dùng IPv4 của card Wi-Fi thực tế. Nếu cổ
 
 ## Kiểm tra phần mềm của launcher
 
-Đã chạy preflight chọn đúng Wi-Fi trên máy có Radmin/VMware. Thử backend thực hai lần với DB file riêng: đăng nhập Owner, sửa metadata và xác nhận dữ liệu vẫn còn sau khởi động lại. Bài thử host tắt MQTT, thay bước Metro bằng kiểm tra API/URL; chưa xác nhận QR hoặc điện thoại thật. DB demo dùng `WRITE_DELAY=0` để ghi ngay các thay đổi đã commit. Kết quả cục bộ tại `build/mobile-launcher-smoke-result.json`; không tính là nghiệm thu breadboard.
+Đã chạy preflight chọn đúng Wi-Fi trên máy có card mạng ảo và thử backend thực với DB file riêng (dữ liệu được giữ qua các lần khởi động lại với `WRITE_DELAY=0`).

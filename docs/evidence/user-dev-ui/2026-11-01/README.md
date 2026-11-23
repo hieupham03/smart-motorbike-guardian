@@ -1,4 +1,4 @@
-# Bằng chứng giao diện — 01/11/2026
+# Kết quả kiểm thử giao diện Web và Mobile
 
 Đây là kiểm thử phần mềm bằng trình duyệt. Ảnh được gắn nhãn dữ liệu giả lập; không phải ảnh nghiệm thu mạch hoặc điện thoại thật.
 
@@ -19,6 +19,6 @@ node tests/integration/user-dev-ui-smoke.cjs
 node tests/integration/mobile-integrated-acceptance.cjs
 ```
 
-Script thứ hai dùng các cổng cục bộ và tự quản lý tiến trình thử; cần JAR backend/dependency trình duyệt theo script. Không dùng dữ liệu tài khoản thật. Các ảnh trong `integration/` thuộc cùng phiên thử, không thay bằng chứng cũ ngày 25/10.
+Script thứ hai dùng các cổng cục bộ và tự quản lý tiến trình thử; cần JAR backend/dependency trình duyệt theo script. Không dùng dữ liệu tài khoản thật.
 
 Các trường `physicalBoard: false` và `nativePhone: false` trong kết quả là giới hạn chủ đích. Export Android/Hermes đã chạy thành công nhưng chưa cài/thao tác native trên điện thoại ở phiên này. Nghiệm thu phần cứng và remote push vẫn cần kết quả trực tiếp.

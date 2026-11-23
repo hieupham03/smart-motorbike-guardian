@@ -1,6 +1,6 @@
-# Backend/frontend realtime — 13/10/2026
+# Kiến trúc Backend và Frontend Realtime
 
-Đã triển khai theo hợp đồng firmware v2 trong `BAN-GIAO-BACKEND-FRONTEND-VA-TICH-HOP.md`. Giữ Spring Boot + PostgreSQL/H2 + React hiện có, không đổi firmware, UART hoặc topic phần cứng.
+Triển khai trên Spring Boot, PostgreSQL/H2, STOMP WebSocket và React/Expo, giữ đồng bộ hợp đồng UART/MQTT với firmware hai node.
 
 ## Luồng đang dùng
 
@@ -38,7 +38,7 @@ HTTP gửi lệnh trả **PENDING**. MQTT publish thành công không phải EXE
 
 Không có ACK sau 10 giây → TIMEOUT/ACK_TIMEOUT. ACK tới muộn được lưu `lateAckResult/lateAckReason/lateAckAt`; giữ TIMEOUT để thể hiện sự không chắc chắn lúc chờ. Không tự gửi lại lệnh hoặc lệnh đối nghịch. Security state lấy từ telemetry, không đoán từ ACK bật/tắt còi. GPIO/tiếp điểm vẫn cần xác minh vật lý.
 
-Các lệnh hỗ trợ ARM, DISARM, LOCK_ENGINE, UNLOCK_ENGINE, SIREN_ON, SIREN_OFF, REBOOT. CONFIG_THRESHOLDS bị từ chối vì firmware hiện chưa hỗ trợ. LOCK cần mật khẩu xác nhận và vẫn qua interlock firmware.
+Các lệnh hỗ trợ `ARM`, `DISARM`, `LOCK_ENGINE`, `UNLOCK_ENGINE`, `SIREN_ON`, `SIREN_OFF`, `RESET_WHEEL_SESSION`, `CONFIG_THRESHOLDS` (ngưỡng cảnh báo tốc độ 1–120 km/h) và `REBOOT`. `LOCK_ENGINE` cần mật khẩu xác nhận và đi qua interlock firmware.
 
 History: `GET /api/devices/<id>/telemetry?from=<epoch>&to=<epoch>&page=0&size=5000`. Page 0 lấy các mẫu gần nhất trong khoảng; mỗi page trả theo thứ tự thời gian tăng, `size` 1–5.000. Không trả mẫu ngoài khoảng khi truy vấn rỗng. Dashboard giữ tối đa 300 mẫu; lịch sử lệnh 100 bản ghi. Analytics/CSV mặc định tối đa 5.000 mẫu gần nhất và ghi rõ giới hạn.
 

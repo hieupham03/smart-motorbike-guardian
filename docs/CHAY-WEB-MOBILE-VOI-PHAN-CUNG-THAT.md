@@ -18,14 +18,13 @@ Hall / MPU / GPS → Node B → UART → Node A → MQTT broker → Backend 8082
 
 Classroom dùng broker riêng trên IP LAN laptop, port 1883; UUID xe thật là `550e8400-e29b-41d4-a716-446655440001`. Node A có username/khóa riêng. Broker công cộng là cấu hình cũ để thử giao tiếp, không đáp ứng ca thu hồi quyền kết nối tại broker.
 
-Backend JAR đã được đóng gói lại từ source hiện tại trong lần chuẩn bị hướng dẫn. Sau các lần sửa backend tiếp theo, cần `mvn package` trong `backend/`; sửa frontend/mobile không yêu cầu đóng gói backend lại.
+Sau mỗi lần sửa mã nguồn backend, cần đóng gói lại bằng `mvn package` trong `backend/`; sửa frontend/mobile không yêu cầu đóng gói backend lại.
 
 ## 2. Mở cửa sổ A: backend và mobile
 
-Trong VS Code mở Terminal → New Terminal, chạy:
+Từ thư mục gốc dự án, chạy:
 
 ```powershell
-cd D:\Firmware-IoT
 .\deployment\start-classroom-demo.bat -ClearCache
 ```
 
@@ -64,7 +63,7 @@ Không chạy thêm `npm start` hoặc `npm run web` ở một cửa sổ mobile
 Mở một terminal mới, giữ nguyên cửa sổ A:
 
 ```powershell
-cd D:\Firmware-IoT\frontend
+cd frontend
 $env:BACKEND_URL = 'http://127.0.0.1:8082'
 $env:VITE_WS_URL = '/ws'
 npm run dev -- --host 0.0.0.0 --port 5173 --strictPort

@@ -6,4 +6,4 @@
 
 Mở đúng `.ino` trong thư mục tương ứng cùng các header bên cạnh. Tạo `node_a_gateway/network_config.h` từ file `.example.h`, điền Wi-Fi local và giữ file thật ngoài Git. Cấu hình GPIO/relay được mô tả trong [hardware](../hardware/README.md).
 
-[Kiểm thử và biên dịch](../tests/firmware/README.md) · [Hướng dẫn firmware/GPS](../docs/HUONG-DAN-HARDWARE-FIRMWARE-V2-GPS.md) · [Ngưỡng tốc độ trên web/mobile](../docs/CAI-DAT-NGUONG-TOC-DO-WEB-MOBILE.md).
+[Kiểm thử và biên dịch](../tests/firmware/README.md) · [Hướng dẫn firmware/GPS](../docs/HUONG-DAN-HARDWARE-FIRMWARE-GPS.md) · [Ngưỡng tốc độ trên web/mobile](../docs/CAI-DAT-NGUONG-TOC-DO-WEB-MOBILE.md).
