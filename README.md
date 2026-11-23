@@ -219,7 +219,7 @@ Chi tiết các bộ kiểm thử xem tại [tests/README.md](tests/README.md).
 
 ## Tài liệu và báo cáo
 
-- **Báo cáo cuối cùng:** [PDF](report/report/technical/BAO-CAO-CUOI-CUNG-SMART-MOTORBIKE-GUARDIAN.pdf) · [Word](report/report/technical/BAO-CAO-CUOI-CUNG-SMART-MOTORBIKE-GUARDIAN.docx) · [Markdown](report/report/technical/BAO-CAO-CUOI-CUNG-SMART-MOTORBIKE-GUARDIAN.md)
+- **Báo cáo cuối cùng:** [PDF](<report/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.pdf>) · [Word](<report/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.docx>) · [Markdown](<report/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.md>)
 - **Slide thuyết trình:** [PowerPoint](report/slides/Smart-Motorbike-Guardian.pptx) · [PDF](report/slides/Smart-Motorbike-Guardian.pdf) · [Kịch bản trình bày & vấn đáp](report/KICH-BAN-DEMO-VA-VAN-DAP.md)
 - **Hướng dẫn vận hành:** [Đổi ngưỡng tốc độ](report/CAI-DAT-NGUONG-TOC-DO-WEB-MOBILE.md) · [Chạy Web/Mobile với mạch thật](report/CHAY-WEB-MOBILE-VOI-PHAN-CUNG-THAT.md) · [Xác thực MQTT & vòng đời thiết bị](report/BAO-MAT-MQTT-VA-VONG-DOI.md)
 - **Tổng hợp kiểm chứng & tài liệu:** [Hồ sơ sản phẩm & kiểm chứng](report/RELEASE.md) · [Danh mục tài liệu](report/README.md)

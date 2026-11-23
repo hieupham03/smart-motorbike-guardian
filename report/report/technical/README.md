@@ -1,6 +1,6 @@
 # Báo cáo Smart Motorbike Guardian
 
-[PDF](BAO-CAO-CUOI-CUNG-SMART-MOTORBIKE-GUARDIAN.pdf) · [Word chỉnh sửa được](BAO-CAO-CUOI-CUNG-SMART-MOTORBIKE-GUARDIAN.docx) · [Markdown nguồn](BAO-CAO-CUOI-CUNG-SMART-MOTORBIKE-GUARDIAN.md).
+[PDF](<Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.pdf>) · [Word chỉnh sửa được](<Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.docx>) · [Markdown nguồn](<Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.md>).
 
 Báo cáo gồm 19 phần theo đề bài IoT, mô tả bài toán, yêu cầu, kiến trúc, phần cứng/firmware, giao thức, database/API, vòng đời thiết bị, phân quyền, bảo mật, triển khai và đánh giá. Thân báo cáo 24 trang theo độ dài khuyến nghị của đề bài; phụ lục 40 trang giữ chi tiết firmware, API và bộ ảnh web/mobile. Bộ xuất có tổng 64 trang, 36 hình, 18 bảng và 25 nguồn tham khảo. Thông tin hành chính và thành viên được để trống để nhóm điền.
 
