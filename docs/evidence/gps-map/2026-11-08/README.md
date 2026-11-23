@@ -17,7 +17,7 @@ Kiểm tra đã chạy:
 | Expo export web | PASS, `build/gps-map-mobile-20261108` |
 | Browser integration | 8 kiểm tra PASS, không page error; chi tiết `results.json` |
 
-Browser integration kiểm trạng thái chưa có vị trí, marker/iframe đúng tọa độ, thay đổi qua STOMP, giữ vị trí cũ, CSS Leaflet không phụ thuộc CDN, lỗi tile và tải lại. API, STOMP và nội dung tile/iframe được kiểm soát bằng fixture; ảnh `web-map-stale.png`, `mobile-map-stale.png` có nhãn mô phỏng. `attempt-1-failure.json` giữ lần thất bại đầu do test đợi tên xe ở màn hình không hiển thị tên; đã sửa điều kiện chờ của test rồi chạy lại thành công.
+Browser integration kiểm trạng thái chưa có vị trí, marker/iframe đúng tọa độ, thay đổi qua STOMP, giữ vị trí cũ, CSS Leaflet không phụ thuộc CDN, lỗi tile và tải lại. API, STOMP và nội dung tile/iframe được kiểm soát bằng fixture; ảnh `web-map-stale.png`, `mobile-map-stale.png` có nhãn mô phỏng.
 
 `provider-probe.json` ghi riêng khả năng tải một bản đồ thật từ dịch vụ ngoài bằng tọa độ ví dụ công khai. Phép thử này không thay thế GPS thật hoặc kiểm trên điện thoại. Không giả kết quả kết nối mạng ngoài thành PASS từ fixture.
 

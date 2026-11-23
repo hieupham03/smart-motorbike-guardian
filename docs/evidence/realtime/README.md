@@ -30,4 +30,4 @@ Artifacts:
 
 Tái chạy: [tests/integration/README.md](../../../tests/integration/README.md).
 
-Chưa nghiệm thu trong phiên: PostgreSQL/Docker runtime, MQTT broker công cộng khi board gửi thật, Hall/MPU→UART→app vật lý, relay/interlock, GPS fix/stale thật, 20 lượt đo latency và chạy 30–60 phút. Dùng checklist ở [hướng dẫn realtime](../../REALTIME-BACKEND-FRONTEND.md) cùng [hướng dẫn hardware v2](../../HUONG-DAN-HARDWARE-FIRMWARE-V2-GPS.md).
+Chưa nghiệm thu trong phiên: PostgreSQL/Docker runtime, MQTT broker công cộng khi board gửi thật, Hall/MPU→UART→app vật lý, relay/interlock, GPS fix/stale thật, 20 lượt đo latency và chạy 30–60 phút. Dùng checklist ở [hướng dẫn realtime](../../REALTIME-BACKEND-FRONTEND.md) cùng [hướng dẫn hardware và firmware](../../HUONG-DAN-HARDWARE-FIRMWARE-GPS.md).

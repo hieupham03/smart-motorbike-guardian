@@ -1,10 +1,10 @@
-# Đặc tả hiện tại — Smart Motorbike Guardian
+# Đặc tả kỹ thuật — Smart Motorbike Guardian
 
-Cập nhật 18/10/2026. Phạm vi bài tập lớn IoT trên breadboard, hướng A/A+ bằng đủ tầng, hành vi đúng và bằng chứng đo. Đặc tả v1 lưu tại archive/PROJECT_SPECIFICATION-v1.md; không áp dụng tuyên bố chuẩn công nghiệp/an toàn tuyệt đối.
+Phạm vi hệ thống IoT bảo vệ và giám sát mô hình xe máy trên breadboard gồm đầy đủ các tầng phần cứng, firmware, truyền thông, backend, cơ sở dữ liệu và ứng dụng web/mobile.
 
 ## Kiến trúc
 
-Hall/MPU6050/NEO-6M → ESP32-S3 Node B → UART → ESP32 Node A → MQTT → Spring Boot → PostgreSQL → REST/STOMP → web React. Lệnh đi từ ứng dụng qua backend/MQTT xuống Node A, ACK quay về. Mobile do thành viên khác phát triển, chưa có source trong repo. Broker từ xa không đồng nghĩa backend/DB đã cloud-hosted.
+Hall/MPU6050/NEO-6M → ESP32-S3 Node B → UART → ESP32 Node A → MQTT → Spring Boot → PostgreSQL/H2 → REST/STOMP → Web React & Mobile Expo/React Native. Lệnh điều khiển đi từ ứng dụng qua backend/MQTT xuống Node A, ACK phản hồi theo chiều ngược lại.
 
 ## Hardware
 
@@ -34,17 +34,17 @@ Command có cmd_id, queue rồi ControlTask thực thi trước ACK. Cache8 kế
 
 ## Hợp đồng dịch vụ
 
-- guardian/<UUID>/: telemetry1s, alert sự kiện, status/LWT retained, heartbeat15s, cmd/<type>, cmd/ack. Chi tiết trong BAN-GIAO-BACKEND-FRONTEND-VA-TICH-HOP.md.
-- Firmware MQTT1883 TCP, publishQoS0; buffer30alert RAM không bảo đảm giữ qua mất điện/giao nhận cuối.
-- Backend commitPENDING trước publish, ACK đúng device/ID mới đổi kết quả; timeout10s, lưu lateACK; không fallback simulator cho hardware.
-- HARDWARE/SIMULATED/LEGACY riêng; simulator bị chặn trước khi ghi lên hardware. Số đo thiếu/invalid=null, chưa ADC không gán12.6V.
-- receivedAt=giờserver, deviceUptimeS=uptimefirmware; GPS có validity/age và last-known. Gatewayoffline khác sensorstale.
-- ACCESS/REFRESH tách, Owner điều khiển, Viewer đọc, STOMP chỉ userqueue. H2console tắt mặc định.
-- Ngưỡng HARDWARE chỉnh trong firmware, chưa CONFIG_THRESHOLDS từ xa; web chỉ sửa thông tin, ngưỡng simulator chỉnh riêng.
+- `guardian/<UUID>/`: telemetry (1s), alert sự kiện, status/LWT (retained), heartbeat (15s), wheel_session, `cmd/<type>`, `cmd/ack`.
+- Firmware MQTT 1883 TCP, publish QoS0; buffer 30 alert RAM.
+- Backend commit PENDING trước publish, ACK đúng device/ID mới đổi kết quả; timeout 10s, lưu late ACK; không fallback simulator cho hardware.
+- HARDWARE/SIMULATED/LEGACY tách biệt; simulator bị chặn trước khi ghi lên hardware. Số đo thiếu/invalid lưu null, chưa ADC không gán 12.6V.
+- receivedAt = giờ server, deviceUptimeS = uptime firmware; GPS có validity/age và last-known. Gateway offline tách biệt với sensor stale.
+- ACCESS/REFRESH tách biệt, Owner điều khiển, Viewer chỉ đọc, STOMP chỉ dùng user queue. H2 console tắt mặc định.
+- Ngưỡng cảnh báo tốc độ HARDWARE cấu hình từ xa qua lệnh `CONFIG_THRESHOLDS` và lưu NVS trên Node A; ngưỡng simulator chỉnh riêng.
 
 ## Database và triển khai
 
-PostgreSQL15, FlywayV1/V2 là nguồn schema duy nhất. Không chạy SQLseed cũ; DataInitializer seed có cấu hình. Secret qua env. Một compose tại deployment/. Local Java17+/Maven, Node20+ theo REALTIME-BACKEND-FRONTEND.md.
+PostgreSQL 15 (hoặc H2 khi chạy cục bộ), Flyway V1/V2/V3 là nguồn schema duy nhất. `DataInitializer` tạo dữ liệu mẫu khi `DEMO_SEED_ENABLED=true`. Secret truyền qua biến môi trường. Triển khai Docker Compose tại `deployment/`. Local cần JDK 17+/Maven và Node.js 22.13+ (xem [REALTIME-BACKEND-FRONTEND.md](REALTIME-BACKEND-FRONTEND.md)).
 
 ## Tiêu chí nghiệm thu
 

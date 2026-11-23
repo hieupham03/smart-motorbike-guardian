@@ -14,7 +14,7 @@ Bám [đề bài](assignment/DE-BAI-IOT.pdf), đặc biệt mục 4, 6, 7 và 8.
 Thực hiện một lần trước buổi demo, không chờ đến lớp mới tải dependencies:
 
 ```powershell
-cd D:\Firmware-IoT
+# Từ thư mục gốc dự án (smart-motorbike-guardian)
 cd backend
 mvn verify
 cd ../frontend
@@ -119,4 +119,4 @@ Script từ chối DB đang mở, sao lưu DB/cấu hình hiện tại vào snap
 
 Dùng [công cụ đo](DO-LUONG-VA-LUU-MINH-CHUNG.md) để ghi số liệu; không gán độ trễ REST thành độ trễ từ cảm biến tới màn hình. Lưu ảnh toàn mạch thật và video ngắn có thao tác vật lý, ứng dụng và kết quả. Báo cáo có chú thích AI và nguồn tài nguyên; đối chiếu thêm quy định AUR.99 của giảng viên nếu được cung cấp.
 
-Nhóm tự điền danh tính ở bìa/bảng nhóm/slide. Mỗi người trả lời được luồng dữ liệu chung, rồi giải thích sâu phần mình theo [kịch bản vấn đáp](KICH-BAN-DEMO-VA-VAN-DAP.md). Đọc [đối chiếu điều kiện đồ án](DOI-CHIEU-DIEU-KIEN-DO-AN.md) và kết quả trong hồ sơ phát hành, không nói mọi chức năng đã được thử trên thiết bị nếu chưa có evidence.
+Mỗi thành viên nắm luồng dữ liệu chung và giải thích chi tiết phần phụ trách theo [kịch bản demo và vấn đáp](KICH-BAN-DEMO-VA-VAN-DAP.md) cùng [hồ sơ kiểm chứng](RELEASE.md).

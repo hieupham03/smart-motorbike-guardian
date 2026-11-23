@@ -1,10 +1,8 @@
-# Đấu nối breadboard — firmware v2
+# Sơ đồ đấu nối phần cứng breadboard
 
-Tắt nguồn trước khi đổi dây. Đối chiếu số GPIO in trên board, không dùng số thứ tự chân header. Hướng dẫn nạp/test: [hardware/firmware v2](../docs/HUONG-DAN-HARDWARE-FIRMWARE-V2-GPS.md).
+Tắt nguồn trước khi đổi dây. Đối chiếu số GPIO in trên board, không dùng số thứ tự chân header. Hướng dẫn nạp và kiểm tra chi tiết: [Hướng dẫn phần cứng và firmware](../docs/HUONG-DAN-HARDWARE-FIRMWARE-GPS.md).
 
-Cập nhật 20/10/2026: người phụ trách xác nhận S3/MPU đã hoạt động lại và relay/motor/nguồn đã ổn. Đây là xác nhận vận hành của người dùng, không phải số đo điện áp/dòng hoặc kết quả chạy lâu mới.
-
-**Bổ sung 21/10:** đã thêm cảnh báo bánh quay khi ARMED, phiên RAM và cảnh báo quá tốc độ. Không đổi chân/thêm linh kiện; cần nạp lại cả hai node. Xem [cách dùng và thử ba tính năng](../docs/BA-TINH-NANG-HALL-VA-TOC-DO.md).
+Chi tiết thuật toán cảnh báo bánh quay, phiên quay bánh và cảnh báo tốc độ: [Tính năng Hall và tốc độ](../docs/BA-TINH-NANG-HALL-VA-TOC-DO.md).
 
 ## UART và cảm biến
 

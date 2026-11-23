@@ -1,8 +1,8 @@
 # Cảnh báo bánh quay, thống kê phiên và cảnh báo tốc độ
 
-Triển khai 20–21/10/2026 trên bản local. Giữ nguyên phần cứng và relay HIGH; không kéo bản backend/mobile mới từ GitHub. Người dùng chọn thống kê RAM theo phiên, không lưu lịch sử phiên vào database.
+Mô tả cơ chế phát hiện bánh quay khi đang canh giữ, thống kê phiên quay bánh trong RAM và cảnh báo vượt tốc độ trên hệ thống hai node ESP32, backend, web và mobile.
 
-## 1. Hành vi mới
+## 1. Hành vi hệ thống
 
 | Tính năng | Điều kiện và kết quả |
 |---|---|
@@ -68,13 +68,12 @@ Mỗi lần reset thật dùng cmd_id mới. Lệnh trùng trong cửa sổ cach
 7. Giữ MPU yên, quay bánh tay ít nhất 3 vòng trong 3 giây (1 xung/vòng). Mong đợi `[WHEEL GUARD]`, ALARM và `WHEEL_MOVEMENT_WHILE_ARMED`. Không cần GPS FIX. `d`/`u` về PARKED và cấp motor trở lại.
 8. ARM khi bánh đang quay phải REJECTED/SPEED_NOT_ZERO, relay không đổi. Mất UART/counter cũ thì ARM/reset phiên bị từ chối, không coi thiếu dữ liệu là đứng yên.
 
-## 5. Web và bàn giao mobile
+## 5. Hiển thị trên Web và Mobile
 
-- Chạy backend/web local như README, cùng broker/device UUID với Node A. Chọn HARDWARE, xem khung **PHIÊN QUAY BÁNH** và ngưỡng do firmware gửi, không dùng ngưỡng simulator 80 km/h.
-- Owner/Admin bấm **Bắt đầu phiên mới**: PENDING → ACK terminal → snapshot mới. Viewer bị chặn cả UI và backend. Dữ liệu cũ giữ thống kê cuối và khóa reset; reload phục hồi snapshot nếu backend còn chạy.
-- Trang cảnh báo có nhãn **Bánh quay khi đang canh giữ**, **Vượt ngưỡng tốc độ**. Lưu log/ảnh/video thật sau khi thử.
-- Mobile mới chưa kéo về local. Thành viên mobile dùng REST/sự kiện/lệnh mục 3; push dùng luồng alert khi tích hợp bản mobile. Chưa coi native app/push đã thử thật.
+- Chạy backend/web/mobile theo README, cùng broker và device UUID với Node A. Chọn thiết bị `HARDWARE`, xem khung **Phiên quay bánh** và ngưỡng cảnh báo do firmware báo về.
+- Owner/Admin có thể bấm **Bắt đầu phiên mới** (`PENDING` → ACK → snapshot mới) hoặc chỉnh ngưỡng cảnh báo tốc độ từ xa (xem [CAI-DAT-NGUONG-TOC-DO-WEB-MOBILE.md](CAI-DAT-NGUONG-TOC-DO-WEB-MOBILE.md)). Viewer bị chặn cả ở UI và backend.
+- Trang cảnh báo hiển thị nhãn **Bánh quay khi đang canh giữ** và **Vượt ngưỡng tốc độ**.
 
-## 6. Trạng thái nghiệm thu
+## 6. Kết quả kiểm chứng
 
-[Bằng chứng phần mềm](evidence/wheel-features-2026-10-20/README.md) và [trạng thái công việc](CAI-DAT-NGUONG-TOC-DO-WEB-MOBILE.md). Chưa nạp board hoặc đo lại mạch trong phiên tự động. Cần actual cho xung/vòng, ARM/relay, overspeed, reset và chuỗi MQTT→DB→web trước khi chốt ba tính năng đạt trên hardware.
+Xem [kết quả kiểm thử phần mềm](evidence/wheel-features-2026-10-20/README.md) và [minh chứng mạch thật](evidence/classroom-hardware/README.md).

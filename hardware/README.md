@@ -1,7 +1,7 @@
 # Phần cứng
 
 - [Bảng đấu nối và nguồn](SO-DO-DAU-NOI-PHAN-CUNG.md) là căn cứ khi lắp mạch.
-- [Bảng linh kiện, GPIO và cách kiểm tra](../docs/HUONG-DAN-HARDWARE-FIRMWARE-V2-GPS.md).
+- [Bảng linh kiện, GPIO và cách kiểm tra](../docs/HUONG-DAN-HARDWARE-FIRMWARE-GPS.md).
 - [Hình mạch có GPS](images/wiring-gps.png) và [cận cảnh Node B/GPS](images/gps-node-b.png) là **hình minh họa**, không phải ảnh chụp prototype.
 - `diagram.json` là mô hình sơ đồ tham khảo; xác nhận chân theo firmware và board thật trước khi nối.
 

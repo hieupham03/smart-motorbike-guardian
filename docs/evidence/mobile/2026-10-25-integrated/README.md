@@ -1,6 +1,6 @@
-# Evidence sau sửa tích hợp mobile — 25/10/2026
+# Kết quả kiểm thử tích hợp Mobile
 
-Nguồn: checkout `main` tại `ba4e81a` cộng thay đổi local Hall và sửa mobile/backend. Đây là kiểm tra phần mềm; không phải ảnh điện thoại hoặc dữ liệu breadboard thật. Bản review trước sửa nằm ở [thư mục lịch sử](../2026-10-25/README.md).
+Kiểm thử tích hợp phần mềm cho ứng dụng mobile (web export) với backend Spring Boot và MQTT emulator cục bộ; không phải ảnh chụp điện thoại thật hoặc dữ liệu breadboard vật lý.
 
 - [integration-results.json](integration-results.json): **15 kiểm tra PASS**, `physicalBoard=false`, `nativePhone=false`, một request tới push HTTP mock, không có browser JS error.
 - [mobile-web-emulator.png](mobile-web-emulator.png): ảnh app Expo web hiển thị dữ liệu MQTT giả lập, có nhãn nguồn kiểm thử.
@@ -31,6 +31,6 @@ node tests/integration/mobile-native-config-check.cjs
 node tests/integration/mobile-integrated-acceptance.cjs
 ```
 
-Script runtime hiện dùng đường dẫn Edge Windows; sửa `executablePath` nếu máy đặt Edge nơi khác. Có thể đặt `GUARDIAN_JAVA` tới Java 17+ thực tế. Đảm bảo bốn port trên đang trống. Không dùng `mobile-integration-smoke.cjs` để nghiệm thu bản sửa: đó là script tái hiện lỗi của review trước.
+Script runtime hiện dùng đường dẫn Edge Windows; sửa `executablePath` nếu máy đặt Edge nơi khác. Có thể đặt `GUARDIAN_JAVA` tới Java 17+ thực tế. Đảm bảo bốn port trên đang trống.
 
 Để thử trên điện thoại sau đó, đổi lại URL LAN trong `.env` và khởi động/export/build lại; địa chỉ 127.0.0.1 ở trên chỉ dành cho bài thử cùng máy. Không dùng các tọa độ thử trong ảnh làm bằng chứng GPS FIX ngoài trời.

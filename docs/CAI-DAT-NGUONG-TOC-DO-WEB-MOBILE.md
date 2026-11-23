@@ -16,7 +16,7 @@ Trong lúc chờ, các nút gửi lệnh bị khóa để tránh gửi lặp. Kh
 - Serial Node A ở 115200 sẽ có `[SPEED LIMIT] boot=... storage=READY`. Sau lệnh thành công có `[SPEED LIMIT] applied=... saved=NVS`.
 - Khởi động lại backend để nạp bản JAR mới. Với bộ chạy trên lớp, đóng phiên launcher hiện tại bằng `Ctrl+C`, đợi backend dừng rồi mở lại `deployment/start-mobile-demo.bat`. Nếu backend được chạy riêng, dừng đúng tiến trình đó rồi chạy lại theo hướng dẫn cũ.
 - Web tải lại trang. Mobile Reload trong Expo Go/dev build; không thêm native module nên không yêu cầu tạo bản native mới chỉ vì thay đổi này.
-- Backend JAR đã build tại `backend/target/smart-motorbike-guardian-backend-1.0.0.jar`. Có bản build riêng tại `build/backend-speed-limit/` để tránh lỗi Windows giữ file đang chạy.
+- Đóng gói lại backend bằng `mvn package` trong `backend/` để tạo `backend/target/smart-motorbike-guardian-backend-1.0.0.jar`.
 
 ## Quy tắc hoạt động
 
