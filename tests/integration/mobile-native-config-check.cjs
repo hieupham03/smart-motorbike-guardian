@@ -39,6 +39,6 @@ const result = {
   androidManifestFlagsAndMapsKeyVerified: true,
   nativeBuildPerformed: false,
 };
-const output = path.join(root, 'docs/evidence/mobile/2026-10-25-integrated/native-config-check.json');
+const output = path.join(root, 'report/evidence/mobile/2026-10-25-integrated/native-config-check.json');
 fs.writeFileSync(output, JSON.stringify(result, null, 2) + '\n');
 console.log(JSON.stringify(result));

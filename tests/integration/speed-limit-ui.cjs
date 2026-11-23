@@ -2,7 +2,7 @@
 const { chromium } = require('../../frontend/node_modules/playwright');
 const fs = require('fs'), path = require('path'), http = require('http'), assert = require('assert/strict');
 const root = path.resolve(__dirname, '../..');
-const output = path.join(root, 'docs/evidence/speed-limit-ui');
+const output = path.join(root, 'report/evidence/speed-limit-ui');
 const servers = [], checks = [], errors = [];
 const now = () => new Date().toISOString();
 const token = () => 'fixture.' + Buffer.from(JSON.stringify({ exp: Math.floor(Date.now()/1000)+3600 })).toString('base64url') + '.fixture';

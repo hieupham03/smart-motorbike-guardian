@@ -22,6 +22,6 @@ Năm RESET_WHEEL_SESSION được gửi riêng, không tác động relay/còi. 
 
 Ca offline được kiểm khi thiết bị đã OFFLINE ở đầu lần xác minh, nên các timestamp chỉ chứng minh trạng thái và phục hồi, không được gọi là độ trễ phát hiện mất nguồn. Lần quan sát ban đầu hết cửa sổ trước khi người vận hành rút nguồn; không chuyển lần chờ đó thành dữ liệu đo.
 
-[Ảnh dashboard nhận dữ liệu thật](../../bao-cao-final/technical/assets/screens/web-dashboard.png) chụp trong ca cảnh báo. Video trình duyệt ở `.local/evidence/demo-readiness/browser-video/` là dự phòng màn hình, không có toàn mạch trong khung hình. **Chưa có ảnh prototype thật hoặc kiểm điện thoại native**; không suy chúng từ screenshot/browser viewport.
+[Ảnh dashboard nhận dữ liệu thật](../../report/technical/assets/screens/web-dashboard.png) chụp trong ca cảnh báo. Video trình duyệt ở `.local/evidence/demo-readiness/browser-video/` là dự phòng màn hình, không có toàn mạch trong khung hình. **Chưa có ảnh prototype thật hoặc kiểm điện thoại native**; không suy chúng từ screenshot/browser viewport.
 
 Raw JSONL chỉ chứa các trường đã chọn: timestamp, ID reading/command, uptime, giá trị Hall và cờ hợp lệ. Không chứa email, mật khẩu, JWT, mã claim, SSID, biển số hay tọa độ. SHA256 raw được ghi trong validation.json. Log serial đầy đủ và cấu hình riêng chỉ giữ local, không xuất bản.

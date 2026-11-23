@@ -404,10 +404,10 @@ Kết quả kiểm thử thể hiện khả năng phối hợp giữa các tần
 | Nguồn, relay và cảm biến | hardware/SO-DO-DAU-NOI-PHAN-CUNG.md |
 | Backend và database | backend/src/main/java/com/guardian/; resources/db/migration/ |
 | UI, realtime và quyền | frontend/src/; frontend/mobile/src/ |
-| 34 UI / 15 tích hợp | docs/evidence/user-dev-ui/2026-11-01/ |
-| Backend36 / web23 / mobile45 | Bộ kiểm thử backend/src/test/, frontend/src/ và frontend/mobile/src/; hồ sơ phát hành docs/RELEASE.md |
-| GPS và vận hành | docs/evidence/gps/; docs/RELEASE.md |
-| Bản build/host firmware | docs/evidence/wheel-features-2026-10-20/; tests/firmware/ |
+| 34 UI / 15 tích hợp | report/evidence/user-dev-ui/2026-11-01/ |
+| Backend36 / web23 / mobile45 | Bộ kiểm thử backend/src/test/, frontend/src/ và frontend/mobile/src/; hồ sơ phát hành report/RELEASE.md |
+| GPS và vận hành | report/evidence/gps/; report/RELEASE.md |
+| Bản build/host firmware | report/evidence/wheel-features-2026-10-20/; tests/firmware/ |
 
 Hai nguồn firmware duy nhất nằm tại firmware/node_a_gateway/ và firmware/node_b_sensor/; ứng dụng mobile nằm tại frontend/mobile/. Các nguồn trong bảng truy vết liên kết phần mô tả thiết kế với mã triển khai và kết quả kiểm thử tương ứng. Báo cáo, mã nguồn và hướng dẫn chạy sử dụng cùng cấu trúc này.
 

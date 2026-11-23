@@ -14,7 +14,7 @@ GitHub main và tag là bản bàn giao hoàn chỉnh cho người đọc/ngư�
 | deployment/ | Docker Compose, broker, bộ chạy và hướng dẫn |
 | hardware/ | Đấu nối, linh kiện, hình prototype/minh họa có nhãn |
 | tests/ | Kiểm thử và kiểm tra bản phát hành |
-| docs/ | Bộ báo cáo/slide hiện hành và thiết kế |
+| report/ | Bộ báo cáo/slide hiện hành và thiết kế |
 | .env.example | Danh sách biến môi trường, không chứa bí mật |
 
 Dotfile Git/CI được giữ khi phục vụ quản lý mã nguồn. Không xuất bản node_modules, dist, target, database local, Wi-Fi thật, Firebase credential, token, khóa API, file Office/Visual Paradigm đang khóa, mirror firmware hoặc nhiều bản báo cáo/slide cũ.
@@ -37,4 +37,4 @@ Dotfile Git/CI được giữ khi phục vụ quản lý mã nguồn. Không xu�
 
 Chạy `python tests/publication/check_repository.py`, bộ quét bí mật và các kiểm thử/build liên quan. Kiểm tra bằng clone sạch: dependencies được cài từ lockfile, không phụ thuộc file cache trên máy tác giả. README, link và launcher phải dùng đúng đường dẫn đang xuất bản.
 
-Tag/release xác định snapshot code, không thay thế nghiệm thu điện thoại thật hay phần cứng. Ghi rõ phạm vi các kết quả đã chạy trong `docs/RELEASE.md`; không đổi phần chưa kiểm thành PASS để gọi bản phát hành là “100%”.
+Tag/release xác định snapshot code, không thay thế nghiệm thu điện thoại thật hay phần cứng. Ghi rõ phạm vi các kết quả đã chạy trong `report/RELEASE.md`; không đổi phần chưa kiểm thành PASS để gọi bản phát hành là “100%”.

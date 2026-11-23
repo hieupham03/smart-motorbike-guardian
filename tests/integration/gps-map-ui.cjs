@@ -6,7 +6,7 @@ const path = require('node:path');
 const http = require('node:http');
 const { chromium } = require('../../frontend/node_modules/playwright');
 const root = path.resolve(__dirname, '../..');
-const out = path.join(root, 'docs/evidence/gps-map/2026-11-08');
+const out = path.join(root, 'report/evidence/gps-map/2026-11-08');
 const checks = [], errors = [], servers = [];
 let browser;
 const now = () => new Date().toISOString();
