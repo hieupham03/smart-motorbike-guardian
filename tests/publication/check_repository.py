@@ -4,8 +4,18 @@ import argparse, re, subprocess, sys
 from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[2]
-REQUIRED = {"README.md", ".env.example", "firmware", "backend", "frontend", "database", "deployment", "hardware", "tests", "report"}
+REQUIRED = {"README.md", ".env.example", "firmware", "backend", "frontend", "database", "deployment", "hardware", "tests", "docs"}
 TOP = REQUIRED | {".gitignore", ".gitattributes", ".github"}
+REQUIRED_RELEASE_FILES = {
+    "docs/README.md",
+    "docs/RELEASE.md",
+    "docs/REPOSITORY-POLICY.md",
+    "docs/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.md",
+    "docs/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.pdf",
+    "docs/report/technical/Báo Cáo BTL IoT - Giám sát và Bảo vệ Xe máy.docx",
+    "docs/slides/Smart-Motorbike-Guardian.pptx",
+    "docs/slides/Smart-Motorbike-Guardian.pdf",
+}
 FORBIDDEN_PARTS = {"node_modules", "dist", "target", ".local", ".agents", ".expo", ".vite", "__pycache__"}
 
 
@@ -19,6 +29,8 @@ def main():
     errors = []
     roots = {name.split('/')[0] for name in files}
     for name in sorted(REQUIRED - roots): errors.append('Missing required entry: '+name)
+    for name in sorted(REQUIRED_RELEASE_FILES - set(files)):
+        errors.append('Missing required release file: '+name)
     for name in files:
         path = Path(name)
         if path.parts[0] not in TOP: errors.append('Unexpected top-level release entry: '+name)

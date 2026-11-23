@@ -24,4 +24,4 @@ arduino-cli compile --fqbn 'esp32:esp32:esp32s3:FlashSize=16M,PSRAM=opi,CDCOnBoo
 arduino-cli compile --fqbn 'esp32:esp32:esp32s3:FlashSize=16M,PSRAM=opi,CDCOnBoot=cdc' --build-path build/gps_bringup firmware/gps_bringup
 ```
 
-Chỉ dùng hai thư mục chuẩn trong `firmware/`. Bánh đường kính 6,5 cm, một xung/vòng cho tốc độ tham chiếu khoảng 0,735 km/h ở một vòng/giây; phép kiểm host không đo sai số bánh thật. Xem [hướng dẫn đấu nối/nạp](../../report/HUONG-DAN-HARDWARE-FIRMWARE-GPS.md).
+Chỉ dùng hai thư mục chuẩn trong `firmware/`. Bánh đường kính 6,5 cm, một xung/vòng cho tốc độ tham chiếu khoảng 0,735 km/h ở một vòng/giây; phép kiểm host không đo sai số bánh thật. Xem [hướng dẫn đấu nối/nạp](../../docs/HUONG-DAN-HARDWARE-FIRMWARE-GPS.md).
