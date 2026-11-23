@@ -1,12 +1,10 @@
 # Hướng dẫn cài đặt, chạy và build mobile
 
-Cập nhật 25/10/2026, Expo SDK 58. Xem [tích hợp đã hoàn thành và giới hạn kiểm chứng](CAI-DAT-NGUONG-TOC-DO-WEB-MOBILE.md). Đã có bằng chứng phần mềm; các bước APK/điện thoại/push thật bên dưới chưa được nghiệm thu trong phiên này.
+Ứng dụng di động sử dụng Expo SDK 58 / React Native, dùng chung backend REST/STOMP với web.
 
-**Test trên lớp:** dùng [launcher một lần mở](CHAY-MOBILE-TREN-LOP.md): chạy `deployment/start-mobile-demo.bat` ở gốc repo. Tự mở backend cổng 8082 + QR Expo Go, tự nhận IP LAN, giữ tài khoản/DB demo sau khi tắt; chỉ đặt mật khẩu lần đầu. Các bước bên dưới là cách chạy thủ công và cấu hình native nâng cao.
+**Chạy nhanh trên Windows:** dùng [launcher một lần mở](CHAY-MOBILE-TREN-LOP.md) (`deployment/start-mobile-demo.bat` từ gốc repo) để mở backend cổng 8082 và Expo Go cổng 8081 với IP LAN tự động. Các bước bên dưới là cách chạy thủ công và cấu hình native nâng cao.
 
-**Đã đăng nhập, thử gì tiếp:** [toàn bộ tính năng và kịch bản test hiện tại](TONG-HOP-TINH-NANG-VA-KICH-BAN-TEST.md), gồm ý nghĩa Bật bảo vệ, thứ tự test trên board và ca app không cần hardware.
-
-**Chạy cả web và mobile cùng phần cứng thật:** [hướng dẫn từng bước](CHAY-WEB-MOBILE-VOI-PHAN-CUNG-THAT.md), dùng một backend 8082 và web 5173, kèm dấu hiệu kiểm tra UART/MQTT và đầu ra thực tế.
+**Chạy cả web và mobile cùng phần cứng thật:** xem [CHAY-WEB-MOBILE-VOI-PHAN-CUNG-THAT.md](CHAY-WEB-MOBILE-VOI-PHAN-CUNG-THAT.md).
 
 ## 1. Yêu cầu
 
@@ -52,7 +50,7 @@ Trên **trình duyệt điện thoại**, mở `http://<IP-MAY-TINH>:8080/api/he
 ## 3. Chạy mobile
 
 ```powershell
-Set-Location mobile
+Set-Location frontend/mobile
 npm ci
 Copy-Item .env.example .env
 ```
@@ -130,7 +128,7 @@ Xóa artifact `.tmp-web-export` sau smoke test. APK/AAB/native generated folders
 
 ## 5. Sự cố thường gặp
 
-- `Cannot find native module 'ExpoTopicSubscriptionModule'`: đã sửa ngày 26/10/2026 bằng cách không nạp notification SDK trong Expo Go. Dừng launcher, đóng app trên điện thoại, chạy lại `start-mobile-demo.bat -ClearCache` rồi quét QR. Nếu dùng APK native cũ và cần push, rebuild APK với package native hiện tại; xóa cache không bổ sung module native cho APK.
+- `Cannot find native module 'ExpoTopicSubscriptionModule'`: ứng dụng tự bỏ qua notification SDK trong Expo Go. Nếu gặp lỗi cache cũ, dừng launcher, đóng app trên điện thoại, chạy lại `start-mobile-demo.bat -ClearCache` rồi quét QR. Nếu dùng APK native cũ và cần push, rebuild APK với package native hiện tại.
 
 - `Network Error`: kiểm tra IP LAN, port 8080, firewall, HTTP cleartext của build và backend health.
 - REST được nhưng realtime lỗi: kiểm tra `EXPO_PUBLIC_WS_URL`, `/ws`, JWT còn hạn và proxy upgrade WebSocket.
@@ -142,4 +140,4 @@ Xóa artifact `.tmp-web-export` sau smoke test. APK/AAB/native generated folders
 - Lệnh TIMEOUT: không retry mù; xem command history, MQTT và ACK firmware.
 - HARDWARE không sửa ngưỡng: đúng thiết kế, chỉnh firmware rồi nạp board; app hiển thị ngưỡng của wheel_session.
 
-Sau cài đặt, thực hiện [checklist điện thoại](NGHIEM-THU-MOBILE-TRUC-TIEP.md) và lưu Actual/ảnh/log. [Bài thử runtime backend thực](evidence/mobile/2026-10-25-integrated/README.md) dùng MQTT emulator, không thay kiểm tra điện thoại và breadboard.
+Xem kết quả kiểm thử tích hợp phần mềm tại [evidence/mobile/2026-10-25-integrated/README.md](evidence/mobile/2026-10-25-integrated/README.md).
