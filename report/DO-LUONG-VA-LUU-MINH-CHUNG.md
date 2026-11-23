@@ -38,7 +38,7 @@ try {
 }
 ```
 
-Các lệnh tiếp theo cũng cần chạy trong terminal có biến môi trường hoặc bên trong khối `try` tương tự. Tệp cấu hình launcher chứa thông tin riêng vẫn ở `.local/`; không copy vào docs hoặc đính kèm khi nộp.
+Các lệnh tiếp theo cũng cần chạy trong terminal có biến môi trường hoặc bên trong khối `try` tương tự. Tệp cấu hình launcher chứa thông tin riêng vẫn ở `.local/`; không copy vào report hoặc đính kèm khi nộp.
 
 ## 3. Ba lượt kiểm phù hợp trước demo
 

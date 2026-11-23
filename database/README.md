@@ -4,7 +4,7 @@ Schema được quản lý duy nhất bởi Flyway trong `backend/src/main/resou
 
 Khởi động PostgreSQL bằng `deployment/docker-compose.yml`. DataInitializer chỉ tạo demo khi `DEMO_SEED_ENABLED=true`, mật khẩu từ môi trường. SQL và compose cũ đã bỏ để tránh khởi tạo chồng nhau và mật khẩu cố định.
 
-Không xóa volume để nâng cấp. Sao lưu dữ liệu nhóm trước khi migrate. Xem `docs/REALTIME-BACKEND-FRONTEND.md`.
+Không xóa volume để nâng cấp. Sao lưu dữ liệu nhóm trước khi migrate. Xem `report/REALTIME-BACKEND-FRONTEND.md`.
 
 - [Dữ liệu xe mẫu](sample-device.json) là fixture công khai, không chứa thông tin cá nhân/mật khẩu và không tự nhập vào DB production.
 - [Truy vấn kiểm tra schema PostgreSQL](inspect-schema.sql) chỉ đọc metadata; dùng sau khi backend đã chạy Flyway.

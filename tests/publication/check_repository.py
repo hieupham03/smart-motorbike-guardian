@@ -4,7 +4,7 @@ import argparse, re, subprocess, sys
 from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[2]
-REQUIRED = {"README.md", ".env.example", "firmware", "backend", "frontend", "database", "deployment", "hardware", "tests", "docs"}
+REQUIRED = {"README.md", ".env.example", "firmware", "backend", "frontend", "database", "deployment", "hardware", "tests", "report"}
 TOP = REQUIRED | {".gitignore", ".gitattributes", ".github"}
 FORBIDDEN_PARTS = {"node_modules", "dist", "target", ".local", ".agents", ".expo", ".vite", "__pycache__"}
 

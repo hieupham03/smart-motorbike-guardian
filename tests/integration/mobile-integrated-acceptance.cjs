@@ -5,7 +5,7 @@ const {spawn,spawnSync}=require('child_process');
 const assert=require('assert/strict');
 const {chromium}=require('../../frontend/node_modules/playwright');
 const root=path.resolve(__dirname,'../..');process.chdir(root);
-const output=path.join(root,'docs/evidence/user-dev-ui/2026-11-01/integration');fs.mkdirSync(output,{recursive:true});
+const output=path.join(root,'report/evidence/user-dev-ui/2026-11-01/integration');fs.mkdirSync(output,{recursive:true});
 const api='http://127.0.0.1:18085',web='http://127.0.0.1:15175';
 const mobileExport=path.join(root,'build/mobile-integration-web');
 const failureOutput=path.join(root,'build/mobile-integration-failures');

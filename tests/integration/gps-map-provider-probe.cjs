@@ -2,7 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { chromium } = require('../../frontend/node_modules/playwright');
-const out=path.resolve(__dirname,'../../docs/evidence/gps-map/2026-11-08');
+const out=path.resolve(__dirname,'../../report/evidence/gps-map/2026-11-08');
 async function main(){
   fs.mkdirSync(out,{recursive:true});
   const browser=await chromium.launch({headless:true});

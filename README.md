@@ -44,7 +44,7 @@ smart-motorbike-guardian/
 ├── deployment/         # Docker Compose, cấu hình Mosquitto và script khởi chạy
 ├── hardware/           # Sơ đồ đấu nối breadboard, linh kiện và hình minh họa
 ├── tests/              # Kiểm thử firmware, tích hợp giao diện và kiểm tra repo
-└── docs/               # Báo cáo cuối cùng, slide thuyết trình, thiết kế và minh chứng
+└── report/             # Báo cáo cuối cùng, slide thuyết trình, thiết kế và minh chứng
 ```
 
 ## Yêu cầu môi trường
@@ -176,14 +176,14 @@ Copy-Item firmware/node_a_gateway/network_config.example.h firmware/node_a_gatew
 .\deployment\start-mobile-client.bat
 ```
 
-Xem chi tiết quy trình chuẩn bị khóa, nạp Node A và kích hoạt mạch tại [Chuẩn bị demo tại trường](docs/CHUAN-BI-DEMO-TAI-TRUONG.md) và [Hướng dẫn mobile](frontend/mobile/README.md).
+Xem chi tiết quy trình chuẩn bị khóa, nạp Node A và kích hoạt mạch tại [Chuẩn bị demo tại trường](report/CHUAN-BI-DEMO-TAI-TRUONG.md) và [Hướng dẫn mobile](frontend/mobile/README.md).
 
 ---
 
 ## Phần cứng và firmware
 
 - Sơ đồ đấu nối chi tiết: [hardware/SO-DO-DAU-NOI-PHAN-CUNG.md](hardware/SO-DO-DAU-NOI-PHAN-CUNG.md)
-- Hướng dẫn thư viện, nạp board và kiểm tra: [docs/HUONG-DAN-HARDWARE-FIRMWARE-GPS.md](docs/HUONG-DAN-HARDWARE-FIRMWARE-GPS.md)
+- Hướng dẫn thư viện, nạp board và kiểm tra: [report/HUONG-DAN-HARDWARE-FIRMWARE-GPS.md](report/HUONG-DAN-HARDWARE-FIRMWARE-GPS.md)
 - Mã nguồn chuẩn nằm tại `firmware/node_a_gateway/` (ESP32-WROOM-32) và `firmware/node_b_sensor/` (ESP32-S3 N16R8). Sao chép `firmware/node_a_gateway/network_config.example.h` thành `network_config.h` để cấu hình Wi-Fi cục bộ (file thật được `.gitignore` loại trừ).
 
 > **Lưu ý an toàn:** Tắt nhánh nguồn motor khi nạp firmware, thay dây hoặc kiểm tra nguồn. Cảnh báo quá tốc độ chỉ phát cảnh báo và không tự cắt motor. Hệ thống là mô hình học phần IoT trên breadboard, không phải thiết bị an toàn thương mại cho xe máy thật.
@@ -219,7 +219,7 @@ Chi tiết các bộ kiểm thử xem tại [tests/README.md](tests/README.md).
 
 ## Tài liệu và báo cáo
 
-- **Báo cáo cuối cùng:** [PDF](docs/bao-cao-final/technical/BAO-CAO-CUOI-CUNG-SMART-MOTORBIKE-GUARDIAN.pdf) · [Word](docs/bao-cao-final/technical/BAO-CAO-CUOI-CUNG-SMART-MOTORBIKE-GUARDIAN.docx) · [Markdown](docs/bao-cao-final/technical/BAO-CAO-CUOI-CUNG-SMART-MOTORBIKE-GUARDIAN.md)
-- **Slide thuyết trình:** [PowerPoint](docs/slides/Smart-Motorbike-Guardian.pptx) · [PDF](docs/slides/Smart-Motorbike-Guardian.pdf) · [Kịch bản trình bày & vấn đáp](docs/KICH-BAN-DEMO-VA-VAN-DAP.md)
-- **Hướng dẫn vận hành:** [Đổi ngưỡng tốc độ](docs/CAI-DAT-NGUONG-TOC-DO-WEB-MOBILE.md) · [Chạy Web/Mobile với mạch thật](docs/CHAY-WEB-MOBILE-VOI-PHAN-CUNG-THAT.md) · [Xác thực MQTT & vòng đời thiết bị](docs/BAO-MAT-MQTT-VA-VONG-DOI.md)
-- **Tổng hợp kiểm chứng & tài liệu:** [Hồ sơ sản phẩm & kiểm chứng](docs/RELEASE.md) · [Danh mục tài liệu](docs/README.md)
+- **Báo cáo cuối cùng:** [PDF](report/report/technical/BAO-CAO-CUOI-CUNG-SMART-MOTORBIKE-GUARDIAN.pdf) · [Word](report/report/technical/BAO-CAO-CUOI-CUNG-SMART-MOTORBIKE-GUARDIAN.docx) · [Markdown](report/report/technical/BAO-CAO-CUOI-CUNG-SMART-MOTORBIKE-GUARDIAN.md)
+- **Slide thuyết trình:** [PowerPoint](report/slides/Smart-Motorbike-Guardian.pptx) · [PDF](report/slides/Smart-Motorbike-Guardian.pdf) · [Kịch bản trình bày & vấn đáp](report/KICH-BAN-DEMO-VA-VAN-DAP.md)
+- **Hướng dẫn vận hành:** [Đổi ngưỡng tốc độ](report/CAI-DAT-NGUONG-TOC-DO-WEB-MOBILE.md) · [Chạy Web/Mobile với mạch thật](report/CHAY-WEB-MOBILE-VOI-PHAN-CUNG-THAT.md) · [Xác thực MQTT & vòng đời thiết bị](report/BAO-MAT-MQTT-VA-VONG-DOI.md)
+- **Tổng hợp kiểm chứng & tài liệu:** [Hồ sơ sản phẩm & kiểm chứng](report/RELEASE.md) · [Danh mục tài liệu](report/README.md)

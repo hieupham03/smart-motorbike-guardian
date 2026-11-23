@@ -2,11 +2,11 @@
 
 ## Demo tại trường: không cần Docker
 
-Ưu tiên [bộ chuẩn bị demo](../docs/CHUAN-BI-DEMO-TAI-TRUONG.md). Sau build, Prepare cấu hình riêng và nạp Node A, dùng `deployment/start-classroom-demo.bat -WebOnly`: backend/H2 **8082**, broker xác thực **1883**, web HTTPS/WSS **5173**. Bỏ `-WebOnly` để chạy cả Expo **8081**, hoặc mở `start-mobile-client.bat` sau khi backend đã chạy.
+Ưu tiên [bộ chuẩn bị demo](../report/CHUAN-BI-DEMO-TAI-TRUONG.md). Sau build, Prepare cấu hình riêng và nạp Node A, dùng `deployment/start-classroom-demo.bat -WebOnly`: backend/H2 **8082**, broker xác thực **1883**, web HTTPS/WSS **5173**. Bỏ `-WebOnly` để chạy cả Expo **8081**, hoặc mở `start-mobile-client.bat` sau khi backend đã chạy.
 
 HTTPS dùng OpenSSL trên laptop, chứng chỉ tự ký và private key nằm trong `.local/classroom-demo/tls/`. Kiểm fingerprint trước khi chấp nhận chứng chỉ, không tự cài CA vào máy khác. HTTP nội bộ, MQTT TCP và Expo Go LAN không được gọi là mã hóa toàn hệ thống. Script `start-classroom-https.bat -LanIp <IPv4>` mở thêm web HTTPS **5443** nếu cần.
 
-Classroom lưu DPAPI/database riêng tại `.local/classroom-demo/`; database `.local/mobile-demo/` cũ không bị thay thế. Mạch mới cần Owner kích hoạt bằng mã Admin xem được. Mỗi thiết bị có mật khẩu MQTT riêng, khác tài khoản dịch vụ backend. Xem [xác thực/vòng đời](../docs/BAO-MAT-MQTT-VA-VONG-DOI.md).
+Classroom lưu DPAPI/database riêng tại `.local/classroom-demo/`; database `.local/mobile-demo/` cũ không bị thay thế. Mạch mới cần Owner kích hoạt bằng mã Admin xem được. Mỗi thiết bị có mật khẩu MQTT riêng, khác tài khoản dịch vụ backend. Xem [xác thực/vòng đời](../report/BAO-MAT-MQTT-VA-VONG-DOI.md).
 
 ## Docker Compose
 
