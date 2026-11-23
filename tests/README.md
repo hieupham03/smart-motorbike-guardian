@@ -9,4 +9,4 @@
 | Firmware | [Host UART/Hall/ngưỡng và Arduino build](firmware/README.md) |
 | Browser | [Web/mobile fixtures và tích hợp](integration/README.md) |
 
-Các test phần mềm dùng nguồn module thật hoặc REST/STOMP/MQTT emulator theo từng phép kiểm. Không coi pass host/browser/export là đã xác nhận GPS RF, relay/motor/còi hoặc push trên điện thoại thật. Kịch bản kiểm thử thủ công nằm trong `report/` và được liên kết từ [tài liệu dự án](../report/README.md).
+Các test phần mềm dùng nguồn module thật hoặc REST/STOMP/MQTT emulator theo từng phép kiểm. Không coi pass host/browser/export là đã xác nhận GPS RF, relay/motor/còi hoặc push trên điện thoại thật. Kịch bản kiểm thử thủ công nằm trong `docs/` và được liên kết từ [tài liệu dự án](../docs/README.md).

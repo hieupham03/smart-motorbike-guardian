@@ -1,8 +1,8 @@
 # Sơ đồ đấu nối phần cứng breadboard
 
-Tắt nguồn trước khi đổi dây. Đối chiếu số GPIO in trên board, không dùng số thứ tự chân header. Hướng dẫn nạp và kiểm tra chi tiết: [Hướng dẫn phần cứng và firmware](../report/HUONG-DAN-HARDWARE-FIRMWARE-GPS.md).
+Tắt nguồn trước khi đổi dây. Đối chiếu số GPIO in trên board, không dùng số thứ tự chân header. Hướng dẫn nạp và kiểm tra chi tiết: [Hướng dẫn phần cứng và firmware](../docs/HUONG-DAN-HARDWARE-FIRMWARE-GPS.md).
 
-Chi tiết thuật toán cảnh báo bánh quay, phiên quay bánh và cảnh báo tốc độ: [Tính năng Hall và tốc độ](../report/BA-TINH-NANG-HALL-VA-TOC-DO.md).
+Chi tiết thuật toán cảnh báo bánh quay, phiên quay bánh và cảnh báo tốc độ: [Tính năng Hall và tốc độ](../docs/BA-TINH-NANG-HALL-VA-TOC-DO.md).
 
 ## UART và cảm biến
 

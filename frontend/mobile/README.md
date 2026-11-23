@@ -21,7 +21,7 @@ npx expo start --dev-client --lan
 
 Development build phục vụ kiểm thử và sửa ứng dụng. Profile `preview` tạo APK cài nội bộ có JavaScript bundle; không cần Metro để mở giao diện, nhưng các chức năng online vẫn cần backend truy cập được.
 
-Remote push cần quyền thông báo, EAS project ID, FCM/APNs và backend bật `EXPO_PUSH_ENABLED=true`. Xem [hướng dẫn cài đặt và chạy mobile](../../report/HUONG-DAN-CAI-DAT-VA-CHAY-MOBILE.md) để cấu hình chi tiết.
+Remote push cần quyền thông báo, EAS project ID, FCM/APNs và backend bật `EXPO_PUSH_ENABLED=true`. Xem [hướng dẫn cài đặt và chạy mobile](../../docs/HUONG-DAN-CAI-DAT-VA-CHAY-MOBILE.md) để cấu hình chi tiết.
 
 ## Kiểm tra
 
